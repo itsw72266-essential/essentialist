@@ -1,46 +1,57 @@
 Essentialist — Next.js full-stack migration (incremental)
 
-Git branch (created in this workspace):
+Git branch (workspace):
   feat/next-fullstack-migration
 
-If you already had a remote repository, connect it after reviewing the new .git init:
+If you connect a remote after a fresh `git init` in this workspace:
   git remote add origin <url>
   git fetch
-  (resolve history as needed — this workspace had no .git before migration scaffolding)
+  (merge or rebase as needed — history may not match an older remote)
 
 Canonical backend (unchanged):
-  server/ — Express + Mongo + all existing routes and jobs
+  server/ — Express + Mongo + routes and jobs (see server/MIGRATION.txt)
 
-Frontend — backend-related consolidation:
+Frontend — backend integration surface:
   client/src/backend/
-    config/runtimePublicEnv.js   — env accessors
-    http/legacyClient.js         — re-export of src/utils/Axios.js
-    contracts/summaryApi.js      — re-export of src/common/SummaryApi.js
-    services/legacyExpressGateway.js — extension point for future services
-    index.js                     — barrel exports
+    config/runtimePublicEnv.js     — env accessors
+    config/upstreamOrigin.js       — getLegacyExpressOrigin() for server BFF fetches
+    http/legacyClient.js             — re-export of src/utils/Axios.js
+    http/axiosToastError.js          — re-export of src/utils/AxiosToastError.js
+    contracts/summaryApi.js        — re-export of src/common/SummaryApi.js
+    services/legacyExpressGateway.js — extension point for future gateways
+    index.js                         — barrel exports
 
-Path alias:
+Path aliases (client/jsconfig.json):
+  @/*        → client/src/*
   @backend/* → client/src/backend/*
 
-Next.js API routes (existing + new):
-  client/src/app/api/system/migration-status/route.js — Next runtime probe only
-  client/src/app/api/legacy/health/route.js — read-only proxy to Express GET /health (uses API_URL then NEXT_PUBLIC_API_URL)
+Next.js Route Handlers (examples):
+  client/src/app/api/system/migration-status/route.js — Next-only JSON probe
+  client/src/app/api/legacy/health/route.js — read-only proxy to Express GET /health
+    (env: API_URL, then NEXT_PUBLIC_API_URL)
 
-Backend config additions:
-  client/src/backend/config/upstreamOrigin.js — getLegacyExpressOrigin() for server-side BFF fetches
-  client/src/backend/http/axiosToastError.js — re-export of utils/AxiosToastError (optional import path)
+Import migration status (app code):
+  - Prefer: @/backend/http/legacyClient, @/backend/contracts/summaryApi,
+    @/backend/http/axiosToastError (or imports from @/backend/index.js barrel).
+  - Intentional exception: client/src/utils/Axios.js still imports
+    ../common/SummaryApi directly for refresh-token wiring — avoids a circular
+    graph if legacyClient re-exported Axios while Axios imported only from @backend.
+  - utils/indexnow.js and hooks/useIndexNow.js use @/backend/contracts/summaryApi
+    (replaces a broken ../api/SummaryApi path; useIndexNow now imports baseURL).
 
-Imports migrated to @backend (non-exhaustive; same runtime behavior):
-  - fetchUserDetails, AppInitializer, ReactQueryProvider
-  - hooks/queries: useCartQueries, useAddressQuery, useCatalogQueries, useBlogQueries, useOrdersQuery, useCategoryWithProductsQuery
-  - useReviews, services/reviewApi, Dropdown, CheckoutPageClient, login page, product/[slug]/queries.js, server/catalog.js
+Live imports of @/utils/Axios, @/common/SummaryApi, or relative .../utils/Axios
+outside backend/ and utils/Axios.js: none (only commented leftovers in a few files).
 
 Conventions:
-  - New code that talks to Express should prefer `import ... from '@backend/...'`.
-  - Do not delete or move `client/src/common/SummaryApi.js` or `client/src/utils/Axios.js` until imports are migrated.
+  - New code that calls Express should use @backend (or @/backend/...) paths.
+  - Do not delete client/src/common/SummaryApi.js or client/src/utils/Axios.js
+    until refresh logic is relocated and parity is tested.
 
-Next steps (suggested order):
-  1. Gradually change imports from @/common/SummaryApi to @backend/contracts/summaryApi (or @backend barrel).
-  2. Introduce typed request/response DTOs under client/src/backend/contracts/types/.
-  3. For each domain, add Route Handlers under app/api/... that proxy or re-implement logic; keep Express routes until parity is verified.
-  4. Optionally add a root package.json "workspaces" definition for client + server.
+Suggested next steps:
+  1. Add domain Route Handlers under app/api/... that proxy Express; gate with
+     tests or flags until responses match.
+  2. Introduce request/response shapes under client/src/backend/contracts/types/
+     (optional, incremental).
+  3. Optionally add a monorepo workspaces root package.json for client + server.
+  4. Remove stale commented import blocks in components/pages when touching those
+     files for other reasons (low priority).

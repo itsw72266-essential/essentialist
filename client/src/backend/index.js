@@ -1,8 +1,9 @@
 /**
  * @fileoverview Backend integration surface for the Next.js app.
  *
- * Import from `@backend/...` for new server-facing code paths.
- * Existing `@/common/SummaryApi` and `@/utils/Axios` imports stay valid until migrated.
+ * Import from `@backend/...` (or `@/backend/...`) for code that talks to Express.
+ * App code is migrated off direct `@/common/SummaryApi` / `@/utils/Axios` imports;
+ * `utils/Axios.js` still imports `common/SummaryApi` for refresh-token config only.
  *
  * Layout:
  * - `config/` — env accessors
