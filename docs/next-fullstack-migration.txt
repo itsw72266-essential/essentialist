@@ -42,27 +42,58 @@ Next-native full-stack (implements API in Next; `server/` not imported or modifi
   client/src/fullstack/
     db/mongoose.js
     schemas/auth.schema.js
-    models/ — user, cartproduct, address, order, category, subCategory, product, brand
-    lib/ — localization (copy of server utils), jwtTokens, invokeController (Express
-      req/res adapter), nextRoute wrappers (auth + admin), cacheNoop, …
-    controllers/ — user/*, cart/handlers, address/handlers, category/handlers,
-      subcategory/handlers, product/handlers.js (copied from server), brand/handlers.js
+    models/ — user, cartproduct, address, order, category, subCategory, product, brand,
+      blog, rating, review, review_comment
+    lib/ — localization, jwtTokens, invokeController, nextRoute (auth, admin, optional
+      auth, admin privilege), cacheNoop, mail (from server utils), uploadImageClodinary,
+      requireAdminPrivilege (ADMIN | SUPER_ADMIN), authFromRequest (cookie + Bearer)
+    config/ — sendEmail.js, stripe.js (lazy: null if STRIPE_SECRET_KEY unset)
+    controllers/ — user, cart, address, category, subcategory, product, brand, order,
+      guestadmin, rating, review, blog (handlers copied from server; imports retargeted)
   Route Handlers under /api/next/ (prefix `next` avoids colliding with /api/user):
-    /api/next/user/*     — full auth surface (see earlier list)
+    /api/next/user/*     — full auth surface
     /api/next/cart/*     — create, get, update-qty, delete-cart-item (Bearer auth)
     /api/next/address/*  — create, get, update, disable (Bearer auth)
     /api/next/category/* — add-category (admin), get, update (admin), delete (admin)
     /api/next/subcategory/* — create (admin), get (POST public), update, delete (admin)
     /api/next/product/*  — all Express product POST/PUT/DELETE routes
     /api/next/brand/*    — create (admin), list (GET), [identifier] (GET), update/[id], delete/[id]
+    /api/next/order/*    — verify-receipt (POST), cash-on-delivery (POST auth), guest-cod (POST),
+      checkout (POST auth), webhook (POST raw Stripe signature), order-list (GET auth),
+      receipt/[orderId] (GET optional auth + cookie/Bearer like Express)
+    /api/next/admin/*    — dashboard, orders, guest-orders (GET admin), orders/[orderId]/deliver (PATCH admin)
+    /api/next/ratings/*  — POST /ratings (optional auth), GET|DELETE /ratings/[productId]
+    /api/next/reviews/*  — public list routes, admin moderation, comments (see path notes below)
+    /api/next/blog/*     — create/update/delete (admin), list & [slug] (optional auth)
+    /api/next/file/upload — POST multipart field `image` (Bearer auth), Cloudinary same env as Express
+
+  Reviews path notes (Next cannot mount two sibling `[id]` dynamic segments; a few URLs differ):
+    - Product-scoped list + delete-my-review: GET|DELETE /api/next/reviews/product/[productId]
+      (Express: GET|DELETE /api/reviews/:productId)
+    - Comments: GET|POST /api/next/reviews/review/[reviewId]/comments
+      (Express: /api/reviews/:reviewId/comments)
+    - Other paths match Express under /reviews/... (public, public/product/..., id/..., admin/..., comments/...).
 
   Cutover: map SummaryApi paths e.g. `/api/cart/create` → `/api/next/cart/create` on the
   same Next origin (or set NEXT_PUBLIC_API_URL to Next when Express is off).
 
-  Env: same MongoDB + JWT secrets as Express; admin routes require role ADMIN.
+  Env: same MongoDB + JWT secrets as Express; `requireAdmin` routes need role ADMIN.
+  Review admin routes use `requireAdminPrivilege` (ADMIN or SUPER_ADMIN). Auth reads
+  `accessToken` cookie first, then `Authorization: Bearer` (matches Express `auth`).
 
-  Note: Express Redis cache middleware is a no-op in Next (`cacheNoop.js`). Some Express-only
-  brand query features may differ if they lived outside the copied controller.
+  Note: Express Redis cache middleware is a no-op in Next (`cacheNoop.js`). Express rate
+  limiters, idempotency keys, duplicate-order guards, and multer are not wired on Next;
+  parity is behavioral for controllers only.
+
+  Stripe: `fullstack/config/stripe.js` uses `new Stripe(secret)` (Stripe SDK v22). Webhook
+  route verifies signature with raw body then calls the same `webhookStripe` handler.
+
+Suggested next steps:
+  1. Port remaining domains (e.g. `server/route/payments.js`, `server/route/admin.routes.js`,
+     `server/route/indexnow.js`) or keep them on Express until needed.
+  2. Point the browser client at `/api/next/...` per domain when tested.
+  3. Add Route Handlers under app/api/legacy/... using fetchLegacyExpress() during overlap.
+  4. Optional: monorepo workspaces root package.json for client + server.
 
 Next.js Route Handlers (legacy proxy examples):
   client/src/app/api/system/migration-status/route.js — Next-only JSON probe
@@ -85,17 +116,3 @@ Conventions:
   - New code that calls Express should use @backend (or @/backend/...) paths.
   - Do not delete client/src/common/SummaryApi.js or client/src/utils/Axios.js
     until refresh logic is relocated and parity is tested.
-
-Suggested next steps:
-  1. Port more domains from `server/controllers` into `client/src/fullstack/controllers`
-     and `client/src/app/api/next/...` (login, refresh, user-details, …), keeping
-     JSON shapes compatible with the existing client.
-  2. When a domain is ready, point the browser client at `/api/next/...` (or a
-     `NEXT_PUBLIC_*` base URL flag) instead of Express for that call only.
-  3. Add domain Route Handlers under app/api/legacy/... that use `fetchLegacyExpress()`
-     if you still need Express during overlap.
-  4. Introduce request/response shapes under client/src/backend/contracts/types/
-     (optional, incremental).
-  5. Optionally add a monorepo workspaces root package.json for client + server.
-  6. Remove stale commented import blocks in components/pages when touching those
-     files for other reasons (low priority).

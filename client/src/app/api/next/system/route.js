@@ -31,6 +31,12 @@ export async function GET() {
       subcategory: "/api/next/subcategory/*",
       product: "/api/next/product/*",
       brand: "/api/next/brand/*",
+      order: "/api/next/order/*",
+      admin: "/api/next/admin/*",
+      ratings: "/api/next/ratings/*",
+      reviews: "/api/next/reviews/*",
+      blog: "/api/next/blog/*",
+      file: "/api/next/file/upload",
     },
     mongo: { configured: hasUri, state: mongoState },
   });

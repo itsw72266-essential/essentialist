@@ -2,6 +2,8 @@
  * Run Express-shaped (req, res) controllers inside Next Route Handlers.
  */
 
+import { parse as parseCookie } from "cookie";
+
 import { connectMongo } from "../db/mongoose.js";
 
 export function createExpressLikeRequest(nextRequest, parsedBody = {}, routeParams = {}) {
@@ -10,6 +12,8 @@ export function createExpressLikeRequest(nextRequest, parsedBody = {}, routePara
   nextRequest.headers.forEach((value, key) => {
     headers[key.toLowerCase()] = value;
   });
+  const cookieHeader = nextRequest.headers.get("cookie") || "";
+  const cookies = parseCookie(cookieHeader);
   return {
     method: nextRequest.method,
     url: nextRequest.url,
@@ -17,6 +21,7 @@ export function createExpressLikeRequest(nextRequest, parsedBody = {}, routePara
     query: Object.fromEntries(url.searchParams.entries()),
     headers,
     params: routeParams,
+    cookies,
   };
 }
 
@@ -42,10 +47,6 @@ export function createExpressResponse() {
   return res;
 }
 
-export function attachUserId(req, userId) {
-  return { ...req, userId };
-}
-
 /**
  * @param {(req: object, res: object) => Promise<void>} handler
  * @param {Request} nextRequest
@@ -68,10 +69,7 @@ export async function invokeController(handler, nextRequest, opts = {}) {
   }
 
   const req = createExpressLikeRequest(nextRequest, body, opts.routeParams ?? {});
-  const finalReq =
-    opts.userId !== undefined && opts.userId !== null
-      ? attachUserId(req, opts.userId)
-      : req;
+  const finalReq = "userId" in opts ? { ...req, userId: opts.userId } : req;
 
   const res = createExpressResponse();
   await connectMongo();

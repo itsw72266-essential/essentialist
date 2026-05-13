@@ -1,8 +1,8 @@
 import { verifyAccessToken } from "./jwtTokens.js";
-import { getBearerToken } from "./authFromRequest.js";
+import { getAccessTokenFromRequest } from "./authFromRequest.js";
 
 export function resolveAuthUserId(nextRequest, { required = true } = {}) {
-  const token = getBearerToken(nextRequest);
+  const token = getAccessTokenFromRequest(nextRequest);
   if (!token) {
     if (!required) return { userId: null };
     return {
@@ -26,5 +26,17 @@ export function resolveAuthUserId(nextRequest, { required = true } = {}) {
         },
       },
     };
+  }
+}
+
+/** Like Express `optionalAuth`: never errors; `userId` is string or `null`. */
+export function resolveOptionalAuthUserId(nextRequest) {
+  const token = getAccessTokenFromRequest(nextRequest);
+  if (!token) return { userId: null };
+  try {
+    const decoded = verifyAccessToken(token);
+    return { userId: decoded.id };
+  } catch {
+    return { userId: null };
   }
 }
