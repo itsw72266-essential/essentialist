@@ -4,9 +4,9 @@ import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
 import AdminPermision from '../../../layouts/AdminPermission';
-import Axios from '../../../utils/Axios';
-import AxiosToastError from '../../../utils/AxiosToastError';
-import SummaryApi from '../../../common/SummaryApi';
+import Axios from '@/backend/http/legacyClient';
+import AxiosToastError from '@/backend/http/axiosToastError';
+import SummaryApi from '@/backend/contracts/summaryApi';
 
 import BlogEditor from '../../../components/blog/BlogEditor';
 import BlogListTable from '../../../components/blog/BlogListTable';

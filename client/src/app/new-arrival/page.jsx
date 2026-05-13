@@ -207,7 +207,7 @@
 
 
 // src/app/new-arrival/page.jsx
-import SummaryApi, { apiFetch } from "../../common/SummaryApi";
+import SummaryApi, { apiFetch } from "@/backend/contracts/summaryApi";
 import NewArrivalContent from "../../components/NewArrivalContent";
 
 const STORE_NAME = "Essentialist Makeup Store";

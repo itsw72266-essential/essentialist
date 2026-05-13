@@ -1,5 +1,5 @@
-import Axios from './Axios'
-import SummaryApi from '../common/SummaryApi'
+import Axios from '@/backend/http/legacyClient'
+import SummaryApi from '@/backend/contracts/summaryApi'
 
 const uploadImage = async(image)=>{
     try {

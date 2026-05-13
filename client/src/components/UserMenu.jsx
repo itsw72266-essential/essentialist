@@ -209,9 +209,9 @@ import {
 import { useTranslation } from 'react-i18next';
 
 import Divider from './Divider';
-import Axios from '../utils/Axios';
-import SummaryApi from '../common/SummaryApi';
-import AxiosToastError from '../utils/AxiosToastError';
+import Axios from '@/backend/http/legacyClient';
+import SummaryApi from '@/backend/contracts/summaryApi';
+import AxiosToastError from '@/backend/http/axiosToastError';
 import isAdmin from '../utils/isAdmin';
 import { logout } from '../store/userSlice';
 import { cn } from '@/lib/utils';

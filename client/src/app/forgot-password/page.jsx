@@ -4,9 +4,9 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import Axios from "../../utils/Axios"; // Adjust path as needed
-import SummaryApi from "../../common/SummaryApi";
-import AxiosToastError from "../../utils/AxiosToastError";
+import Axios from "@/backend/http/legacyClient";
+import SummaryApi from "@/backend/contracts/summaryApi";
+import AxiosToastError from "@/backend/http/axiosToastError";
 
 const ForgotPassword = () => {
   const [data, setData] = useState({ email: "" });

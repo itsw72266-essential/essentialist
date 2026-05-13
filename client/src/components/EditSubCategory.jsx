@@ -3,10 +3,10 @@ import React, { useState } from 'react'
 import { IoClose } from "react-icons/io5";
 import uploadImage from './../utils/UploadImage';
 import { useSelector } from 'react-redux';
-import Axios from './../utils/Axios';
-import SummaryApi from '../common/SummaryApi';
+import Axios from '@/backend/http/legacyClient';
+import SummaryApi from '@/backend/contracts/summaryApi';
+import AxiosToastError from '@/backend/http/axiosToastError';
 import toast from 'react-hot-toast';
-import AxiosToastError from '../utils/AxiosToastError';
 
 const EditSubCategory = ({close,data,fetchData}) => {
     const [subCategoryData,setSubCategoryData] = useState({

@@ -7,7 +7,7 @@
 // import { useQuery } from "@tanstack/react-query";
 // import CardProduct from "../../../components/CardProduct";
 // import { valideURLConvert } from "../../../utils/valideURLConvert";
-// import SummaryApi, { callSummaryApi } from "@/common/SummaryApi";
+// import SummaryApi, { callSummaryApi } from "@/backend/contracts/summaryApi";
 
 // const PAGE_SIZE = 8;
 
@@ -474,7 +474,7 @@ import Image from "next/image";
 import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
 import CardProduct from "../../../components/CardProduct";
 import { valideURLConvert } from "../../../utils/valideURLConvert";
-import SummaryApi, { callSummaryApi } from "@/common/SummaryApi";
+import SummaryApi, { callSummaryApi } from "@/backend/contracts/summaryApi";
 
 const PAGE_SIZE = 12;
 

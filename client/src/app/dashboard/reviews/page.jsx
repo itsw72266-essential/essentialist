@@ -21,7 +21,7 @@ import {
   useAdminReviews,
   useAdminUpdateReview,
 } from "@/hooks/queries/reviews";
-import { callSummaryApi, SummaryApi } from "@/common/SummaryApi";
+import SummaryApi, { callSummaryApi } from "@/backend/contracts/summaryApi";
 
 dayjs.extend(localizedFormat);
 

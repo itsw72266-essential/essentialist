@@ -9,11 +9,11 @@ import { FaCloudUploadAlt, FaStar } from 'react-icons/fa';
 import { IoClose, IoSearchOutline } from 'react-icons/io5';
 import { MdDelete, MdEdit, MdOutlinePublishedWithChanges } from 'react-icons/md';
 
-import SummaryApi from '../../../common/SummaryApi';
-import Axios from '../../../utils/Axios';
+import SummaryApi from '@/backend/contracts/summaryApi';
+import Axios from '@/backend/http/legacyClient';
 import uploadImage from '../../../utils/UploadImage';
 import successAlert from '../../../utils/SuccessAlert';
-import AxiosToastError from '../../../utils/AxiosToastError';
+import AxiosToastError from '@/backend/http/axiosToastError';
 import AdminPermission from '../../../components/AdminPermission';
 import Loading from '../../../components/Loading';
 import { setAllBrands, setLoadingBrands } from '../../../store/productSlice';

@@ -345,8 +345,8 @@ import toast from "react-hot-toast";
 import RatingStars from "./RatingStars";
 import RichTextEditor from "./RichTextEditor";
 import { useUpsertReview } from "@/hooks/queries/reviews";
-import Axios from "@/utils/Axios";
-import SummaryApi from "@/common/SummaryApi";
+import Axios from "@/backend/http/legacyClient";
+import SummaryApi from "@/backend/contracts/summaryApi";
 
 const SUBJECT_OPTIONS = [
   { value: "product", label: "Product" },

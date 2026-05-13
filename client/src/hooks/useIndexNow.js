@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import axios from 'axios';
-import SummaryApi from '../api/SummaryApi';
+import SummaryApi, { baseURL } from '@/backend/contracts/summaryApi';
 
 export default function useIndexNow() {
   const [loading, setLoading] = useState(false);

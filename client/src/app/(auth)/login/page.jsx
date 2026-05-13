@@ -4,7 +4,7 @@ import React, { useState, Suspense } from "react"; // Added Suspense import
 import { FaRegEyeSlash, FaRegEye } from "react-icons/fa6";
 import toast from "react-hot-toast";
 import SummaryApi from "./../../../backend/contracts/summaryApi";
-import AxiosToastError from "./../../../utils/AxiosToastError";
+import AxiosToastError from "./../../../backend/http/axiosToastError";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import fetchUserDetails from "./../../../utils/fetchUserDetails";

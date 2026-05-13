@@ -27,7 +27,7 @@ import {
 // import { useGlobalContext } from "../providers/GlobalProvider";
 import { DisplayPriceInRupees } from "../utils/DisplayPriceInRupees";
 import { handleClearCart } from "../store/cartProduct";
-import SummaryApi, { callSummaryApi } from "../common/SummaryApi";
+import SummaryApi, { callSummaryApi } from "@/backend/contracts/summaryApi";
 import { useGlobalContext } from "@/providers/ReactQueryProvider";
 
 const RECEIPT_PUBLIC_KEY_RAW =

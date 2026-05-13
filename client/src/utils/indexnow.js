@@ -1,8 +1,7 @@
 // utils/indexnow.js
 
 import axios from 'axios';
-import SummaryApi from '../api/SummaryApi';
-import { baseURL } from '../api/SummaryApi';
+import SummaryApi, { baseURL } from '@/backend/contracts/summaryApi';
 
 /**
  * Notify IndexNow about a content change

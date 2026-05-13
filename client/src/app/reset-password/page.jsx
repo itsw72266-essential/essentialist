@@ -4,10 +4,10 @@ import React, { useEffect, useState } from "react";
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa6";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import SummaryApi from "../../common/SummaryApi";
+import SummaryApi from "@/backend/contracts/summaryApi";
 import toast from "react-hot-toast";
-import AxiosToastError from "../../utils/AxiosToastError";
-import Axios from "../../utils/Axios";
+import AxiosToastError from "@/backend/http/axiosToastError";
+import Axios from "@/backend/http/legacyClient";
 
 const ResetPassword = () => {
   const router = useRouter();

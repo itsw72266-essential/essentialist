@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import SummaryApi from "../common/SummaryApi";
+import SummaryApi from "@/backend/contracts/summaryApi";
 
 const PAGE_SIZE = 24;
 

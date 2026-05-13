@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
-import SummaryApi from './../../common/SummaryApi'
-import Axios from './../../utils/Axios'
-import AxiosToastError from './../../utils/AxiosToastError'
+import SummaryApi from '@/backend/contracts/summaryApi'
+import Axios from '@/backend/http/legacyClient'
+import AxiosToastError from '@/backend/http/axiosToastError'
 import CardProduct from './../../components/CardProduct'
 import InfiniteScroll from 'react-infinite-scroll-component'
 // import noDataImage from '/public/assets/nothing here yet.webp'

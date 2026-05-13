@@ -2,9 +2,9 @@
 import React, { useState } from 'react';
 import { FaRegEyeSlash, FaRegEye } from "react-icons/fa6";
 import toast from 'react-hot-toast';
-import Axios from '../../../utils/Axios';
-import SummaryApi from '../../../common/SummaryApi';
-import AxiosToastError from '../../../utils/AxiosToastError';
+import Axios from '@/backend/http/legacyClient';
+import SummaryApi from '@/backend/contracts/summaryApi';
+import AxiosToastError from '@/backend/http/axiosToastError';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';

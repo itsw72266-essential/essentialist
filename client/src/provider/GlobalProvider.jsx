@@ -1,10 +1,10 @@
 "use client"
 import { createContext, useContext, useEffect, useState } from "react";
-import Axios from "../utils/Axios";
-import SummaryApi from "../common/SummaryApi";
+import Axios from "@/backend/http/legacyClient";
+import SummaryApi from "@/backend/contracts/summaryApi";
 import { useDispatch, useSelector } from "react-redux";
 import { handleAddItemCart } from "../store/cartProduct";
-import AxiosToastError from "../utils/AxiosToastError";
+import AxiosToastError from "@/backend/http/axiosToastError";
 import toast from "react-hot-toast";
 import { pricewithDiscount } from "../utils/PriceWithDiscount";
 import { handleAddAddress } from "../store/addressSlice";

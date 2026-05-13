@@ -867,8 +867,8 @@ import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useQuery } from '@tanstack/react-query'
 
-import SummaryApi from '@/common/SummaryApi'
-import Axios from '@/utils/Axios'
+import SummaryApi from '@/backend/contracts/summaryApi'
+import Axios from '@/backend/http/legacyClient'
 import { valideURLConvert } from '../../../utils/valideURLConvert'
 import {
   useBrandsQuery,

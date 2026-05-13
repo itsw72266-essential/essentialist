@@ -3,7 +3,7 @@
 // import { notFound } from 'next/navigation';
 // import CardProduct from '../../components/CardProduct';
 // import { valideURLConvert } from '../../utils/valideURLConvert';
-// import SummaryApi, { baseURL } from '../../common/SummaryApi';
+// import SummaryApi, { baseURL } from '@/backend/contracts/summaryApi';
 
 // /**
 //  * SEO KEYWORD MAP
@@ -674,7 +674,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import CardProduct from '../../components/CardProduct';
 import { valideURLConvert } from '../../utils/valideURLConvert';
-import SummaryApi, { baseURL } from '../../common/SummaryApi';
+import SummaryApi, { baseURL } from '@/backend/contracts/summaryApi';
 
 const SEO_KEYWORDS = {
   'face makeup': 'beginner face makeup kit with brushes',

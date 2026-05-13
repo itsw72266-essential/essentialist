@@ -2,9 +2,9 @@
 import React, { useState } from 'react'
 import { FaRegUserCircle } from 'react-icons/fa'
 import { useDispatch, useSelector } from 'react-redux'
-import Axios from '../utils/Axios'
-import SummaryApi from '../common/SummaryApi'
-import AxiosToastError from '../utils/AxiosToastError'
+import Axios from '@/backend/http/legacyClient'
+import SummaryApi from '@/backend/contracts/summaryApi'
+import AxiosToastError from '@/backend/http/axiosToastError'
 import { updatedAvatar } from '../store/userSlice'
 import { IoClose } from "react-icons/io5";
 

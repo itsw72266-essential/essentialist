@@ -152,9 +152,9 @@ import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { FaRegUserCircle } from "react-icons/fa";
 import UserProfileAvatarEdit from '../../../components/UserProfileAvatarEdit';
-import Axios from '../../../utils/Axios';
-import SummaryApi from '../../../common/SummaryApi';
-import AxiosToastError from '../../../utils/AxiosToastError';
+import Axios from '@/backend/http/legacyClient';
+import SummaryApi from '@/backend/contracts/summaryApi';
+import AxiosToastError from '@/backend/http/axiosToastError';
 import toast from 'react-hot-toast';
 import { setUserDetails } from '../../../store/userSlice';
 import fetchUserDetails from '../../../utils/fetchUserDetails';

@@ -4,11 +4,11 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Divider from '../../components/Divider';
-import Axios from '../../utils/Axios';
-import SummaryApi from '../../common/SummaryApi';
+import Axios from '@/backend/http/legacyClient';
+import SummaryApi from '@/backend/contracts/summaryApi';
 import { logout } from '../../store/userSlice';
 import toast from 'react-hot-toast';
-import AxiosToastError from '../../utils/AxiosToastError';
+import AxiosToastError from '@/backend/http/axiosToastError';
 import { HiOutlineExternalLink } from "react-icons/hi";
 import isAdmin from '../../utils/isAdmin';
 import { useRouter } from 'next/navigation';

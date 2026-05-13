@@ -1,9 +1,9 @@
 "use client"
 import React, { useEffect, useState } from 'react'
 import UploadSubCategoryModel from '../../../components/UploadSubCategoryModel'
-import AxiosToastError from '../../../utils/AxiosToastError'
-import Axios from '../../../utils/Axios'
-import SummaryApi from '../../../common/SummaryApi'
+import AxiosToastError from '@/backend/http/axiosToastError'
+import Axios from '@/backend/http/legacyClient'
+import SummaryApi from '@/backend/contracts/summaryApi'
 import DisplayTable from '../../../components/DisplayTable'
 import { createColumnHelper } from '@tanstack/react-table'
 import ViewImage from '../../../components/ViewImage'

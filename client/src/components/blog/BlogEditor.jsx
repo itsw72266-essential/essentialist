@@ -4,8 +4,8 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import dynamic from 'next/dynamic';
 import toast from 'react-hot-toast';
 
-import Axios from '../../utils/Axios';
-import SummaryApi from '../../common/SummaryApi';
+import Axios from '@/backend/http/legacyClient';
+import SummaryApi from '@/backend/contracts/summaryApi';
 
 import 'react-quill-new/dist/quill.snow.css';
 

@@ -1,8 +1,8 @@
 "use client"
 import React, { useEffect, useState } from 'react'
-import SummaryApi from '../../../common/SummaryApi'
-import AxiosToastError from '../../../utils/AxiosToastError'
-import Axios from '../../../utils/Axios'
+import SummaryApi from '@/backend/contracts/summaryApi'
+import AxiosToastError from '@/backend/http/axiosToastError'
+import Axios from '@/backend/http/legacyClient'
 import Loading from '../../../components/Loading'
 import ProductCardAdmin from '../../../components/ProductCardAdmin'
 import { IoSearchOutline } from "react-icons/io5";

@@ -3,9 +3,9 @@ import React, { useState } from 'react'
 import EditProductAdmin from './EditProductAdmin'
 import CofirmBox from './CofirmBox'
 import { IoClose } from 'react-icons/io5'
-import SummaryApi from '../common/SummaryApi'
-import Axios from '../utils/Axios'
-import AxiosToastError from '../utils/AxiosToastError'
+import SummaryApi from '@/backend/contracts/summaryApi'
+import Axios from '@/backend/http/legacyClient'
+import AxiosToastError from '@/backend/http/axiosToastError'
 import toast from 'react-hot-toast'
 
 const ProductCardAdmin = ({ data, fetchProductData }) => {

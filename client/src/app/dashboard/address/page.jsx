@@ -5,10 +5,10 @@ import AddAddress from '../../../components/AddAddress'
 import { MdDelete } from "react-icons/md";
 import { MdEdit } from "react-icons/md";
 import EditAddressDetails from '../../../components/EditAddressDetails';
-import Axios from '../../../utils/Axios';
-import SummaryApi from '../../../common/SummaryApi';
+import Axios from '@/backend/http/legacyClient';
+import SummaryApi from '@/backend/contracts/summaryApi';
 import toast from 'react-hot-toast';
-import AxiosToastError from '../../../utils/AxiosToastError';
+import AxiosToastError from '@/backend/http/axiosToastError';
 import { useGlobalContext } from '@/providers/ReactQueryProvider';
 // import { useGlobalContext } from '../../../providers/GlobalProvider';
 

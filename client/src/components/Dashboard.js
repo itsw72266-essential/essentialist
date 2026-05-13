@@ -10,7 +10,7 @@ import React, {
   useTransition,
 } from 'react';
 import { useSelector } from 'react-redux';
-import SummaryApi, { callSummaryApi, apiFetch } from '../common/SummaryApi';
+import SummaryApi, { callSummaryApi, apiFetch } from '@/backend/contracts/summaryApi';
 
 import {
   ResponsiveContainer,

@@ -11,7 +11,7 @@ import { format } from "date-fns";
 
 import NoData from "../../../components/NoData";
 import { DisplayPriceInRupees } from "../../../utils/DisplayPriceInRupees";
-import SummaryApi, { callSummaryApi } from "../../../common/SummaryApi";
+import SummaryApi, { callSummaryApi } from "@/backend/contracts/summaryApi";
 import { setOrder } from "../../../store/orderSlice";
 
 const loaderStyles = `
