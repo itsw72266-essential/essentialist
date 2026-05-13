@@ -720,13 +720,13 @@ export default async function Home() {
                     href={href}
                     className="block text-center transition-transform hover:scale-105"
                   >
-                    <div className="relative w-full aspect-square bg-gray-100 rounded-xl overflow-hidden">
+                    <div className="relative w-full aspect-square bg-gray-100 rounded-full overflow-hidden">
                       <Image
                         src={cat.image || "/placeholder.png"}
                         alt={cat.name}
                         fill
                         unoptimized={true}
-                        className="object-contain p-2"
+                        className="object-contain p-2 rounded-full"
                       />
                     </div>
                     <div className="text-[10px] sm:text-xs font-bold text-gray-700 mt-2 truncate uppercase tracking-tighter">
