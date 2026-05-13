@@ -42,23 +42,28 @@ Next-native full-stack (implements API in Next; `server/` not imported or modifi
   client/src/fullstack/
     db/mongoose.js
     schemas/auth.schema.js
-    models/user.model.js, cartproduct.model.js, address.model.js, order.model.js
-    lib/jwtTokens.js, guestMerge.js, orderFingerprint.js, …
-    config/sendEmail.js
-    templates/
-    controllers/user/*.js
-  User Route Handlers (mirror Express /api/user/* JSON; paths are under /api/next/user/):
-    POST register, login, verify-email, refresh-token
-    GET logout, user-details
-    PUT forgot-password, verify-forgot-password-otp, reset-password, update-user
+    models/ — user, cartproduct, address, order, category, subCategory, product, brand
+    lib/ — localization (copy of server utils), jwtTokens, invokeController (Express
+      req/res adapter), nextRoute wrappers (auth + admin), cacheNoop, …
+    controllers/ — user/*, cart/handlers, address/handlers, category/handlers,
+      subcategory/handlers, product/handlers.js (copied from server), brand/handlers.js
+  Route Handlers under /api/next/ (prefix `next` avoids colliding with /api/user):
+    /api/next/user/*     — full auth surface (see earlier list)
+    /api/next/cart/*     — create, get, update-qty, delete-cart-item (Bearer auth)
+    /api/next/address/*  — create, get, update, disable (Bearer auth)
+    /api/next/category/* — add-category (admin), get, update (admin), delete (admin)
+    /api/next/subcategory/* — create (admin), get (POST public), update, delete (admin)
+    /api/next/product/*  — all Express product POST/PUT/DELETE routes
+    /api/next/brand/*    — create (admin), list (GET), [identifier] (GET), update/[id], delete/[id]
 
-  Env (same as Express for auth): MONGODB_URI, SECRET_KEY_ACCESS_TOKEN,
-  SECRET_KEY_REFRESH_TOKEN, RESEND_API, NEXT_PUBLIC_SITE_URL or FRONTEND_URL,
-  ACCESS_TOKEN_EXPIRES_IN, REFRESH_TOKEN_EXPIRES_IN (optional).
+  Cutover: map SummaryApi paths e.g. `/api/cart/create` → `/api/next/cart/create` on the
+  same Next origin (or set NEXT_PUBLIC_API_URL to Next when Express is off).
 
-  Client cutover: point Axios baseURL to the Next origin and map paths from
-  /api/user/... to /api/next/user/... (or add a small wrapper) when ready.
-  Axios refresh handler persists `refreshToken` when the refresh response includes it.
+  Env: same MongoDB + JWT secrets as Express; admin routes require role ADMIN.
+
+  Note: Express Redis cache middleware is a no-op in Next (`cacheNoop.js`). Some Express-only
+  brand query features may differ if they lived outside the copied controller.
+
 Next.js Route Handlers (legacy proxy examples):
   client/src/app/api/system/migration-status/route.js — Next-only JSON probe
   client/src/app/api/legacy/health/route.js — read-only proxy to Express GET /health

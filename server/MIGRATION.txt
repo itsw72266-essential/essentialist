@@ -2,6 +2,6 @@ This directory remains the authoritative Express backend.
 
 Next.js client code is consolidating HTTP/API access under client/src/backend/ (see docs/next-fullstack-migration.txt). Route Handlers may call the same Express deployment via fetchLegacyExpress() — they do not replace server/ by default.
 
-Parallel Next-native API (same Mongo when configured): client/src/fullstack/ and /api/next/* — schemas/controllers live in the client; server/ is not edited and can remain your template for another app.
+Parallel Next-native API: client/src/fullstack/ + /api/next/* (catalog, cart, address, brand, product, user). server/ is not edited.
 
 Do not remove or disable routes here during migration. New Next Route Handlers should duplicate behavior only behind feature flags or after parity tests.
