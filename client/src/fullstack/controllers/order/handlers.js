@@ -418,7 +418,7 @@
 //  */
 // export function formatOrderForClient(orderDoc) {
 //   const { totalQuantity } = normalizeProducts(orderDoc);
-//   const receiptDownloadPath = `/api/order/receipt/${encodeURIComponent(
+//   const receiptDownloadPath = `/api/next/order/receipt/${encodeURIComponent(
 //     orderDoc.orderId,
 //   )}`;
 
@@ -1588,7 +1588,7 @@ function resolveDeliveryAddressCandidate(orderDoc = {}) {
  */
 export function formatOrderForClient(orderDoc) {
   const { totalQuantity } = normalizeProducts(orderDoc);
-  const receiptDownloadPath = `/api/order/receipt/${encodeURIComponent(
+  const receiptDownloadPath = `/api/next/order/receipt/${encodeURIComponent(
     orderDoc.orderId,
   )}`;
 
@@ -1994,6 +1994,119 @@ export async function paymentController(request, response) {
   }
 }
 
+/** Public Stripe Checkout for guests (no auth). Webhook reads `metadata.isGuest`. */
+export async function guestStripeCheckoutController(request, response) {
+  try {
+    if (!Stripe) {
+      return response.status(503).json({
+        message: "Stripe is not configured.",
+        error: true,
+        success: false,
+      });
+    }
+
+    const body = request.body ?? {};
+    const {
+      list_items,
+      totalAmt: _totalAmt,
+      subTotalAmt: _subTotalAmt,
+      metadata,
+      isGuestOrder: _isGuestOrder,
+      ...addressData
+    } = body;
+
+    if (!Array.isArray(list_items) || !list_items.length) {
+      return response.status(400).json({
+        message: "Provide at least one product.",
+        error: true,
+        success: false,
+      });
+    }
+
+    const contactInfoBase = sanitizeGuestContact(addressData);
+    if (!contactInfoBase.customer_email) {
+      return response.status(400).json({
+        message: "Guest email address is required.",
+        error: true,
+        success: false,
+      });
+    }
+
+    const sanitizedAddress = sanitizeGuestAddress(addressData);
+    const forwardedMetadata = {
+      ...(metadata && typeof metadata === "object" ? metadata : {}),
+      payload_autoTaggedGuest: true,
+      guest_delivery_address: sanitizedAddress,
+    };
+
+    const line_items = list_items.map((item) => {
+      const productId = item.productId;
+      if (!productId?.name) {
+        throw new Error("Invalid cart item: missing product details.");
+      }
+      const pid = productId._id ?? productId.id;
+      if (!pid) {
+        throw new Error("Invalid cart item: missing product id.");
+      }
+      return {
+        price_data: {
+          currency: DEFAULT_CURRENCY.toLowerCase(),
+          product_data: {
+            name: productId.name,
+            images: productId.image || [],
+            metadata: {
+              productId: String(pid),
+            },
+          },
+          unit_amount: pricewithDiscount(
+            productId.price,
+            productId.discount,
+          ),
+        },
+        adjustable_quantity: {
+          enabled: true,
+          minimum: 1,
+        },
+        quantity: item.quantity,
+      };
+    });
+
+    const params = {
+      submit_type: "pay",
+      mode: "payment",
+      payment_method_types: ["card"],
+      customer_email: contactInfoBase.customer_email,
+      metadata: {
+        isGuest: "true",
+        forwardedMetadata: JSON.stringify(forwardedMetadata),
+        guestContactJson: JSON.stringify({
+          name: contactInfoBase.name ?? "",
+          customer_email: contactInfoBase.customer_email ?? "",
+          mobile: contactInfoBase.mobile ?? "",
+        }),
+      },
+      line_items,
+      success_url: `${process.env.FRONTEND_URL}/success`,
+      cancel_url: `${process.env.FRONTEND_URL}/cancel`,
+    };
+
+    const session = await Stripe.checkout.sessions.create(params);
+
+    return response.status(200).json(session);
+  } catch (error) {
+    const status = /Invalid cart item|Provide at least one/i.test(
+      String(error?.message || ""),
+    )
+      ? 400
+      : 500;
+    return response.status(status).json({
+      message: error.message || error,
+      error: true,
+      success: false,
+    });
+  }
+}
+
 const getOrderProductItems = async ({
   lineItems,
   userId,
@@ -2003,6 +2116,8 @@ const getOrderProductItems = async ({
   customer,
   currency = DEFAULT_CURRENCY,
   metadata,
+  isGuest = false,
+  guestDeliveryAddress = null,
 }) => {
   const productList = [];
 
@@ -2019,9 +2134,10 @@ const getOrderProductItems = async ({
     for (const item of lineItems.data) {
       const product = await Stripe.products.retrieve(item.price.product);
 
+      const orderIdPrefix = isGuest ? "GUEST" : "ORD";
       const payload = {
-        userId: userId,
-        orderId: `ORD-${new mongoose.Types.ObjectId()}`,
+        ...(userId ? { userId } : {}),
+        orderId: `${orderIdPrefix}-${new mongoose.Types.ObjectId()}`,
         productId: product.metadata.productId,
         product_details: {
           name: product.name,
@@ -2031,17 +2147,21 @@ const getOrderProductItems = async ({
         paymentId: paymentId,
         payment_status: normalizedStripeStatus,
         paymentMethod: "Stripe Checkout",
-        delivery_address: addressId,
+        delivery_address: isGuest ? null : addressId,
         contact_info: {
           name: customer?.name ?? "",
-          customer_email: customer?.email ?? "",
-          mobile: customer?.phone ?? "",
+          customer_email:
+            customer?.email ?? customer?.customer_email ?? "",
+          mobile: customer?.phone ?? customer?.mobile ?? "",
+          ...(isGuest && guestDeliveryAddress
+            ? { address_snapshot: guestDeliveryAddress }
+            : {}),
         },
         subTotalAmt: Number(item.amount_subtotal / 100),
         totalAmt: Number(item.amount_total / 100),
         totalQuantity: item.quantity ?? 1,
         currency,
-        is_guest: false,
+        is_guest: Boolean(isGuest),
         metadata: {
           ...(metadata && typeof metadata === "object" ? metadata : {}),
           stripe_product_id: product.id,
@@ -2077,24 +2197,43 @@ export async function webhookStripe(request, response) {
         const lineItems = await Stripe.checkout.sessions.listLineItems(
           session.id,
         );
-        const userId = session.metadata.userId;
+        const isGuest = String(session.metadata?.isGuest || "") === "true";
+        const userId = isGuest ? null : session.metadata.userId;
+        let guestContact = {};
+        if (isGuest && session.metadata.guestContactJson) {
+          try {
+            guestContact = JSON.parse(session.metadata.guestContactJson);
+          } catch {
+            guestContact = {};
+          }
+        }
         const forwardedMetadata = session.metadata.forwardedMetadata
           ? JSON.parse(session.metadata.forwardedMetadata)
           : {};
+        const guestDeliveryAddress =
+          isGuest && forwardedMetadata?.guest_delivery_address
+            ? forwardedMetadata.guest_delivery_address
+            : null;
+
         const orderProduct = await getOrderProductItems({
           lineItems: lineItems,
-          userId: userId,
+          userId,
           addressId: session.metadata.addressId,
           paymentId: session.payment_intent,
           payment_status: session.payment_status,
           customer: session.customer_details ?? {
-            email: session.customer_email ?? "",
+            name: guestContact.name ?? "",
+            email:
+              guestContact.customer_email ?? session.customer_email ?? "",
+            phone: guestContact.mobile ?? "",
           },
           currency: session.currency?.toUpperCase() ?? DEFAULT_CURRENCY,
           metadata: {
             stripe_session_id: session.id,
             ...forwardedMetadata,
           },
+          isGuest,
+          guestDeliveryAddress,
         });
 
         const insertedOrders = await OrderModel.insertMany(orderProduct);
@@ -2118,10 +2257,12 @@ export async function webhookStripe(request, response) {
             );
           });
 
-          await UserModel.findByIdAndUpdate(userId, {
-            shopping_cart: [],
-          });
-          await CartProductModel.deleteMany({ userId: userId });
+          if (!isGuest && userId) {
+            await UserModel.findByIdAndUpdate(userId, {
+              shopping_cart: [],
+            });
+            await CartProductModel.deleteMany({ userId: userId });
+          }
         }
         break;
       }

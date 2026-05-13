@@ -82,7 +82,7 @@
 //   if (!CAN_USE_REMOTE_API) return []
 
 //   const payload = await fetchJson(
-//     `${API_BASE}/api/brand/list?limit=500&sort=nameAsc&onlyActive=true`,
+//     `${API_BASE}/api/next/brand/list?limit=500&sort=nameAsc&onlyActive=true`,
 //     { cache: 'no-store' },
 //   )
 
@@ -100,7 +100,7 @@
 //   if (!CAN_USE_REMOTE_API || !slug) return null
 
 //   const direct = await fetchJson(
-//     `${API_BASE}/api/brand/${encodeURIComponent(slug)}?includeProducts=true`,
+//     `${API_BASE}/api/next/brand/${encodeURIComponent(slug)}?includeProducts=true`,
 //     { cache: 'no-store' },
 //   )
 //   const directNormalized = direct?.data || direct?.brand || direct
@@ -121,7 +121,7 @@
 //     ? { brandId: brand._id, page: 1, limit: 500, onlyActive: true }
 //     : { brandSlug: canonicalizeBrandSlug(brand), page: 1, limit: 500 }
 
-//   const payload = await fetchJson(`${API_BASE}/api/product/get`, {
+//   const payload = await fetchJson(`${API_BASE}/api/next/product/get`, {
 //     cache: 'no-store',
 //     method: 'POST',
 //     headers: { 'Content-Type': 'application/json' },
@@ -636,7 +636,7 @@ async function fetchBrandCollection() {
   if (!CAN_USE_REMOTE_API) return []
 
   const payload = await fetchJson(
-    `${API_BASE}/api/brand/list?limit=500&sort=nameAsc&onlyActive=true`,
+    `${API_BASE}/api/next/brand/list?limit=500&sort=nameAsc&onlyActive=true`,
     { cache: 'no-store' },
   )
 
@@ -654,7 +654,7 @@ async function fetchBrandBySlug(slug) {
   if (!CAN_USE_REMOTE_API || !slug) return null
 
   const direct = await fetchJson(
-    `${API_BASE}/api/brand/${encodeURIComponent(slug)}?includeProducts=true`,
+    `${API_BASE}/api/next/brand/${encodeURIComponent(slug)}?includeProducts=true`,
     { cache: 'no-store' },
   )
   const directNormalized = direct?.data || direct?.brand || direct
@@ -675,7 +675,7 @@ async function fetchProductsByBrand(brand) {
     ? { brandId: brand._id, page: 1, limit: 500, onlyActive: true }
     : { brandSlug: canonicalizeBrandSlug(brand), page: 1, limit: 500 }
 
-  const payload = await fetchJson(`${API_BASE}/api/product/get`, {
+  const payload = await fetchJson(`${API_BASE}/api/next/product/get`, {
     cache: 'no-store',
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

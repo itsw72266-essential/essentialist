@@ -317,8 +317,7 @@ const CheckoutPage = () => {
         }
       } else {
         const response = await Axios({
-          url: "/api/order/guest-cod",
-          method: "POST",
+          ...SummaryApi.GuestCashOnDeliveryOrder,
           data: {
             list_items: cartItemsList,
             quantity: totalQty,
@@ -376,7 +375,7 @@ const CheckoutPage = () => {
 
       const endpoint = isAuthenticated
         ? SummaryApi.payment_url
-        : { url: "/api/payment/guest-stripe", method: "POST" };
+        : SummaryApi.guestStripePayment;
 
       const paymentData = isAuthenticated
         ? {

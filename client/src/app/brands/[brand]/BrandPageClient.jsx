@@ -577,7 +577,7 @@
 
 // async function pingBrandIndexNow(brandSlug) {
 //   try {
-//     await fetch('/api/indexnow/submit-url', {
+//     await fetch('/api/next/indexnow/submit-url', {
 //       method: 'POST',
 //       headers: { 'Content-Type': 'application/json' },
 //       body: JSON.stringify({ url: `${SITE_URL}/brands/${brandSlug}` })
@@ -1441,7 +1441,7 @@ function BrandNotFound({ brandSlug }) {
 
 async function pingBrandIndexNow(brandSlug) {
   try {
-    await fetch('/api/indexnow/submit-url', {
+    await fetch('/api/next/indexnow/submit-url', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ url: `${SITE_URL}/brands/${brandSlug}` })

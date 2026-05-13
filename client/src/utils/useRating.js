@@ -14,7 +14,7 @@
 //     if (!apiBase || !productId) return;
 //     setLoading(true);
 //     try {
-//       const res = await fetch(`${apiBase}/api/ratings/${productId}`, { credentials: "include" });
+//       const res = await fetch(`${apiBase}/api/next/ratings/${productId}`, { credentials: "include" });
 //       if (res.ok) {
 //         const json = await res.json();
 //         const d = json?.data || {};
@@ -36,7 +36,7 @@
 //       const prev = { average, count, myRating };
 //       try {
 //         setMyRating(value);
-//         const res = await fetch(`${apiBase}/api/ratings`, {
+//         const res = await fetch(`${apiBase}/api/next/ratings`, {
 //           method: "POST",
 //           headers: { "Content-Type": "application/json" },
 //           credentials: "include",
@@ -62,7 +62,7 @@
 //     const prev = { average, count, myRating };
 //     try {
 //       setMyRating(null);
-//       const res = await fetch(`${apiBase}/api/ratings/${productId}`, {
+//       const res = await fetch(`${apiBase}/api/next/ratings/${productId}`, {
 //         method: "DELETE",
 //         credentials: "include",
 //       });
@@ -101,20 +101,29 @@ function getOrCreateAnonId() {
   }
 }
 
+function clientApiOrigin() {
+  const fromEnv = (process.env.NEXT_PUBLIC_API_URL || "").trim().replace(/\/+$/, "");
+  if (fromEnv) return fromEnv;
+  if (typeof window !== "undefined" && window.location?.origin) {
+    return window.location.origin;
+  }
+  return "";
+}
+
 export default function useRating(productId) {
   const [average, setAverage] = useState(0);
   const [count, setCount] = useState(0);
   const [myRating, setMyRating] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const apiBase = process.env.NEXT_PUBLIC_API_URL;
+  const apiBase = clientApiOrigin();
   const anonId = useMemo(() => getOrCreateAnonId(), []);
 
   const fetchData = useCallback(async () => {
     if (!apiBase || !productId) return;
     setLoading(true);
     try {
-      const url = new URL(`${apiBase}/api/ratings/${productId}`);
+      const url = new URL(`${apiBase}/api/next/ratings/${productId}`);
       if (anonId) url.searchParams.set("anonId", anonId);
       const res = await fetch(url.toString(), { credentials: "include" });
       const text = await res.text();
@@ -142,7 +151,7 @@ export default function useRating(productId) {
       const prev = { average, count, myRating };
       try {
         setMyRating(value);
-        const url = new URL(`${apiBase}/api/ratings`);
+        const url = new URL(`${apiBase}/api/next/ratings`);
         if (anonId) url.searchParams.set("anonId", anonId);
         const res = await fetch(url.toString(), {
           method: "POST",
@@ -173,7 +182,7 @@ export default function useRating(productId) {
     const prev = { average, count, myRating };
     try {
       setMyRating(null);
-      const url = new URL(`${apiBase}/api/ratings/${productId}`);
+      const url = new URL(`${apiBase}/api/next/ratings/${productId}`);
       if (anonId) url.searchParams.set("anonId", anonId);
       const res = await fetch(url.toString(), {
         method: "DELETE",

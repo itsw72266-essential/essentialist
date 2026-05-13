@@ -1,7 +1,7 @@
 // services/indexnow.js
 export const notifyIndexNow = async (url) => {
   try {
-    const response = await fetch('/api/indexnow/submit-url', {
+    const response = await fetch('/api/next/indexnow/submit-url', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

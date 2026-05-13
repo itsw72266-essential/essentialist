@@ -44,7 +44,7 @@
 //   if (!CAN_USE_REMOTE_API) return { items: [], meta: {} }
 
 //   const payload = await fetchJson(
-//     `${API_BASE}/api/brand/list?limit=200&sort=nameAsc&onlyActive=true&includeMetrics=true`,
+//     `${API_BASE}/api/next/brand/list?limit=200&sort=nameAsc&onlyActive=true&includeMetrics=true`,
 //     { cache: 'no-store' }
 //   )
 
@@ -65,7 +65,7 @@
 // async function fetchProductCatalog() {
 //   if (!CAN_USE_REMOTE_API) return { items: [], meta: {} }
 
-//   const payload = await fetchJson(`${API_BASE}/api/product/get`, {
+//   const payload = await fetchJson(`${API_BASE}/api/next/product/get`, {
 //     cache: 'no-store',
 //     method: 'POST',
 //     headers: { 'Content-Type': 'application/json' },
@@ -560,7 +560,7 @@ async function fetchBrandCollection() {
   if (!CAN_USE_REMOTE_API) return { items: [], meta: {} }
 
   const payload = await fetchJson(
-    `${API_BASE}/api/brand/list?limit=200&sort=nameAsc&onlyActive=true&includeMetrics=true`,
+    `${API_BASE}/api/next/brand/list?limit=200&sort=nameAsc&onlyActive=true&includeMetrics=true`,
     { cache: 'no-store' }
   )
 
@@ -581,7 +581,7 @@ async function fetchBrandCollection() {
 async function fetchProductCatalog() {
   if (!CAN_USE_REMOTE_API) return { items: [], meta: {} }
 
-  const payload = await fetchJson(`${API_BASE}/api/product/get`, {
+  const payload = await fetchJson(`${API_BASE}/api/next/product/get`, {
     cache: 'no-store',
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

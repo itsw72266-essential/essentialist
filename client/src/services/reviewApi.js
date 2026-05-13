@@ -28,7 +28,7 @@ const normalisePayload = (payload = {}) => ({
 });
 
 async function requestPublicReviews({ params, signal }) {
-  const response = await Axios.get("/api/reviews/public", {
+  const response = await Axios.get("/api/next/reviews/public", {
     params,
     signal,
   });
@@ -132,7 +132,7 @@ export const upsertReview = async (payload = {}) => {
     headers[REVIEW_TOKEN_HEADER] = payload.guestToken;
   }
 
-  const response = await Axios.post("/api/reviews", payload, {
+  const response = await Axios.post("/api/next/reviews", payload, {
     headers,
   });
   return response?.data;
@@ -144,7 +144,7 @@ export const removeReviewById = async ({ reviewId, guestToken }) => {
     headers[REVIEW_TOKEN_HEADER] = guestToken;
   }
 
-  const response = await Axios.delete(`/api/reviews/id/${reviewId}`, {
+  const response = await Axios.delete(`/api/next/reviews/id/${reviewId}`, {
     headers,
   });
   return response?.data;
@@ -154,14 +154,14 @@ export const deleteMyReview = async ({
     productId,
     subjectType = "product",
   }) => {
-  const response = await Axios.delete(`/api/reviews/${productId}`, {
+  const response = await Axios.delete(`/api/next/reviews/product/${productId}`, {
     params: { subjectType },
   });
   return response?.data;
 };
 
 export const fetchReviewComments = async ({ reviewId, signal }) => {
-  const response = await Axios.get(`/api/reviews/${reviewId}/comments`, {
+  const response = await Axios.get(`/api/next/reviews/review/${reviewId}/comments`, {
     signal,
   });
   return response?.data?.data?.items ?? [];
@@ -174,7 +174,7 @@ export const createReviewComment = async ({ reviewId, payload }) => {
   }
 
   const response = await Axios.post(
-    `/api/reviews/${reviewId}/comments`,
+    `/api/next/reviews/review/${reviewId}/comments`,
     payload,
     { headers }
   );
@@ -187,14 +187,14 @@ export const deleteReviewComment = async ({ commentId, guestToken }) => {
     headers[REVIEW_TOKEN_HEADER] = guestToken;
   }
 
-  const response = await Axios.delete(`/api/reviews/comments/${commentId}`, {
+  const response = await Axios.delete(`/api/next/reviews/comments/${commentId}`, {
     headers,
   });
   return response?.data;
 };
 
 export const adminListReviews = async ({ query = {}, signal } = {}) => {
-  const response = await Axios.get("/api/reviews", {
+  const response = await Axios.get("/api/next/reviews", {
     params: pruneParams(query),
     signal,
   });
@@ -202,21 +202,21 @@ export const adminListReviews = async ({ query = {}, signal } = {}) => {
 };
 
 export const adminCreateReview = async (payload) => {
-  const response = await Axios.post("/api/reviews/admin", payload);
+  const response = await Axios.post("/api/next/reviews/admin", payload);
   return response?.data;
 };
 
 export const adminUpdateReview = async ({ reviewId, payload }) => {
-  const response = await Axios.put(`/api/reviews/admin/${reviewId}`, payload);
+  const response = await Axios.put(`/api/next/reviews/admin/${reviewId}`, payload);
   return response?.data;
 };
 
 export const adminDeleteReview = async (reviewId) => {
-  const response = await Axios.delete(`/api/reviews/admin/${reviewId}`);
+  const response = await Axios.delete(`/api/next/reviews/admin/${reviewId}`);
   return response?.data;
 };
 
 export const adminDeleteComment = async (commentId) => {
-  const response = await Axios.delete(`/api/reviews/admin/comments/${commentId}`);
+  const response = await Axios.delete(`/api/next/reviews/admin/comments/${commentId}`);
   return response?.data;
 };

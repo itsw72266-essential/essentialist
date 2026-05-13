@@ -1,6 +1,6 @@
 export async function fetchProductDetails(productId) {
   try {
-    const res = await fetch('/api/product/get-product-details', {
+    const res = await fetch('/api/next/product/get-product-details', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ productId }),

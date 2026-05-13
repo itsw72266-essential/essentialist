@@ -76,15 +76,15 @@
 
 
 import axios from "axios";
-import SummaryApi from "../common/SummaryApi";
+import SummaryApi, { baseURL as summaryApiBaseURL } from "../common/SummaryApi";
 import i18n, { getCurrentLocale } from "@/lib/i18n";
 
-const baseURL = process.env.NEXT_PUBLIC_API_URL || '';
+const axiosBaseURL = summaryApiBaseURL || "";
 
 // Creating an instance of axios with the baseURL
 // and withCredentials set to true
 const Axios = axios.create({
-    baseURL: baseURL,
+    baseURL: axiosBaseURL,
     withCredentials: true
 });
 

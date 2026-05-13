@@ -4,6 +4,10 @@ Next.js client code is consolidating HTTP/API access under client/src/backend/ (
 
 Parallel Next-native API: client/src/fullstack/ + /api/next/* (user, cart, address,
   category, subcategory, product, brand, order, payments (Payunit), admin stats + guest summary,
-  ratings, reviews, blog, file upload, indexnow). server/ is not edited.
+  ratings, reviews, blog, file upload, indexnow, sitemap-data). server/ is not edited.
+
+Cutover: client SummaryApi + Axios use /api/next/... on the Next origin. Set
+  NEXT_PUBLIC_API_URL / API_URL to that origin for SSR and builds. Stripe webhook URL:
+  /api/next/order/webhook. Payunit: /api/next/payments/webhook (or PAYUNIT_NOTIFY_URL).
 
 Do not remove or disable routes here during migration. New Next Route Handlers should duplicate behavior only behind feature flags or after parity tests.

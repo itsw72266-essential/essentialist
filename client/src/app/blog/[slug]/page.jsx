@@ -10,7 +10,7 @@
 
 // async function fetchBlog(slug) {
 //   try {
-//     const response = await fetch(`${API_BASE_URL}/api/blog/${slug}`, {
+//     const response = await fetch(`${API_BASE_URL}/api/next/blog/${slug}`, {
 //       next: { revalidate: 120 },
 //     });
 
@@ -189,14 +189,16 @@ const BUSINESS_CONFIG = {
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL ||
   process.env.API_URL ||
-  "http://localhost:1010"
+  process.env.NEXT_PUBLIC_SITE_URL ||
+  process.env.SITE_URL ||
+  "http://localhost:3000"
 
 /**
  * Fetch blog post
  */
 async function fetchBlog(slug) {
   try {
-    const response = await fetch(`${API_BASE_URL}/api/blog/${slug}`, {
+    const response = await fetch(`${API_BASE_URL}/api/next/blog/${slug}`, {
       next: { revalidate: 120 },
     })
 

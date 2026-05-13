@@ -2,11 +2,21 @@
 
 export const getCachedProduct = unstable_cache(
   async (productId) => {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/product/get-product-details`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ productId }),
-    })
+    const base = (
+      process.env.NEXT_PUBLIC_API_URL ||
+      process.env.API_URL ||
+      process.env.NEXT_PUBLIC_SITE_URL ||
+      process.env.SITE_URL ||
+      "http://localhost:3000"
+    ).replace(/\/+$/, "");
+    const response = await fetch(
+      `${base}/api/next/product/get-product-details`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ productId }),
+      },
+    );
 
     if (!response.ok) return null
 

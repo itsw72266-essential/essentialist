@@ -41,9 +41,14 @@ export default function CardProductRating({ productId, initial }) {
     async function run() {
       if (typeof initial?.average === 'number') return
       try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL
-        if (!apiUrl) return
-        const res = await fetch(`${apiUrl}/api/ratings/${productId}`, {
+        const origin = (
+          process.env.NEXT_PUBLIC_API_URL || ""
+        )
+          .trim()
+          .replace(/\/+$/, "") ||
+          (typeof window !== "undefined" ? window.location.origin : "");
+        if (!origin) return;
+        const res = await fetch(`${origin}/api/next/ratings/${productId}`, {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' },
           cache: 'no-store',

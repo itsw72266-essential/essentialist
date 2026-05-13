@@ -86,8 +86,10 @@ Next-native full-stack (implements API in Next; `server/` not imported or modifi
       (Express: /api/reviews/:reviewId/comments)
     - Other paths match Express under /reviews/... (public, public/product/..., id/..., admin/..., comments/...).
 
-  Cutover: map SummaryApi paths e.g. `/api/cart/create` → `/api/next/cart/create` on the
-  same Next origin (or set NEXT_PUBLIC_API_URL to Next when Express is off).
+  Cutover: `SummaryApi` and Axios now target **`/api/next/...`** on the same
+  origin. Set `NEXT_PUBLIC_API_URL` and `API_URL` to your Next origin (e.g.
+  `http://localhost:3000`) so server components and `next build` self-fetch hit
+  Route Handlers, not Express. Stripe webhooks must use **`/api/next/order/webhook`**.
 
   Env: same MongoDB + JWT secrets as Express; `requireAdmin` routes need role ADMIN.
   Review admin routes use `requireAdminPrivilege` (ADMIN or SUPER_ADMIN). Auth reads

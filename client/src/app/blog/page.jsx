@@ -21,7 +21,9 @@ const BUSINESS_CONFIG = {
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL ||
   process.env.API_URL ||
-  "http://localhost:1010"
+  process.env.NEXT_PUBLIC_SITE_URL ||
+  process.env.SITE_URL ||
+  "http://localhost:3000"
 
 /**
  * Enhanced Metadata Export
@@ -92,7 +94,7 @@ export const metadata = {
  */
 async function fetchBlogs(page = 1) {
   try {
-    const url = new URL("/api/blog/list", API_BASE_URL)
+    const url = new URL("/api/next/blog/list", API_BASE_URL)
     url.searchParams.set("status", "published")
     url.searchParams.set("limit", "12")
     url.searchParams.set("page", page.toString())

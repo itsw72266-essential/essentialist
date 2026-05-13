@@ -1,5 +1,11 @@
 //D:\essentialist_next_ecommerce\client\src\app\sitemap.js
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const API_URL = (
+  process.env.NEXT_PUBLIC_API_URL ||
+  process.env.API_URL ||
+  process.env.NEXT_PUBLIC_SITE_URL ||
+  process.env.SITE_URL ||
+  "http://localhost:3000"
+).replace(/\/+$/, "");
 
 function valideURLConvert(str) {
   return (str || '')
@@ -79,7 +85,7 @@ export default async function sitemap() {
 
   try {
     // 🔥 THE FIX: Fetching from our new, fast endpoint!
-    const data = await fetchJSON('/api/sitemap-data');
+    const data = await fetchJSON('/api/next/sitemap-data');
     
     categories = data.categories || fallbackCategories;
     products = data.products || fallbackProducts;

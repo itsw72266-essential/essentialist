@@ -40,6 +40,7 @@ export async function GET() {
       blog: "/api/next/blog/*",
       file: "/api/next/file/upload",
       indexnow: "/api/next/indexnow/*",
+      sitemapData: "GET /api/next/sitemap-data",
       userUploadAvatar: "/api/next/user/upload-avatar",
     },
     mongo: { configured: hasUri, state: mongoState },

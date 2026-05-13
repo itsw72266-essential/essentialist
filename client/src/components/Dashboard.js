@@ -775,7 +775,7 @@ const Dashboard = () => {
   }, [assertSuccess]);
 
   const fetchAdminDashboard = useCallback(async () => {
-    const response = await apiFetch('/api/admin/dashboard', {
+    const response = await apiFetch('/api/next/admin/dashboard', {
       credentials: 'include',
     });
     return assertSuccess(response, 'Failed to fetch admin dashboard') ?? null;
