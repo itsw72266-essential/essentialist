@@ -1,13 +1,13 @@
 import bcryptjs from "bcryptjs";
 
 import { connectMongo } from "../../db/mongoose.js";
-import { getBearerToken } from "../../lib/authFromRequest.js";
+import { getAccessTokenFromRequest } from "../../lib/authFromRequest.js";
 import { verifyAccessToken } from "../../lib/jwtTokens.js";
 import UserModel from "../../models/user.model.js";
 import { updateUserSchema } from "../../schemas/auth.schema.js";
 
 export async function updateUserAction(request, input) {
-  const token = getBearerToken(request);
+  const token = getAccessTokenFromRequest(request);
   if (!token) {
     return {
       status: 401,

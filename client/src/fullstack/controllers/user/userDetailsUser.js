@@ -1,10 +1,10 @@
 import { connectMongo } from "../../db/mongoose.js";
-import { getBearerToken } from "../../lib/authFromRequest.js";
+import { getAccessTokenFromRequest } from "../../lib/authFromRequest.js";
 import { verifyAccessToken } from "../../lib/jwtTokens.js";
 import UserModel from "../../models/user.model.js";
 
 export async function userDetailsAction(request) {
-  const token = getBearerToken(request);
+  const token = getAccessTokenFromRequest(request);
   if (!token) {
     return {
       status: 401,
