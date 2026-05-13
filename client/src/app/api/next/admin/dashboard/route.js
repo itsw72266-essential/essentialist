@@ -1,4 +1,5 @@
-import { getAdminDashboardController } from "@/fullstack/controllers/guestadmin/handlers";
+import { getAdminDashboardStats } from "@/fullstack/controllers/admin/handlers";
 import { asAdminGet } from "@/fullstack/lib/nextRoute";
 
-export const GET = asAdminGet(getAdminDashboardController);
+/** Matches Express: first `admin.routes` wins on `GET /api/admin/dashboard` (stats + series). */
+export const GET = asAdminGet(getAdminDashboardStats);

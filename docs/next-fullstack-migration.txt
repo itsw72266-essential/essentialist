@@ -49,9 +49,10 @@ Next-native full-stack (implements API in Next; `server/` not imported or modifi
       requireAdminPrivilege (ADMIN | SUPER_ADMIN), authFromRequest (cookie + Bearer)
     config/ — sendEmail.js, stripe.js (lazy: null if STRIPE_SECRET_KEY unset)
     controllers/ — user, cart, address, category, subcategory, product, brand, order,
-      guestadmin, rating, review, blog (handlers copied from server; imports retargeted)
+      guestadmin, admin (stats), rating, review, blog, indexnow (handlers copied from server;
+      imports retargeted)
   Route Handlers under /api/next/ (prefix `next` avoids colliding with /api/user):
-    /api/next/user/*     — full auth surface
+    /api/next/user/*     — full auth surface + PUT upload-avatar (multipart field `avatar`)
     /api/next/cart/*     — create, get, update-qty, delete-cart-item (Bearer auth)
     /api/next/address/*  — create, get, update, disable (Bearer auth)
     /api/next/category/* — add-category (admin), get, update (admin), delete (admin)
@@ -61,7 +62,12 @@ Next-native full-stack (implements API in Next; `server/` not imported or modifi
     /api/next/order/*    — verify-receipt (POST), cash-on-delivery (POST auth), guest-cod (POST),
       checkout (POST auth), webhook (POST raw Stripe signature), order-list (GET auth),
       receipt/[orderId] (GET optional auth + cookie/Bearer like Express)
-    /api/next/admin/*    — dashboard, orders, guest-orders (GET admin), orders/[orderId]/deliver (PATCH admin)
+    /api/next/admin/*    — GET dashboard = **admin.controller** stats (matches Express when
+      `admin.routes` is registered before guest admin on `/api/admin`). GET summary =
+      guest-style totals from `guestadmin.controller`. orders, guest-orders, PATCH
+      orders/[orderId]/deliver
+    /api/next/indexnow/* — submit-url, submit-urls, notify-content-change (POST), key (GET),
+      regenerate-key (POST); same env as Express (`SITE_HOST`, `PUBLIC_DIR`, `INDEX_NOW_KEY`)
     /api/next/ratings/*  — POST /ratings (optional auth), GET|DELETE /ratings/[productId]
     /api/next/reviews/*  — public list routes, admin moderation, comments (see path notes below)
     /api/next/blog/*     — create/update/delete (admin), list & [slug] (optional auth)
@@ -89,8 +95,7 @@ Next-native full-stack (implements API in Next; `server/` not imported or modifi
   route verifies signature with raw body then calls the same `webhookStripe` handler.
 
 Suggested next steps:
-  1. Port remaining domains (e.g. `server/route/payments.js`, `server/route/admin.routes.js`,
-     `server/route/indexnow.js`) or keep them on Express until needed.
+  1. Port `server/route/payments.js` (Payunit / long router) or keep on Express until needed.
   2. Point the browser client at `/api/next/...` per domain when tested.
   3. Add Route Handlers under app/api/legacy/... using fetchLegacyExpress() during overlap.
   4. Optional: monorepo workspaces root package.json for client + server.
