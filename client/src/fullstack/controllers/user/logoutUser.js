@@ -1,11 +1,11 @@
 import { connectMongo } from "../../db/mongoose.js";
-import { getBearerToken } from "../../lib/authFromRequest.js";
+import { getAccessTokenFromRequest } from "../../lib/authFromRequest.js";
 import { verifyAccessToken } from "../../lib/jwtTokens.js";
 import UserModel from "../../models/user.model.js";
 
 export async function logoutUserAction(request) {
   let userId = null;
-  const token = getBearerToken(request);
+  const token = getAccessTokenFromRequest(request);
   if (token) {
     try {
       const decoded = verifyAccessToken(token);

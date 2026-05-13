@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { loginUserAction } from "@/fullstack/controllers/user/loginUser";
+import { applyAuthTokensToResponse } from "@/fullstack/lib/authCookies";
 
 export async function POST(request) {
   let json;
@@ -15,7 +16,19 @@ export async function POST(request) {
 
   try {
     const result = await loginUserAction(json);
-    return NextResponse.json(result.body, { status: result.status });
+    const res = NextResponse.json(result.body, { status: result.status });
+    if (
+      result.status === 200 &&
+      result.body?.success &&
+      result.body?.data?.accessToken &&
+      result.body?.data?.refreshToken
+    ) {
+      applyAuthTokensToResponse(res, {
+        accessToken: result.body.data.accessToken,
+        refreshToken: result.body.data.refreshToken,
+      });
+    }
+    return res;
   } catch (error) {
     console.error("POST /api/next/user/login", error);
     return NextResponse.json(
