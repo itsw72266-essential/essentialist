@@ -1,5 +1,14 @@
 Essentialist — Next.js full-stack migration (incremental)
 
+Are we moving `server/` (Express) into Next.js?
+  No — not as a wholesale cutover. The plan is incremental:
+  - **Today:** `server/` stays the canonical API, database access, and jobs.
+  - **Next.js:** Owns the UI and can add Route Handlers that **proxy** (or later
+    **re-implement**) Express routes after parity is verified.
+  - **End state (optional, over time):** Some routes may live only in Next;
+    others may stay on Express indefinitely. Nothing is removed from `server/`
+    until you explicitly choose parity and traffic switching.
+
 Git branch (workspace):
   feat/next-fullstack-migration
 
@@ -48,8 +57,9 @@ Conventions:
     until refresh logic is relocated and parity is tested.
 
 Suggested next steps:
-  1. Add domain Route Handlers under app/api/... that proxy Express; gate with
-     tests or flags until responses match.
+  1. Add domain Route Handlers under app/api/... that use `fetchLegacyExpress()`
+     from `client/src/backend/services/legacyExpressGateway.js` to proxy Express;
+     gate with tests or flags until responses match.
   2. Introduce request/response shapes under client/src/backend/contracts/types/
      (optional, incremental).
   3. Optionally add a monorepo workspaces root package.json for client + server.

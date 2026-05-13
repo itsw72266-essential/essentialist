@@ -17,4 +17,8 @@ export { getLegacyExpressOrigin } from "./config/upstreamOrigin.js";
 export { default as httpClient } from "./http/legacyClient.js";
 export { default as AxiosToastError } from "./http/axiosToastError.js";
 export * from "./contracts/summaryApi.js";
-export { LEGACY_EXPRESS_ENTRY } from "./services/legacyExpressGateway.js";
+export {
+  LEGACY_EXPRESS_ENTRY,
+  fetchLegacyExpress,
+  getLegacyExpressFetchUrl,
+} from "./services/legacyExpressGateway.js";

@@ -1,5 +1,5 @@
 This directory remains the authoritative Express backend.
 
-Next.js client code is consolidating HTTP/API access under client/src/backend/ (see docs/next-fullstack-migration.txt).
+Next.js client code is consolidating HTTP/API access under client/src/backend/ (see docs/next-fullstack-migration.txt). Route Handlers may call the same Express deployment via fetchLegacyExpress() — they do not replace server/ by default.
 
 Do not remove or disable routes here during migration. New Next Route Handlers should duplicate behavior only behind feature flags or after parity tests.

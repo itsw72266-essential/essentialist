@@ -1,28 +1,25 @@
 import { NextResponse } from "next/server";
 
-import { getLegacyExpressOrigin } from "@/backend/config/upstreamOrigin";
+import { fetchLegacyExpress } from "@/backend/services/legacyExpressGateway";
 
 /**
  * Proxies Express `GET /health` through Next for ops / future dashboards.
  * Read-only; does not change Express behavior.
  */
 export async function GET() {
-  const origin = getLegacyExpressOrigin();
-  if (!origin) {
-    return NextResponse.json(
-      {
-        ok: false,
-        error: "Missing API_URL or NEXT_PUBLIC_API_URL for upstream health check",
-      },
-      { status: 503 },
-    );
-  }
-
   try {
-    const upstream = await fetch(`${origin}/health`, {
-      cache: "no-store",
+    const upstream = await fetchLegacyExpress("/health", {
       headers: { Accept: "application/json" },
     });
+    if (!upstream) {
+      return NextResponse.json(
+        {
+          ok: false,
+          error: "Missing API_URL or NEXT_PUBLIC_API_URL for upstream health check",
+        },
+        { status: 503 },
+      );
+    }
     const body = await upstream.text();
     let json;
     try {
