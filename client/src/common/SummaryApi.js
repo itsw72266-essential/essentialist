@@ -203,6 +203,7 @@ const SummaryApi = {
   logout: { url: '/api/next/user/logout', method: 'get' },
   uploadAvatar: { url: '/api/next/user/upload-avatar', method: 'put' },
   updateUserDetails: { url: '/api/next/user/update-user', method: 'put' },
+  mergeGuestData: { url: '/api/next/user/merge-guest-data', method: 'post' },
   addCategory: { url: '/api/next/category/add-category', method: 'post' },
   uploadImage: { url: '/api/next/file/upload', method: 'post' },
   getCategory: { url: '/api/next/category/get', method: 'get' },

@@ -52,7 +52,8 @@ Next-native full-stack (implements API in Next; `server/` not imported or modifi
       payments (Payunit), guestadmin, admin (stats), rating, review, blog, indexnow (handlers
       copied from server; imports retargeted)
   Route Handlers under /api/next/ (prefix `next` avoids colliding with /api/user):
-    /api/next/user/*     — full auth surface + PUT upload-avatar (multipart field `avatar`)
+    /api/next/user/*     — full auth surface + POST merge-guest-data (guest cart/addresses/orders),
+      PUT upload-avatar (multipart field `avatar`)
     /api/next/cart/*     — create, get, update-qty, delete-cart-item (Bearer auth)
     /api/next/address/*  — create, get, update, disable (Bearer auth)
     /api/next/category/* — add-category (admin), get, update (admin), delete (admin)

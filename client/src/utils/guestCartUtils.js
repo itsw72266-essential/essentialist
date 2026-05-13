@@ -1,6 +1,7 @@
 // utils/guestCartUtils.js
 
 import toast from "react-hot-toast";
+import SummaryApi from "@/backend/contracts/summaryApi";
 
 /**
  * LocalStorage Keys
@@ -157,8 +158,7 @@ export const mergeCartAndAddressAfterLogin = async (apiClient) => {
     try {
         // Send both to your login merge endpoint if needed
         await apiClient({
-            url: '/api/auth/merge-guest-data',
-            method: 'post',
+            ...SummaryApi.mergeGuestData,
             data: {
                 guestCart: guestCart.map(item => ({
                     productId: item.productId._id || item.productId,

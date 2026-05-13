@@ -8,7 +8,10 @@ import {
   createExpressResponse,
 } from "@/fullstack/lib/invokeController";
 
-const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET;
+const STRIPE_WEBHOOK_SECRET =
+  process.env.STRIPE_WEBHOOK_SECRET ||
+  process.env.STRIPE_WEBHOOK_SECRET_KEY ||
+  process.env.STRIPE_ENPOINT_WEBHOOK_SECRET_KEY;
 
 export async function POST(request) {
   if (!STRIPE_WEBHOOK_SECRET) {

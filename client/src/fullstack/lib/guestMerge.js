@@ -51,10 +51,17 @@ export async function mergeGuestAddresses(userId, guestAddresses = []) {
   if (!Array.isArray(guestAddresses) || !guestAddresses.length) return;
 
   for (const addr of guestAddresses) {
+    if (!addr || typeof addr !== "object") continue;
+    const addrFields = { ...addr };
+    delete addrFields._id;
     const shaped = {
-      ...addr,
+      ...addrFields,
       userId,
     };
+    if (shaped.mobile != null && shaped.mobile !== "") {
+      const n = Number(shaped.mobile);
+      shaped.mobile = Number.isFinite(n) ? n : null;
+    }
 
     const exists = await AddressModel.findOne({
       userId,

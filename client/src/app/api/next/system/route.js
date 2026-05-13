@@ -24,7 +24,7 @@ export async function GET() {
     ok: true,
     layer: "next-fullstack",
     api: {
-      user: "/api/next/user/*",
+      user: "/api/next/user/* (incl. merge-guest-data)",
       cart: "/api/next/cart/*",
       address: "/api/next/address/*",
       category: "/api/next/category/*",
