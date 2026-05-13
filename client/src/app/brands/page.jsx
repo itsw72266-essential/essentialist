@@ -517,6 +517,7 @@
 //client\src\app\brands\page.jsx
 import BrandsDirectoryClient from './BrandsDirectoryClient'
 import { valideURLConvert } from '../../utils/valideURLConvert'
+import { getServerSideApiBaseUrl } from '@/lib/serverApiOrigin'
 
 const SITE_URL = 'https://www.esmakeupstore.com/brands'
 const ROOT_URL = 'https://www.esmakeupstore.com'
@@ -529,7 +530,7 @@ const DEFAULT_BRANDS =
 const DEFAULT_DESC =
   'Shop authentic cosmetic products from top brands. Browse our directory, compare prices, and order professional makeup with fast delivery.'
 
-const RAW_API_BASE = (process.env.NEXT_PUBLIC_API_URL || '').trim()
+const RAW_API_BASE = (getServerSideApiBaseUrl() || process.env.NEXT_PUBLIC_API_URL || '').trim()
 const API_BASE = RAW_API_BASE.replace(/\/$/, '')
 const IS_EXPORT_MODE = process.env.NEXT_EXPORT === 'true'
 const IS_LOCALHOST_API = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(API_BASE)

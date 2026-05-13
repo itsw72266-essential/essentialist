@@ -1,3 +1,5 @@
+import { getServerSideApiBaseUrl } from '../lib/serverApiOrigin.js'
+
 const isServer = typeof window === 'undefined'
 const isProd = process.env.NODE_ENV === 'production'
 
@@ -32,7 +34,9 @@ function fallbackOrigin() {
   return cachedFallbackOrigin
 }
 
-const resolvedBaseURL = envClientBase || fallbackOrigin()
+const resolvedBaseURL = isServer
+  ? getServerSideApiBaseUrl() || envClientBase || fallbackOrigin()
+  : envClientBase || fallbackOrigin()
 const resolvedSiteURL = envSiteUrl || fallbackOrigin()
 
 function getBrowserLocale() {

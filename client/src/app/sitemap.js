@@ -1,5 +1,8 @@
 //D:\essentialist_next_ecommerce\client\src\app\sitemap.js
+import { getServerSideApiBaseUrl } from "@/lib/serverApiOrigin";
+
 const API_URL = (
+  getServerSideApiBaseUrl() ||
   process.env.NEXT_PUBLIC_API_URL ||
   process.env.API_URL ||
   process.env.NEXT_PUBLIC_SITE_URL ||

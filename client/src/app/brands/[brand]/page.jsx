@@ -555,6 +555,7 @@
 // app/brands/[brand]/page.jsx
 import { notFound } from 'next/navigation'
 import BrandPageClient from './BrandPageClient'
+import { getServerSideApiBaseUrl } from '@/lib/serverApiOrigin'
 
 const SITE_URL = 'https://www.esmakeupstore.com'
 const SITE_NAME = 'Essentialist Makeup Store'
@@ -567,7 +568,7 @@ const BUILD_VALIDATION_PLACEHOLDER = '__build-validation__'
 // Make sure these slugs are always generated even if the API omits them.
 const HARDCODED_BRAND_SLUGS = ['estee-lauder']
 
-const RAW_API_BASE = (process.env.NEXT_PUBLIC_API_URL || '').trim()
+const RAW_API_BASE = (getServerSideApiBaseUrl() || process.env.NEXT_PUBLIC_API_URL || '').trim()
 const API_BASE = RAW_API_BASE.replace(/\/$/, '')
 const IS_EXPORT_MODE = process.env.NEXT_EXPORT === 'true'
 const IS_LOCALHOST_API = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(API_BASE)
