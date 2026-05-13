@@ -720,16 +720,20 @@ export default async function Home() {
                     href={href}
                     className="block text-center transition-transform hover:scale-105"
                   >
-                    <div className="relative w-full aspect-square bg-gray-100 rounded-full overflow-hidden">
-                      <Image
-                        src={cat.image || "/placeholder.png"}
-                        alt={cat.name}
-                        fill
-                        unoptimized={true}
-                        className="object-contain p-2 rounded-full"
-                      />
+                    <div className="relative w-full aspect-square rounded-full bg-gray-100 overflow-hidden ring-1 ring-gray-200/70">
+                      <div className="absolute inset-0 flex items-center justify-center p-2 sm:p-3">
+                        <Image
+                          src={cat.image || "/placeholder.png"}
+                          alt={cat.name}
+                          width={256}
+                          height={256}
+                          unoptimized={true}
+                          sizes="(max-width: 640px) 22vw, 12vw"
+                          className="max-h-full max-w-full w-auto h-auto object-contain object-center"
+                        />
+                      </div>
                     </div>
-                    <div className="text-[10px] sm:text-xs font-bold text-gray-700 mt-2 truncate uppercase tracking-tighter">
+                    <div className="text-[10px] sm:text-xs font-bold text-gray-700 mt-2 line-clamp-2 min-h-[2.4em] uppercase tracking-tighter leading-tight px-0.5">
                       {cat.name}
                     </div>
                   </Link>
