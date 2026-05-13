@@ -5,8 +5,8 @@ import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { useQuery } from "@tanstack/react-query";
 
-import Axios from "@/utils/Axios";
-import SummaryApi from "@/common/SummaryApi";
+import Axios from "@/backend/http/legacyClient";
+import SummaryApi from "@/backend/contracts/summaryApi";
 import { setAllBlogs } from "@/store/blogSlice";
 
 export const BLOGS_QUERY_KEY = ["blogs"];

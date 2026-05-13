@@ -161,7 +161,7 @@ import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 
 import { valideURLConvert } from "@/utils/valideURLConvert";
-import SummaryApi, { callSummaryApi } from "@/common/SummaryApi";
+import SummaryApi, { callSummaryApi } from "@/backend/contracts/summaryApi";
 
 const normalizeCollection = (payload) => {
   if (!payload) return [];

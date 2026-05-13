@@ -24,6 +24,16 @@ Path alias:
 
 Next.js API routes (existing + new):
   client/src/app/api/system/migration-status/route.js — Next runtime probe only
+  client/src/app/api/legacy/health/route.js — read-only proxy to Express GET /health (uses API_URL then NEXT_PUBLIC_API_URL)
+
+Backend config additions:
+  client/src/backend/config/upstreamOrigin.js — getLegacyExpressOrigin() for server-side BFF fetches
+  client/src/backend/http/axiosToastError.js — re-export of utils/AxiosToastError (optional import path)
+
+Imports migrated to @backend (non-exhaustive; same runtime behavior):
+  - fetchUserDetails, AppInitializer, ReactQueryProvider
+  - hooks/queries: useCartQueries, useAddressQuery, useCatalogQueries, useBlogQueries, useOrdersQuery, useCategoryWithProductsQuery
+  - useReviews, services/reviewApi, Dropdown, CheckoutPageClient, login page, product/[slug]/queries.js, server/catalog.js
 
 Conventions:
   - New code that talks to Express should prefer `import ... from '@backend/...'`.

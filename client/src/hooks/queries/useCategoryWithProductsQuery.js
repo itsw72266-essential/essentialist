@@ -3,8 +3,8 @@
 
 import { useQuery } from "@tanstack/react-query";
 
-import Axios from "@/utils/Axios";
-import SummaryApi from "@/common/SummaryApi";
+import Axios from "@/backend/http/legacyClient";
+import SummaryApi from "@/backend/contracts/summaryApi";
 import { valideURLConvert } from "@/utils/valideURLConvert";
 
 const extractList = (response) => {

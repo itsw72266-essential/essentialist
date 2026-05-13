@@ -5,9 +5,9 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useDispatch } from "react-redux";
 import toast from "react-hot-toast";
 
-import Axios from "@/utils/Axios";
-import SummaryApi from "@/common/SummaryApi";
-import AxiosToastError from "@/utils/AxiosToastError";
+import Axios from "@/backend/http/legacyClient";
+import SummaryApi from "@/backend/contracts/summaryApi";
+import AxiosToastError from "@/backend/http/axiosToastError";
 import {
   isLoggedIn,
   getGuestCart,

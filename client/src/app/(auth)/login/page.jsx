@@ -3,7 +3,7 @@
 import React, { useState, Suspense } from "react"; // Added Suspense import
 import { FaRegEyeSlash, FaRegEye } from "react-icons/fa6";
 import toast from "react-hot-toast";
-import SummaryApi from "./../../../common/SummaryApi";
+import SummaryApi from "./../../../backend/contracts/summaryApi";
 import AxiosToastError from "./../../../utils/AxiosToastError";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -12,7 +12,7 @@ import { useDispatch } from "react-redux";
 import { setUserDetails } from "./../../../store/userSlice";
 import { motion } from "framer-motion";
 import Image from "next/image";
-import Axios from "./../../../utils/Axios";
+import Axios from "./../../../backend/http/legacyClient";
 
 const GUEST_ORDER_STORAGE_KEY = "guestOrderHistory";
 

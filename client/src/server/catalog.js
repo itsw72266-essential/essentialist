@@ -3,7 +3,7 @@
 
 import { cache } from 'react'
 import { cacheLife, cacheTag } from 'next/cache'
-import SummaryApi, { baseURL, callSummaryApi } from '../common/SummaryApi'
+import SummaryApi, { baseURL, callSummaryApi } from '@/backend/contracts/summaryApi'
 
 const API_AVAILABLE = Boolean(baseURL)
 const DEFAULT_CACHE_MINUTES = 5

@@ -276,8 +276,8 @@ import {
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { useDispatch, useSelector } from "react-redux";
 
-import Axios from "@/utils/Axios";
-import SummaryApi from "@/common/SummaryApi";
+import Axios from "@/backend/http/legacyClient";
+import SummaryApi from "@/backend/contracts/summaryApi";
 import { pricewithDiscount } from "@/utils/PriceWithDiscount";
 import { handleAddItemCart } from "@/store/cartProduct";
 import { logout } from "@/store/userSlice";

@@ -1,6 +1,6 @@
 // client\src\app\product\[slug]\queries.js
 import { cache } from "react";
-import SummaryApi, { apiFetch } from "../../../common/SummaryApi";
+import SummaryApi, { apiFetch } from "@/backend/contracts/summaryApi";
 
 export const productQueryKey = (productId) => ["product-details", productId];
 export const ratingQueryKey = (productId) => ["product-ratings", productId];
