@@ -1,18 +1,23 @@
 "use client";
 
-import React, { useState, Suspense } from "react"; // Added Suspense import
+import React, { useState, Suspense, useEffect } from "react";
 import { FaRegEyeSlash, FaRegEye } from "react-icons/fa6";
 import toast from "react-hot-toast";
-import SummaryApi from "./../../../backend/contracts/summaryApi";
-import AxiosToastError from "./../../../backend/http/axiosToastError";
+import SummaryApi from "@/backend/contracts/summaryApi";
+import AxiosToastError from "@/backend/http/axiosToastError";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import fetchUserDetails from "./../../../utils/fetchUserDetails";
+import { useRouter, useSearchParams } from "next/navigation";
+import fetchUserDetails from "@/utils/fetchUserDetails";
 import { useDispatch } from "react-redux";
-import { setUserDetails } from "./../../../store/userSlice";
+import { setUserDetails } from "@/store/userSlice";
 import { motion } from "framer-motion";
 import Image from "next/image";
-import Axios from "./../../../backend/http/legacyClient";
+import Axios from "@/backend/http/legacyClient";
+import {
+  AUTH_PROVIDER,
+  getLastAuthProvider,
+  setLastAuthProvider,
+} from "@/utils/lastAuthPreference";
 
 const GUEST_ORDER_STORAGE_KEY = "guestOrderHistory";
 
@@ -63,6 +68,29 @@ function pruneSyncedGuestOrders(orderIds = []) {
   );
 }
 
+function GoogleMark({ className }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" aria-hidden="true">
+      <path
+        fill="#4285F4"
+        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+      />
+      <path
+        fill="#34A853"
+        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+      />
+      <path
+        fill="#FBBC05"
+        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+      />
+      <path
+        fill="#EA4335"
+        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+      />
+    </svg>
+  );
+}
+
 const Login = () => {
   const [data, setData] = useState({
     email: "",
@@ -70,8 +98,25 @@ const Login = () => {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [lastAuthMethod, setLastAuthMethod] = useState(null);
   const router = useRouter();
+  const searchParams = useSearchParams();
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    setLastAuthMethod(getLastAuthProvider());
+  }, []);
+
+  useEffect(() => {
+    const param = searchParams.get("lastAuth");
+    if (param !== AUTH_PROVIDER.GOOGLE && param !== AUTH_PROVIDER.EMAIL) return;
+    setLastAuthProvider(param);
+    setLastAuthMethod(param);
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("lastAuth");
+    const qs = params.toString();
+    router.replace(qs ? `/login?${qs}` : "/login", { scroll: false });
+  }, [searchParams, router]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -104,6 +149,8 @@ const Login = () => {
 
       if (response.data.success) {
         toast.success(response.data.message);
+        setLastAuthProvider(AUTH_PROVIDER.EMAIL);
+        setLastAuthMethod(AUTH_PROVIDER.EMAIL);
 
         const tokens = response.data?.data ?? {};
         const mergedGuestOrders = tokens.mergedGuestOrders ?? [];
@@ -135,6 +182,15 @@ const Login = () => {
     }
   };
 
+  const handleGoogleSignIn = () => {
+    const startUrl = process.env.NEXT_PUBLIC_GOOGLE_SIGNIN_URL?.trim();
+    if (!startUrl) {
+      toast("Google sign-in is not configured yet.", { icon: "ℹ️" });
+      return;
+    }
+    window.location.assign(startUrl);
+  };
+
   return (
     <section className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-pink-50 p-2 md:p-4">
       <div className="w-full max-w-4xl flex flex-col md:flex-row overflow-hidden rounded-3xl shadow-2xl bg-white">
@@ -164,6 +220,33 @@ const Login = () => {
             <p className="text-black">
               Sign in to continue your beauty experience
             </p>
+          </div>
+
+          <div className="relative w-full mb-2">
+            {lastAuthMethod === AUTH_PROVIDER.GOOGLE && (
+              <span className="pointer-events-none absolute -top-2 right-3 z-10 rounded-full border border-zinc-600 bg-zinc-950 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white">
+                Last used
+              </span>
+            )}
+            <button
+              type="button"
+              onClick={handleGoogleSignIn}
+              className="flex w-full items-center justify-center gap-3 rounded-lg border border-zinc-600/80 bg-zinc-800 py-3 px-4 text-sm font-medium text-white shadow-sm transition hover:bg-zinc-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+            >
+              <GoogleMark className="h-5 w-5 shrink-0" />
+              Continue with Google
+            </button>
+          </div>
+
+          <div className="relative my-7">
+            <div className="absolute inset-0 flex items-center" aria-hidden>
+              <span className="w-full border-t border-gray-200" />
+            </div>
+            <div className="relative flex justify-center text-xs">
+              <span className="bg-white px-3 font-medium uppercase tracking-wide text-gray-500">
+                Or with email
+              </span>
+            </div>
           </div>
 
           <form className="space-y-7" onSubmit={handleSubmit} autoComplete="on">
