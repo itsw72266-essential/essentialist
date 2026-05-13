@@ -55,6 +55,7 @@
     "framer-motion": "^12.23.12",
     "i18next": "^26.0.8",
     "i18next-browser-languagedetector": "^8.2.1",
+    "jsonwebtoken": "^9.0.3",
     "jose": "^6.0.12",
     "lucide-react": "^0.536.0",
     "mongoose": "^8.19.2",

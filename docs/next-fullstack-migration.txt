@@ -42,14 +42,23 @@ Next-native full-stack (implements API in Next; `server/` not imported or modifi
   client/src/fullstack/
     db/mongoose.js
     schemas/auth.schema.js
-    models/user.model.js
+    models/user.model.js, cartproduct.model.js, address.model.js, order.model.js
+    lib/jwtTokens.js, guestMerge.js, orderFingerprint.js, …
     config/sendEmail.js
-    templates/verifyEmailTemplate.js
-    controllers/user/registerUser.js
-  Route Handlers:
-    GET  /api/next/system
-    POST /api/next/user/register
+    templates/
+    controllers/user/*.js
+  User Route Handlers (mirror Express /api/user/* JSON; paths are under /api/next/user/):
+    POST register, login, verify-email, refresh-token
+    GET logout, user-details
+    PUT forgot-password, verify-forgot-password-otp, reset-password, update-user
 
+  Env (same as Express for auth): MONGODB_URI, SECRET_KEY_ACCESS_TOKEN,
+  SECRET_KEY_REFRESH_TOKEN, RESEND_API, NEXT_PUBLIC_SITE_URL or FRONTEND_URL,
+  ACCESS_TOKEN_EXPIRES_IN, REFRESH_TOKEN_EXPIRES_IN (optional).
+
+  Client cutover: point Axios baseURL to the Next origin and map paths from
+  /api/user/... to /api/next/user/... (or add a small wrapper) when ready.
+  Axios refresh handler persists `refreshToken` when the refresh response includes it.
 Next.js Route Handlers (legacy proxy examples):
   client/src/app/api/system/migration-status/route.js — Next-only JSON probe
   client/src/app/api/legacy/health/route.js — read-only proxy to Express GET /health

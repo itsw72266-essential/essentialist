@@ -129,6 +129,10 @@ const refreshAccessToken = async (refreshToken) => {
                 if (accessToken) {
                     localStorage.setItem('accesstoken', accessToken);
                 }
+                const nextRefresh = response.data?.data?.refreshToken;
+                if (nextRefresh) {
+                    localStorage.setItem('refreshToken', nextRefresh);
+                }
                 return accessToken || null;
             } catch (err) {
                 console.log(err);

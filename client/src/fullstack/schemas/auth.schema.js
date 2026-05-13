@@ -81,3 +81,15 @@ export const resetPasswordSchema = z.object({
 export const refreshTokenSchema = z.object({
   refreshToken: z.string().min(20),
 });
+
+export const updateUserSchema = z
+  .object({
+    name: z.string().min(2).max(120).optional(),
+    email: z.string().email().optional(),
+    mobile: z.string().max(30).optional(),
+    password: z.string().min(6).max(128).optional(),
+  })
+  .refine(
+    (d) => Boolean(d.name || d.email || d.mobile || d.password),
+    "At least one field is required"
+  );
