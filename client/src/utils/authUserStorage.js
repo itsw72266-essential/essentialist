@@ -31,11 +31,11 @@ export function clearPersistedUser() {
   localStorage.removeItem(AUTH_USER_STORAGE_KEY);
 }
 
+/**
+ * JWTs are httpOnly cookies (not visible to JS). We only use persisted `user`
+ * as an optimistic cache; session validity is confirmed by API calls.
+ */
 export function hasAuthTokens() {
   if (typeof window === 'undefined') return false;
-  return !!(
-    localStorage.getItem('accesstoken') ||
-    localStorage.getItem('accessToken') ||
-    localStorage.getItem('refreshToken')
-  );
+  return !!readPersistedUser();
 }

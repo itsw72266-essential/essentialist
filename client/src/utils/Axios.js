@@ -88,17 +88,12 @@ const Axios = axios.create({
     withCredentials: true
 });
 
-// Sending access token in the header
+// Auth: httpOnly `accessToken` / `refreshToken` cookies (set by Next login + refresh routes).
+// Do not read JWTs from localStorage or send Authorization — `withCredentials` sends cookies.
+
 Axios.interceptors.request.use(
     async (config) => {
-        // Only access localStorage on client side
         if (typeof window !== 'undefined') {
-            const accessToken = localStorage.getItem('accesstoken');
-
-            if (accessToken) {
-                config.headers.Authorization = `Bearer ${accessToken}`;
-            }
-
             config.headers["X-Locale"] = getCurrentLocale();
             config.headers["Accept-Language"] = i18n.language || getCurrentLocale();
         }
@@ -113,30 +108,18 @@ Axios.interceptors.request.use(
 /** Single in-flight refresh so concurrent 401s do not race or invalidate each other */
 let refreshAccessTokenPromise = null;
 
-const refreshAccessToken = async (refreshToken) => {
-    if (!refreshToken) return null;
+const refreshAccessToken = async () => {
     if (!refreshAccessTokenPromise) {
         refreshAccessTokenPromise = (async () => {
             try {
                 const response = await Axios({
                     ...SummaryApi.refreshToken,
-                    headers: {
-                        Authorization: `Bearer ${refreshToken}`
-                    }
+                    data: {},
                 });
-
-                const accessToken = response.data?.data?.accessToken;
-                if (accessToken) {
-                    localStorage.setItem('accesstoken', accessToken);
-                }
-                const nextRefresh = response.data?.data?.refreshToken;
-                if (nextRefresh) {
-                    localStorage.setItem('refreshToken', nextRefresh);
-                }
-                return accessToken || null;
+                return response.data?.success ? true : false;
             } catch (err) {
                 console.log(err);
-                return null;
+                return false;
             } finally {
                 refreshAccessTokenPromise = null;
             }
@@ -146,7 +129,7 @@ const refreshAccessToken = async (refreshToken) => {
 };
 
 // Extend the life span of access token with
-// the help of refresh token
+// the help of refresh token (refresh cookie is httpOnly)
 Axios.interceptors.response.use(
     (response) => {
         return response;
@@ -172,12 +155,12 @@ Axios.interceptors.response.use(
         ) {
             originRequest.retry = true;
 
-            const refreshToken = localStorage.getItem("refreshToken");
-            const newAccessToken = await refreshAccessToken(refreshToken);
+            const refreshed = await refreshAccessToken();
 
-            if (newAccessToken) {
-                originRequest.headers = originRequest.headers || {};
-                originRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+            if (refreshed) {
+                if (originRequest.headers) {
+                    delete originRequest.headers.Authorization;
+                }
                 return Axios(originRequest);
             }
         }

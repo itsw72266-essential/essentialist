@@ -155,12 +155,10 @@ const Login = () => {
         const tokens = response.data?.data ?? {};
         const mergedGuestOrders = tokens.mergedGuestOrders ?? [];
 
-        if (tokens.accessToken) {
-          localStorage.setItem("accessToken", tokens.accessToken);
-          localStorage.setItem("accesstoken", tokens.accessToken);
-        }
-        if (tokens.refreshToken) {
-          localStorage.setItem("refreshToken", tokens.refreshToken);
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("accessToken");
+          localStorage.removeItem("accesstoken");
+          localStorage.removeItem("refreshToken");
         }
         if (mergedGuestOrders.length) {
           pruneSyncedGuestOrders(mergedGuestOrders);

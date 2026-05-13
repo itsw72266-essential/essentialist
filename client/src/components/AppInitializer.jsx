@@ -9,8 +9,6 @@ import Axios from '@/backend/http/legacyClient';
 import SummaryApi from '@/backend/contracts/summaryApi';
 import {
   readPersistedUser,
-  hasAuthTokens,
-  clearPersistedUser,
 } from '../utils/authUserStorage';
 
 export default function AppInitializer() {
@@ -24,10 +22,8 @@ export default function AppInitializer() {
 
       if (typeof window !== 'undefined') {
         const persisted = readPersistedUser();
-        if (persisted && hasAuthTokens()) {
+        if (persisted) {
           dispatch(setUserDetails(persisted));
-        } else if (persisted && !hasAuthTokens()) {
-          clearPersistedUser();
         }
       }
 

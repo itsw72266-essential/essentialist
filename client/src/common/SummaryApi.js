@@ -87,12 +87,6 @@ function buildUrl(path, params) {
   return url.toString()
 }
 
-function getBrowserAccessToken() {
-  if (typeof window === 'undefined') return null
-  const t = window.localStorage?.getItem('accesstoken')
-  return t && String(t).trim() ? String(t).trim() : null
-}
-
 export async function apiFetch(
   path,
   {
@@ -110,12 +104,10 @@ export async function apiFetch(
   const controller = signal ? null : new AbortController()
   const requestSignal = signal ?? controller?.signal
 
-  const bearer = getBrowserAccessToken()
   const init = {
     method,
     headers: {
       'Content-Type': 'application/json',
-      ...(bearer ? { Authorization: `Bearer ${bearer}` } : {}),
       ...(getBrowserLocale() ? { 'X-Locale': getBrowserLocale() } : {}),
       ...(getBrowserLocale() ? { 'Accept-Language': getBrowserLocale() } : {}),
       ...headers,

@@ -18,6 +18,15 @@ function baseCookieOptions() {
   };
 }
 
+/** Remove JWT fields from JSON so clients rely on httpOnly cookies only. */
+export function stripAuthSecretsFromBodyForClient(body) {
+  if (!body || typeof body !== "object" || !body.data || typeof body.data !== "object") {
+    return body;
+  }
+  const { accessToken, refreshToken, ...rest } = body.data;
+  return { ...body, data: rest };
+}
+
 /** @param {import("next/server").NextResponse} res */
 export function applyAuthTokensToResponse(res, { accessToken, refreshToken }) {
   if (!accessToken || !refreshToken) return;

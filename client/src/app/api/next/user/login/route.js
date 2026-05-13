@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
 
 import { loginUserAction } from "@/fullstack/controllers/user/loginUser";
-import { applyAuthTokensToResponse } from "@/fullstack/lib/authCookies";
+import {
+  applyAuthTokensToResponse,
+  stripAuthSecretsFromBodyForClient,
+} from "@/fullstack/lib/authCookies";
 
 export async function POST(request) {
   let json;
@@ -16,7 +19,8 @@ export async function POST(request) {
 
   try {
     const result = await loginUserAction(json);
-    const res = NextResponse.json(result.body, { status: result.status });
+    const bodyForClient = stripAuthSecretsFromBodyForClient(result.body);
+    const res = NextResponse.json(bodyForClient, { status: result.status });
     if (
       result.status === 200 &&
       result.body?.success &&
