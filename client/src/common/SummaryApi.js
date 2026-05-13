@@ -140,9 +140,11 @@ export async function apiFetch(
 
     if (!response.ok) {
       const errorText = await response.text()
-      throw new Error(
+      const err = new Error(
         `API ${upperMethod} ${requestUrl} failed: ${response.status} ${response.statusText} — ${errorText}`,
       )
+      err.status = response.status
+      throw err
     }
 
     if (response.status === 204) return null

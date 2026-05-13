@@ -1529,15 +1529,19 @@ export default async function ProductDisplayPage({ params }) {
   if (!productId) return notFound()
 
   let productData
-  let ratingSnapshot
+  let ratingSnapshot = { average: 0, count: 0, myRating: null }
   try {
-    ;[productData, ratingSnapshot] = await Promise.all([
-      getCachedProduct(productId),
-      getCachedRatings(productId),
-    ])
+    productData = await getCachedProduct(productId)
   } catch (error) {
-    if (error?.status === 404) return notFound()
+    const status = error?.status
+    if (status === 404 || status === 400) return notFound()
     throw error
+  }
+
+  try {
+    ratingSnapshot = await getCachedRatings(productId)
+  } catch {
+    // Ratings are optional; do not fail the PDP if the ratings route errors.
   }
 
   const dataUpdatedAt = Date.now()
