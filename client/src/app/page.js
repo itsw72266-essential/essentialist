@@ -705,8 +705,8 @@ export default async function Home() {
           {/* FIX 2: PRODUCT RECOMMENDATIONS MOVED BELOW HERO */}
           <ProductRecommendations />
 
-          {/* Category Grid */}
-          <div className="container mx-auto px-4 my-8 grid grid-cols-4 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4">
+          {/* Category Grid — compact circles; column counts −2 vs prior; gap −2 (gap-2) */}
+          <div className="container mx-auto px-4 my-8 grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2 justify-items-center">
             {Array.isArray(categoryData) &&
               categoryData.slice(0, 16).map((cat) => {
                 if (!cat?._id) return null;
@@ -718,22 +718,22 @@ export default async function Home() {
                   <Link
                     key={cat._id}
                     href={href}
-                    className="block text-center transition-transform hover:scale-105"
+                    className="block w-full max-w-[3.25rem] sm:max-w-14 md:max-w-16 text-center transition-transform hover:scale-105"
                   >
-                    <div className="relative w-full aspect-square rounded-full bg-gray-100 overflow-hidden ring-1 ring-gray-200/70">
-                      <div className="absolute inset-0 flex items-center justify-center p-2 sm:p-3">
+                    <div className="relative mx-auto aspect-square w-full rounded-full bg-gray-100 overflow-hidden shadow-sm ring-2 ring-gray-200/90">
+                      <div className="absolute inset-0 flex items-center justify-center p-1.5 sm:p-2">
                         <Image
                           src={cat.image || "/placeholder.png"}
                           alt={cat.name}
                           width={256}
                           height={256}
                           unoptimized={true}
-                          sizes="(max-width: 640px) 22vw, 12vw"
+                          sizes="(max-width: 640px) 18vw, 10vw"
                           className="max-h-full max-w-full w-auto h-auto object-contain object-center"
                         />
                       </div>
                     </div>
-                    <div className="text-[10px] sm:text-xs font-bold text-gray-700 mt-2 line-clamp-2 min-h-[2.4em] uppercase tracking-tighter leading-tight px-0.5">
+                    <div className="text-[9px] sm:text-[10px] font-bold text-gray-700 mt-1.5 line-clamp-2 min-h-[2.2em] uppercase tracking-tighter leading-tight px-0.5">
                       {cat.name}
                     </div>
                   </Link>
