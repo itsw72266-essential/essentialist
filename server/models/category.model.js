@@ -1,0 +1,27 @@
+//D:\EssentialistMakeupStore\server\models\category.model.js
+import mongoose from "mongoose";
+
+const categorySchema = new mongoose.Schema({
+    name : {
+        type : String,
+        default : ""
+    },
+    translations: {
+        fr: {
+            name: {
+                type: String,
+                default: ""
+            }
+        }
+    },
+    image : {
+        type : String,
+        default : ""
+    }
+},{
+    timestamps : true
+})
+
+const CategoryModel = mongoose.model('category',categorySchema)
+
+export default CategoryModel

@@ -1,0 +1,398 @@
+/* D:\essentialist_next_ecommerce\client\src\app\globals.css */
+/* Poppins comes from next/font in app/layout.js — avoid @import of the full
+   Google Fonts CSS (100–900 × italic), which is huge and slows dev/HMR. */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-weight: 400;
+  font-style: normal;
+  @apply bg-background text-foreground;
+}
+
+/* Custom Scrollbar */
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+.scrollbarCustom::-webkit-scrollbar {
+  width: 10px;
+  background: theme('colors.slate.100');
+}
+.scrollbarCustom::-webkit-scrollbar-thumb {
+  background: theme('colors.blue.100');
+  border-radius: 9999px;
+}
+
+/* Product Description Content Styling */
+.product-description-content p {
+  margin-bottom: 0.75em;
+  line-height: 1.7;
+}
+.product-description-content h1,
+.product-description-content h2,
+.product-description-content h3 {
+  font-weight: 700;
+  margin-top: 1.5em;
+  margin-bottom: 0.7em;
+}
+.product-description-content ul,
+.product-description-content ol {
+  padding-left: 1.5em;
+  margin-bottom: 1em;
+}
+.product-description-content ul {
+  list-style-type: disc;
+}
+.product-description-content ol {
+  list-style-type: decimal;
+}
+.product-description-content strong {
+  font-weight: 600;
+}
+
+/* Layer base for CSS vars */
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+    --primary: 240 5.9% 10%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 240 10% 3.9%;
+    --radius: 0.5rem;
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+  .dark {
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 240 5.9% 10%;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 240 4.9% 83.9%;
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    border-color: hsl(var(--border));
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+@layer base {
+  h1, h2, h3, h4, h5, h6 {
+    font-family: "Poppins", sans-serif;
+    font-weight: 700;
+  }
+}
+
+/* Accessible focus defaults */
+a:focus-visible,
+button:focus-visible,
+[role="button"]:focus-visible {
+  outline: 2px solid hsl(var(--secondary-foreground));
+  outline-offset: 3px;
+}
+
+.link {
+  @apply text-primary hover:underline focus-visible:underline focus-visible:decoration-pink-500 outline-none transition rounded px-1;
+}
+
+/* Custom styles for Quill editor */
+.quill-editor {
+  height: 200px;
+  margin-bottom: 30px;
+}
+
+.ql-container {
+  min-height: 150px;
+  border-bottom-left-radius: 0.25rem;
+  border-bottom-right-radius: 0.25rem;
+  background: #EFF6FF;
+}
+
+.ql-toolbar {
+  background: white;
+  border-top-left-radius: 0.25rem;
+  border-top-right-radius: 0.25rem;
+}
+
+.quill-html-content p {
+  margin-block: 0.5em;
+  line-height: 1.6;
+}
+
+.quill-html-content h1, .quill-html-content h2, .quill-html-content h3 {
+  margin-top: 1em;
+  margin-bottom: 0.5em;
+  font-weight: bold;
+}
+.quill-html-content ul, .quill-html-content ol {
+  margin-left: 1.5em;
+  margin-bottom: 1em;
+}
+.quill-html-content p {
+  margin-bottom: 0.75em;
+}
+
+[dangerouslySetInnerHTML] p {
+  margin-bottom: 0.75em;
+  line-height: 1.6;
+}
+
+[dangerouslySetInnerHTML] h1 {
+  font-size: 1.5em;
+  font-weight: bold;
+  margin-top: 1em;
+  margin-bottom: 0.5em;
+  line-height: 1.6;
+}
+
+[dangerouslySetInnerHTML] h2 {
+  font-size: 1.3em;
+  font-weight: bold;
+  margin-top: 0.8em;
+  margin-bottom: 0.5em;
+  line-height: 1.6;
+}
+
+[dangerouslySetInnerHTML] h3 {
+  font-size: 1.1em;
+  font-weight: bold;
+  margin-top: 0.8em;
+  margin-bottom: 0.5em;
+  line-height: 1.6;
+}
+
+[dangerouslySetInnerHTML] ul,
+[dangerouslySetInnerHTML] ol {
+  padding-left: 1.5em;
+  margin-bottom: 1em;
+  line-height: 1.6;
+}
+
+[dangerouslySetInnerHTML] li {
+  margin-bottom: 0.25em;
+  line-height: 1.6;
+}
+
+[dangerouslySetInnerHTML] strong {
+  font-weight: bold;
+}
+
+[dangerouslySetInnerHTML] {
+  line-height: 1.6;
+}
+
+[dangerouslySetInnerHTML] p {
+  margin-bottom: 1em;
+  line-height: 1.6;
+}
+
+[dangerouslySetInnerHTML] ul,
+[dangerouslySetInnerHTML] ol {
+  padding-left: 2em;
+  margin-bottom: 1em;
+  list-style-position: outside;
+}
+
+[dangerouslySetInnerHTML] li {
+  margin-bottom: 0.5em;
+}
+
+[dangerouslySetInnerHTML] h1 {
+  font-size: 1.5em;
+  font-weight: bold;
+  margin-top: 1em;
+  margin-bottom: 0.5em;
+}
+
+[dangerouslySetInnerHTML] strong {
+  font-weight: bold;
+}
+
+[dangerouslySetInnerHTML] p:has(strong) {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5em;
+  align-items: baseline;
+}
+
+[dangerouslySetInnerHTML] pre {
+  white-space: pre-wrap;
+}
+
+[dangerouslySetInnerHTML] ul + p,
+[dangerouslySetInnerHTML] ol + p {
+  margin-top: 1em;
+}
+
+.controls {
+  display: flex;
+  border: 1px solid #ccc;
+  border-top: 0;
+  padding: 10px;
+}
+
+.controls-right {
+  margin-left: auto;
+}
+
+.state {
+  margin: 10px 0;
+  font-family: monospace;
+}
+
+.state-title {
+  color: #999;
+  text-transform: uppercase;
+}
+
+/* ========================================================================== */
+/* ==                  STYLES FOR REACT-QUILL EDITOR                       == */
+/* ========================================================================== */
+.quill-editor .ql-toolbar {
+  background: white;
+  border: 1px solid #ccc;
+  border-bottom: 0;
+  border-top-left-radius: 0.25rem;
+  border-top-right-radius: 0.25rem;
+}
+
+.quill-editor .ql-container {
+  border: 1px solid #ccc;
+  min-height: 150px;
+  border-bottom-left-radius: 0.25rem;
+  border-bottom-right-radius: 0.25rem;
+  background: #EFF6FF;
+}
+
+.quill-editor .ql-editor {
+  min-height: 150px;
+  padding: 1rem;
+  line-height: 1.6;
+}
+
+/* ========================================================================== */
+/* ==         STYLES FOR RENDERED HTML ON PRODUCT DETAIL PAGE              == */
+/* ========================================================================== */
+.product-description-content {
+  line-height: 1.6;
+  text-align: left;
+}
+
+.product-description-content p {
+  margin-top: 0;
+  margin-bottom: 0.5em;
+}
+
+.product-description-content p:has(br:only-child) {
+  margin-bottom: 0;
+}
+.product-description-content p:empty {
+  margin-bottom: 0;
+}
+
+.product-description-content h1,
+.product-description-content h2,
+.product-description-content h3 {
+  font-weight: bold;
+  line-height: 1.3;
+  margin-top: 1.5em;
+  margin-bottom: 0.75em;
+}
+
+.product-description-content h1 { font-size: 1.25em; }
+.product-description-content h2 { font-size: 1.15em; }
+.product-description-content h3 { font-size: 1.05em; }
+
+.product-description-content ul,
+.product-description-content ol {
+  margin-top: 1.5em;
+  margin-bottom: 1em;
+  padding-left: 1.5em;
+}
+
+.product-description-content li {
+  margin-bottom: 0.5em;
+}
+
+.product-description-content strong {
+  font-weight: bold;
+}
+
+.product-description-content > *:last-child {
+  margin-bottom: 0;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}

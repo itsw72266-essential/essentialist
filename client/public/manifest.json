@@ -1,0 +1,21 @@
+{
+  "name": "Essentialist Makeup Store",
+  "short_name": "Essentialist",
+  "description": "Authentic makeup and cosmetics in Cameroon.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#db2777",
+  "icons": [
+    {
+      "src": "/icon.avif",
+      "sizes": "192x192",
+      "type": "image/avif"
+    },
+    {
+      "src": "/icon.avif",
+      "sizes": "512x512",
+      "type": "image/avif"
+    }
+  ]
+}

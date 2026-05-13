@@ -1,0 +1,26 @@
+// src/app/robots.js
+export default function robots() {
+  return {
+    rules: [
+      {
+        userAgent: '*',
+        allow: '/',
+        disallow: ['/api/', '/dashboard/', '/admin/'],
+      },
+      {
+        userAgent: 'Googlebot',
+        allow: '/',
+      },
+      {
+        userAgent: 'Bingbot', 
+        allow: '/',
+      },
+      {
+        userAgent: 'Slurp',
+        allow: '/',
+      }
+    ],
+    sitemap: 'https://www.esmakeupstore.com/sitemap.xml',
+    host: 'https://www.esmakeupstore.com',
+  }
+}

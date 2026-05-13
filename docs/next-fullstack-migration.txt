@@ -1,0 +1,36 @@
+Essentialist — Next.js full-stack migration (incremental)
+
+Git branch (created in this workspace):
+  feat/next-fullstack-migration
+
+If you already had a remote repository, connect it after reviewing the new .git init:
+  git remote add origin <url>
+  git fetch
+  (resolve history as needed — this workspace had no .git before migration scaffolding)
+
+Canonical backend (unchanged):
+  server/ — Express + Mongo + all existing routes and jobs
+
+Frontend — backend-related consolidation:
+  client/src/backend/
+    config/runtimePublicEnv.js   — env accessors
+    http/legacyClient.js         — re-export of src/utils/Axios.js
+    contracts/summaryApi.js      — re-export of src/common/SummaryApi.js
+    services/legacyExpressGateway.js — extension point for future services
+    index.js                     — barrel exports
+
+Path alias:
+  @backend/* → client/src/backend/*
+
+Next.js API routes (existing + new):
+  client/src/app/api/system/migration-status/route.js — Next runtime probe only
+
+Conventions:
+  - New code that talks to Express should prefer `import ... from '@backend/...'`.
+  - Do not delete or move `client/src/common/SummaryApi.js` or `client/src/utils/Axios.js` until imports are migrated.
+
+Next steps (suggested order):
+  1. Gradually change imports from @/common/SummaryApi to @backend/contracts/summaryApi (or @backend barrel).
+  2. Introduce typed request/response DTOs under client/src/backend/contracts/types/.
+  3. For each domain, add Route Handlers under app/api/... that proxy or re-implement logic; keep Express routes until parity is verified.
+  4. Optionally add a root package.json "workspaces" definition for client + server.
