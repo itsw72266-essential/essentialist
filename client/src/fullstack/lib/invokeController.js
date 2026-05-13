@@ -5,6 +5,8 @@
 import { parse as parseCookie } from "cookie";
 
 import { connectMongo } from "../db/mongoose.js";
+import { findBlockingDuplicateOrder } from "./duplicateOrderCheck.js";
+import { getIdempotencyHeaderValue, tryAcquireIdempotencyKey } from "./idempotency.js";
 
 export function createExpressLikeRequest(nextRequest, parsedBody = {}, routeParams = {}) {
   const url = new URL(nextRequest.url);
@@ -50,7 +52,14 @@ export function createExpressResponse() {
 /**
  * @param {(req: object, res: object) => Promise<void>} handler
  * @param {Request} nextRequest
- * @param {{ body?: object, routeParams?: object, userId?: string | null }} [opts]
+ * @param {{
+ *   body?: object,
+ *   routeParams?: object,
+ *   userId?: string | null,
+ *   idempotencyPrefix?: string,
+ *   duplicateOrderGuard?: boolean,
+ *   idempotencyTtlSeconds?: number,
+ * }} [opts]
  */
 export async function invokeController(handler, nextRequest, opts = {}) {
   let body = opts.body;
@@ -71,8 +80,61 @@ export async function invokeController(handler, nextRequest, opts = {}) {
   const req = createExpressLikeRequest(nextRequest, body, opts.routeParams ?? {});
   const finalReq = "userId" in opts ? { ...req, userId: opts.userId } : req;
 
-  const res = createExpressResponse();
+  const {
+    idempotencyPrefix,
+    duplicateOrderGuard,
+    idempotencyTtlSeconds = 300,
+  } = opts;
+
+  let idemRelease = null;
+  if (idempotencyPrefix) {
+    const headerKey = getIdempotencyHeaderValue(finalReq.headers);
+    if (!headerKey) {
+      const res = createExpressResponse();
+      res.status(400).json({
+        message: "X-Idempotency-Key header is required.",
+        error: true,
+        success: false,
+      });
+      return res.getResult();
+    }
+    const storageKey = `${idempotencyPrefix}:${headerKey}`;
+    const slot = tryAcquireIdempotencyKey(storageKey, idempotencyTtlSeconds);
+    if (!slot) {
+      const res = createExpressResponse();
+      res.status(409).json({
+        message:
+          "Duplicate request detected. Last attempt is still being processed.",
+        error: true,
+        success: false,
+      });
+      return res.getResult();
+    }
+    idemRelease = slot.release;
+  }
+
   await connectMongo();
-  await handler(finalReq, res);
-  return res.getResult();
+
+  if (duplicateOrderGuard) {
+    const dup = await findBlockingDuplicateOrder(body, finalReq.userId ?? null);
+    if (dup) {
+      if (idemRelease) idemRelease();
+      const res = createExpressResponse();
+      res.status(dup.status).json(dup.body);
+      return res.getResult();
+    }
+  }
+
+  const res = createExpressResponse();
+  try {
+    await handler(finalReq, res);
+  } catch (err) {
+    if (idemRelease) idemRelease();
+    throw err;
+  }
+  const result = res.getResult();
+  if (idemRelease && result.status >= 500) {
+    idemRelease();
+  }
+  return result;
 }

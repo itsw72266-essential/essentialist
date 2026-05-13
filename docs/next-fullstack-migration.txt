@@ -44,8 +44,9 @@ Next-native full-stack (implements API in Next; `server/` not imported or modifi
     schemas/auth.schema.js
     models/ — user, cartproduct, address, order, category, subCategory, product, brand,
       blog, rating, review, review_comment
-    lib/ — localization, jwtTokens, invokeController, nextRoute (auth, admin, optional
-      auth, admin privilege), cacheNoop, mail (from server utils), uploadImageClodinary,
+    lib/ — localization, jwtTokens, invokeController (optional idempotency + duplicate-order for
+      order/Payunit POSTs), nextRoute (auth, admin, optional auth, admin privilege), cacheNoop,
+      mail (from server utils), uploadImageClodinary,
       requireAdminPrivilege (ADMIN | SUPER_ADMIN), authFromRequest (cookie + Bearer)
     config/ — sendEmail.js, stripe.js (lazy: null if STRIPE_SECRET_KEY unset)
     controllers/ — user, cart, address, category, subcategory, product, brand, order,
@@ -98,8 +99,11 @@ Next-native full-stack (implements API in Next; `server/` not imported or modifi
   `FRONTEND_URL` (see `/api/next/payments/*` note above).
 
   Note: Express Redis cache middleware is a no-op in Next (`cacheNoop.js`). Express rate
-  limiters, idempotency keys, duplicate-order guards, and multer are not wired on Next;
-  parity is behavioral for controllers only.
+  limiters and multer are not wired on Next. Order placement (COD, guest COD, Stripe checkout)
+  and Payunit customer POST routes require **`X-Idempotency-Key`** and use the same in-memory
+  idempotency behavior as Express when Redis is unavailable; COD routes also run the same
+  **duplicate-order** fingerprint check as Express `duplicateOrderGuard`. Redis-backed
+  idempotency across multiple Next instances is still optional and not implemented in Next yet.
 
   Stripe: `fullstack/config/stripe.js` uses `new Stripe(secret)` (Stripe SDK v22). Webhook
   route verifies signature with raw body then calls the same `webhookStripe` handler.

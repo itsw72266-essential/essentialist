@@ -13,10 +13,10 @@ function jsonError(message, status = 500) {
 }
 
 /** @param {(req: object, res: object) => Promise<void>} handler */
-export function asPublicPost(handler) {
+export function asPublicPost(handler, routeOpts = {}) {
   return async (request) => {
     try {
-      const result = await invokeController(handler, request);
+      const result = await invokeController(handler, request, routeOpts);
       return NextResponse.json(result.body, { status: result.status });
     } catch (e) {
       console.error(handler.name || "handler", e);
@@ -53,7 +53,7 @@ export function asPublicGetWithParams(handler) {
   };
 }
 
-export function asAuthPost(handler) {
+export function asAuthPost(handler, routeOpts = {}) {
   return async (request) => {
     const auth = resolveAuthUserId(request, { required: true });
     if (auth.error) {
@@ -61,6 +61,7 @@ export function asAuthPost(handler) {
     }
     try {
       const result = await invokeController(handler, request, {
+        ...routeOpts,
         userId: auth.userId,
       });
       return NextResponse.json(result.body, { status: result.status });
@@ -280,7 +281,7 @@ export function asAuthGetWithParams(handler) {
   };
 }
 
-export function asAuthPostWithParams(handler) {
+export function asAuthPostWithParams(handler, routeOpts = {}) {
   return async (request, context) => {
     const auth = resolveAuthUserId(request, { required: true });
     if (auth.error) {
@@ -289,6 +290,7 @@ export function asAuthPostWithParams(handler) {
     try {
       const params = await context.params;
       const result = await invokeController(handler, request, {
+        ...routeOpts,
         userId: auth.userId,
         routeParams: params,
       });
