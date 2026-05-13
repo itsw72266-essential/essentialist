@@ -69,10 +69,9 @@ Next-native full-stack (implements API in Next; `server/` not imported or modifi
       POST invoice; GET invoice/[invoiceId]; POST disburse (auth). Webhook notify URL defaults
       to `${BACKEND_URL}/api/next/payments/webhook` when `BACKEND_URL` is set, else
       `${FRONTEND_URL}/api/next/payments/webhook`; override with `PAYUNIT_NOTIFY_URL`.
-    /api/next/admin/*    — GET dashboard = **admin.controller** stats (matches Express when
-      `admin.routes` is registered before guest admin on `/api/admin`). GET summary =
-      guest-style totals from `guestadmin.controller`. orders, guest-orders, PATCH
-      orders/[orderId]/deliver
+    /api/next/admin/*    — GET dashboard = **admin.controller** stats; GET summary =
+      guest-style totals (same handler family as legacy guestadmin dashboard payload); orders,
+      guest-orders, PATCH orders/[orderId]/deliver
     /api/next/indexnow/* — submit-url, submit-urls, notify-content-change (POST), key (GET),
       regenerate-key (POST); same env as Express (`SITE_HOST`, `PUBLIC_DIR`, `INDEX_NOW_KEY`)
     /api/next/ratings/*  — POST /ratings (optional auth), GET|DELETE /ratings/[productId]

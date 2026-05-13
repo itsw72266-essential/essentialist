@@ -1,4 +1,5 @@
 import UserModel from "../../models/user.model.js";
+import { mergeGuestDataSchema } from "../../schemas/auth.schema.js";
 import {
   mergeGuestAddresses,
   mergeGuestCart,
@@ -12,11 +13,18 @@ import {
 export async function mergeGuestDataController(request, response) {
   try {
     const userId = request.userId;
-    const {
-      guestCart = [],
-      guestAddresses = [],
-      guestOrders = [],
-    } = request.body || {};
+
+    const parsed = mergeGuestDataSchema.safeParse(request.body ?? {});
+    if (!parsed.success) {
+      return response.status(400).json({
+        message: "Invalid payload",
+        error: true,
+        success: false,
+        details: parsed.error.issues.map((i) => i.message),
+      });
+    }
+
+    const { guestCart, guestAddresses, guestOrders } = parsed.data;
 
     const user = await UserModel.findById(userId).lean();
     if (!user) {

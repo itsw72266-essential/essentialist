@@ -49,6 +49,12 @@ export const verifyEmailSchema = z.object({
   code: z.string().regex(objectIdRegex, "Invalid verification code"),
 });
 
+export const mergeGuestDataSchema = z.object({
+  guestCart: z.array(guestCartItemSchema).optional().default([]),
+  guestAddresses: z.array(z.record(z.string(), z.unknown())).optional().default([]),
+  guestOrders: z.array(guestOrderSchema).optional().default([]),
+});
+
 export const loginSchema = z.object({
   email: emailSchema,
   password: z.string(),

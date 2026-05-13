@@ -243,7 +243,7 @@ const SummaryApi = {
   disableAddress: { url: '/api/next/address/disable', method: 'delete' },
   CashOnDeliveryOrder: { url: '/api/next/order/cash-on-delivery', method: 'post' },
   GuestCashOnDeliveryOrder: { url: '/api/next/order/guest-cod', method: 'post' },
-  guestOrderCreate: { url: '/api/guest-orders', method: 'post' },
+  guestOrderCreate: { url: '/api/next/order/guest-cod', method: 'post' },
   guestOrderReceipt: { url: '/api/guest-orders', method: 'get' },
   payment_url: { url: '/api/next/order/checkout', method: 'post' },
   guestStripePayment: { url: '/api/next/order/guest-checkout', method: 'post' },
@@ -344,6 +344,7 @@ const SummaryApi = {
   }),
   productFilterMeta: { url: '/api/next/product/filter-meta', method: 'post' },
   adminDashboard: { url: '/api/next/admin/dashboard', method: 'get' },
+  adminSummary: { url: '/api/next/admin/summary', method: 'get' },
   getGuestOrders: { url: '/api/next/admin/guest-orders', method: 'get' },
   adminOrders: { url: '/api/next/admin/orders', method: 'get' },
   markOrderDelivered: (orderId) => ({

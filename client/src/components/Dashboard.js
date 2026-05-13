@@ -10,7 +10,7 @@ import React, {
   useTransition,
 } from 'react';
 import { useSelector } from 'react-redux';
-import SummaryApi, { callSummaryApi, apiFetch } from '@/backend/contracts/summaryApi';
+import SummaryApi, { callSummaryApi } from '@/backend/contracts/summaryApi';
 
 import {
   ResponsiveContainer,
@@ -775,7 +775,7 @@ const Dashboard = () => {
   }, [assertSuccess]);
 
   const fetchAdminDashboard = useCallback(async () => {
-    const response = await apiFetch('/api/next/admin/dashboard', {
+    const response = await callSummaryApi(SummaryApi.adminDashboard, {
       credentials: 'include',
     });
     return assertSuccess(response, 'Failed to fetch admin dashboard') ?? null;
