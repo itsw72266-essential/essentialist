@@ -3,7 +3,7 @@ This directory remains the authoritative Express backend.
 Next.js client code is consolidating HTTP/API access under client/src/backend/ (see docs/next-fullstack-migration.txt). Route Handlers may call the same Express deployment via fetchLegacyExpress() — they do not replace server/ by default.
 
 Parallel Next-native API: client/src/fullstack/ + /api/next/* (user, cart, address,
-  category, subcategory, product, brand, order, admin stats + guest summary, ratings, reviews,
-  blog, file upload, indexnow). server/ is not edited.
+  category, subcategory, product, brand, order, payments (Payunit), admin stats + guest summary,
+  ratings, reviews, blog, file upload, indexnow). server/ is not edited.
 
 Do not remove or disable routes here during migration. New Next Route Handlers should duplicate behavior only behind feature flags or after parity tests.

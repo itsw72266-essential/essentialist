@@ -37,6 +37,22 @@ export function asPublicGet(handler) {
   };
 }
 
+export function asPublicGetWithParams(handler) {
+  return async (request, context) => {
+    try {
+      const params = await context.params;
+      const result = await invokeController(handler, request, {
+        body: {},
+        routeParams: params,
+      });
+      return NextResponse.json(result.body, { status: result.status });
+    } catch (e) {
+      console.error(handler.name || "handler", e);
+      return jsonError(e?.message || "Server error");
+    }
+  };
+}
+
 export function asAuthPost(handler) {
   return async (request) => {
     const auth = resolveAuthUserId(request, { required: true });

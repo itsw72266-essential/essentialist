@@ -49,8 +49,8 @@ Next-native full-stack (implements API in Next; `server/` not imported or modifi
       requireAdminPrivilege (ADMIN | SUPER_ADMIN), authFromRequest (cookie + Bearer)
     config/ — sendEmail.js, stripe.js (lazy: null if STRIPE_SECRET_KEY unset)
     controllers/ — user, cart, address, category, subcategory, product, brand, order,
-      guestadmin, admin (stats), rating, review, blog, indexnow (handlers copied from server;
-      imports retargeted)
+      payments (Payunit), guestadmin, admin (stats), rating, review, blog, indexnow (handlers
+      copied from server; imports retargeted)
   Route Handlers under /api/next/ (prefix `next` avoids colliding with /api/user):
     /api/next/user/*     — full auth surface + PUT upload-avatar (multipart field `avatar`)
     /api/next/cart/*     — create, get, update-qty, delete-cart-item (Bearer auth)
@@ -62,6 +62,12 @@ Next-native full-stack (implements API in Next; `server/` not imported or modifi
     /api/next/order/*    — verify-receipt (POST), cash-on-delivery (POST auth), guest-cod (POST),
       checkout (POST auth), webhook (POST raw Stripe signature), order-list (GET auth),
       receipt/[orderId] (GET optional auth + cookie/Bearer like Express)
+    /api/next/payments/* — Payunit (same behavior as server/route/payments.js): POST mtn,
+      orange, guest-mtn, guest-orange; POST webhook (public); GET status/[transactionId];
+      GET order-status/[orderId] (auth); GET guest-order-status/[orderId] (public + ?token=);
+      POST invoice; GET invoice/[invoiceId]; POST disburse (auth). Webhook notify URL defaults
+      to `${BACKEND_URL}/api/next/payments/webhook` when `BACKEND_URL` is set, else
+      `${FRONTEND_URL}/api/next/payments/webhook`; override with `PAYUNIT_NOTIFY_URL`.
     /api/next/admin/*    — GET dashboard = **admin.controller** stats (matches Express when
       `admin.routes` is registered before guest admin on `/api/admin`). GET summary =
       guest-style totals from `guestadmin.controller`. orders, guest-orders, PATCH
@@ -86,6 +92,8 @@ Next-native full-stack (implements API in Next; `server/` not imported or modifi
   Env: same MongoDB + JWT secrets as Express; `requireAdmin` routes need role ADMIN.
   Review admin routes use `requireAdminPrivilege` (ADMIN or SUPER_ADMIN). Auth reads
   `accessToken` cookie first, then `Authorization: Bearer` (matches Express `auth`).
+  Payunit notify URL: set `PAYUNIT_NOTIFY_URL` explicitly, or rely on `BACKEND_URL` /
+  `FRONTEND_URL` (see `/api/next/payments/*` note above).
 
   Note: Express Redis cache middleware is a no-op in Next (`cacheNoop.js`). Express rate
   limiters, idempotency keys, duplicate-order guards, and multer are not wired on Next;
@@ -94,8 +102,14 @@ Next-native full-stack (implements API in Next; `server/` not imported or modifi
   Stripe: `fullstack/config/stripe.js` uses `new Stripe(secret)` (Stripe SDK v22). Webhook
   route verifies signature with raw body then calls the same `webhookStripe` handler.
 
+  Payunit: `fullstack/config/payunit.js` exposes `getPayunitClient()` (lazy; returns `null`
+  if `PAYUNIT_API_KEY`, `PAYUNIT_API_USERNAME`, and `PAYUNIT_API_PASSWORD` are unset so
+  `next build` does not throw). Optional `PAYUNIT_MODE` (default `test`). Install
+  `@payunit/nodejs-sdk` in the client app.
+
 Suggested next steps:
-  1. Port `server/route/payments.js` (Payunit / long router) or keep on Express until needed.
+  1. Point remaining SummaryApi paths at `/api/next/...` as each surface is verified (Payunit
+     payment URLs already target `/api/next/payments/*`).
   2. Point the browser client at `/api/next/...` per domain when tested.
   3. Add Route Handlers under app/api/legacy/... using fetchLegacyExpress() during overlap.
   4. Optional: monorepo workspaces root package.json for client + server.

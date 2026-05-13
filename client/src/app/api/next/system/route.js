@@ -32,6 +32,8 @@ export async function GET() {
       product: "/api/next/product/*",
       brand: "/api/next/brand/*",
       order: "/api/next/order/*",
+      payments:
+        "/api/next/payments/mtn|orange|guest-mtn|guest-orange|webhook|status/[id]|order-status/[id]|guest-order-status/[id]|invoice|disburse",
       admin: "/api/next/admin/dashboard|summary|orders|guest-orders|…",
       ratings: "/api/next/ratings/*",
       reviews: "/api/next/reviews/*",

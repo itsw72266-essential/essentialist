@@ -246,20 +246,20 @@ const SummaryApi = {
   guestOrderReceipt: { url: '/api/guest-orders', method: 'get' },
   payment_url: { url: '/api/order/checkout', method: 'post' },
   guestStripePayment: { url: '/api/payment/guest-stripe', method: 'post' },
-  payunitMtn: { url: '/api/payments/mtn', method: 'post' },
-  payunitOrange: { url: '/api/payments/orange', method: 'post' },
-  payunitGuestMtn: { url: '/api/payments/guest-mtn', method: 'post' },
-  payunitGuestOrange: { url: '/api/payments/guest-orange', method: 'post' },
+  payunitMtn: { url: '/api/next/payments/mtn', method: 'post' },
+  payunitOrange: { url: '/api/next/payments/orange', method: 'post' },
+  payunitGuestMtn: { url: '/api/next/payments/guest-mtn', method: 'post' },
+  payunitGuestOrange: { url: '/api/next/payments/guest-orange', method: 'post' },
   payunitStatus: (transactionId) => ({
-    url: `/api/payments/status/${transactionId}`,
+    url: `/api/next/payments/status/${transactionId}`,
     method: 'get',
   }),
   payunitOrderStatus: (orderId) => ({
-    url: `/api/payments/order-status/${orderId}`,
+    url: `/api/next/payments/order-status/${orderId}`,
     method: 'get',
   }),
   payunitGuestOrderStatus: (orderId, token) => ({
-    url: `/api/payments/guest-order-status/${orderId}${
+    url: `/api/next/payments/guest-order-status/${orderId}${
       token ? `?token=${encodeURIComponent(token)}` : ''
     }`,
     method: 'get',
