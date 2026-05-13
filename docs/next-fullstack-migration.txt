@@ -1,13 +1,16 @@
 Essentialist — Next.js full-stack migration (incremental)
 
 Are we moving `server/` (Express) into Next.js?
-  No — not as a wholesale cutover. The plan is incremental:
-  - **Today:** `server/` stays the canonical API, database access, and jobs.
-  - **Next.js:** Owns the UI and can add Route Handlers that **proxy** (or later
-    **re-implement**) Express routes after parity is verified.
-  - **End state (optional, over time):** Some routes may live only in Next;
-    others may stay on Express indefinitely. Nothing is removed from `server/`
-    until you explicitly choose parity and traffic switching.
+  You asked for a **complete full-stack Next.js app** without relying on an
+  external Express process for those routes, while **`server/` stays intact**
+  (reference + reuse for another app). The approach is **dual track**:
+  - **`server/`** — unchanged; keep committing and running it as today.
+  - **`client/src/fullstack/`** — new home for Zod schemas, Mongoose models,
+    controllers, and Route Handlers that implement the same behavior against
+    the **same `MONGODB_URI`** (and shared secrets like `RESEND_API`) when you
+    wire traffic to `/api/next/...`.
+  - **`client/src/backend/`** — legacy HTTP surface + optional **proxies** to
+    Express (`/api/legacy/...`) during transition.
 
 Git branch (workspace):
   feat/next-fullstack-migration
@@ -31,10 +34,23 @@ Frontend — backend integration surface:
     index.js                         — barrel exports
 
 Path aliases (client/jsconfig.json):
-  @/*        → client/src/*
-  @backend/* → client/src/backend/*
+  @/*         → client/src/*
+  @backend/*  → client/src/backend/*
+  @fullstack/* → client/src/fullstack/*
 
-Next.js Route Handlers (examples):
+Next-native full-stack (implements API in Next; `server/` not imported or modified):
+  client/src/fullstack/
+    db/mongoose.js
+    schemas/auth.schema.js
+    models/user.model.js
+    config/sendEmail.js
+    templates/verifyEmailTemplate.js
+    controllers/user/registerUser.js
+  Route Handlers:
+    GET  /api/next/system
+    POST /api/next/user/register
+
+Next.js Route Handlers (legacy proxy examples):
   client/src/app/api/system/migration-status/route.js — Next-only JSON probe
   client/src/app/api/legacy/health/route.js — read-only proxy to Express GET /health
     (env: API_URL, then NEXT_PUBLIC_API_URL)
@@ -57,11 +73,15 @@ Conventions:
     until refresh logic is relocated and parity is tested.
 
 Suggested next steps:
-  1. Add domain Route Handlers under app/api/... that use `fetchLegacyExpress()`
-     from `client/src/backend/services/legacyExpressGateway.js` to proxy Express;
-     gate with tests or flags until responses match.
-  2. Introduce request/response shapes under client/src/backend/contracts/types/
+  1. Port more domains from `server/controllers` into `client/src/fullstack/controllers`
+     and `client/src/app/api/next/...` (login, refresh, user-details, …), keeping
+     JSON shapes compatible with the existing client.
+  2. When a domain is ready, point the browser client at `/api/next/...` (or a
+     `NEXT_PUBLIC_*` base URL flag) instead of Express for that call only.
+  3. Add domain Route Handlers under app/api/legacy/... that use `fetchLegacyExpress()`
+     if you still need Express during overlap.
+  4. Introduce request/response shapes under client/src/backend/contracts/types/
      (optional, incremental).
-  3. Optionally add a monorepo workspaces root package.json for client + server.
-  4. Remove stale commented import blocks in components/pages when touching those
+  5. Optionally add a monorepo workspaces root package.json for client + server.
+  6. Remove stale commented import blocks in components/pages when touching those
      files for other reasons (low priority).
