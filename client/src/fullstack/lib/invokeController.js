@@ -7,6 +7,7 @@ import { parse as parseCookie } from "cookie";
 import { connectMongo } from "../db/mongoose.js";
 import { findBlockingDuplicateOrder } from "./duplicateOrderCheck.js";
 import { getIdempotencyHeaderValue, tryAcquireIdempotencyKey } from "./idempotency.js";
+import { enforceRateLimit } from "./rateLimiterMemory.js";
 
 export function createExpressLikeRequest(nextRequest, parsedBody = {}, routeParams = {}) {
   const url = new URL(nextRequest.url);
@@ -59,9 +60,19 @@ export function createExpressResponse() {
  *   idempotencyPrefix?: string,
  *   duplicateOrderGuard?: boolean,
  *   idempotencyTtlSeconds?: number,
+ *   rateLimitKind?: "orders" | "payments" | "webhooks",
  * }} [opts]
  */
 export async function invokeController(handler, nextRequest, opts = {}) {
+  if (opts.rateLimitKind) {
+    const limited = await enforceRateLimit(opts.rateLimitKind, nextRequest);
+    if (limited) {
+      const res = createExpressResponse();
+      res.status(limited.status).json(limited.body);
+      return res.getResult();
+    }
+  }
+
   let body = opts.body;
   if (body === undefined) {
     const method = nextRequest.method;

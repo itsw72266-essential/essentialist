@@ -44,8 +44,9 @@ Next-native full-stack (implements API in Next; `server/` not imported or modifi
     schemas/auth.schema.js
     models/ — user, cartproduct, address, order, category, subCategory, product, brand,
       blog, rating, review, review_comment
-    lib/ — localization, jwtTokens, invokeController (optional idempotency + duplicate-order for
-      order/Payunit POSTs), nextRoute (auth, admin, optional auth, admin privilege), cacheNoop,
+    lib/ — localization, jwtTokens, invokeController (rate limits + optional idempotency +
+      duplicate-order for order/Payunit POSTs; `rateLimiterMemory.js`), nextRoute (auth, admin,
+      optional auth, admin privilege), cacheNoop,
       mail (from server utils), uploadImageClodinary,
       requireAdminPrivilege (ADMIN | SUPER_ADMIN), authFromRequest (cookie + Bearer)
     config/ — sendEmail.js, stripe.js (lazy: null if STRIPE_SECRET_KEY unset)
@@ -65,9 +66,9 @@ Next-native full-stack (implements API in Next; `server/` not imported or modifi
       checkout (POST auth), webhook (POST raw Stripe signature), order-list (GET auth),
       receipt/[orderId] (GET optional auth + cookie/Bearer like Express)
     /api/next/payments/* — Payunit (same behavior as server/route/payments.js): POST mtn,
-      orange, guest-mtn, guest-orange; POST webhook (public); GET status/[transactionId];
-      GET order-status/[orderId] (auth); GET guest-order-status/[orderId] (public + ?token=);
-      POST invoice; GET invoice/[invoiceId]; POST disburse (auth). Webhook notify URL defaults
+      orange, guest-mtn, guest-orange (idempotency + **payments** rate limit); POST webhook
+      (**webhooks** limit); GET status/[transactionId], order-status/[orderId], guest-order-status,
+      invoice/[invoiceId] (**payments** limit); POST invoice; POST disburse. Webhook notify URL defaults
       to `${BACKEND_URL}/api/next/payments/webhook` when `BACKEND_URL` is set, else
       `${FRONTEND_URL}/api/next/payments/webhook`; override with `PAYUNIT_NOTIFY_URL`.
     /api/next/admin/*    — GET dashboard = **admin.controller** stats; GET summary =
@@ -91,6 +92,8 @@ Next-native full-stack (implements API in Next; `server/` not imported or modifi
   origin. Set `NEXT_PUBLIC_API_URL` and `API_URL` to your Next origin (e.g.
   `http://localhost:3000`) so server components and `next build` self-fetch hit
   Route Handlers, not Express. Stripe webhooks must use **`/api/next/order/webhook`**.
+  Guest receipt GET: **`SummaryApi.guestOrderReceipt(orderId, integrityToken)`** maps to
+  **`GET /api/next/order/receipt/:orderId?token=...`** (same as `downloadReceipt` for guests).
 
   Env: same MongoDB + JWT secrets as Express; `requireAdmin` routes need role ADMIN.
   Review admin routes use `requireAdminPrivilege` (ADMIN or SUPER_ADMIN). Auth reads
@@ -98,12 +101,14 @@ Next-native full-stack (implements API in Next; `server/` not imported or modifi
   Payunit notify URL: set `PAYUNIT_NOTIFY_URL` explicitly, or rely on `BACKEND_URL` /
   `FRONTEND_URL` (see `/api/next/payments/*` note above).
 
-  Note: Express Redis cache middleware is a no-op in Next (`cacheNoop.js`). Express rate
-  limiters and multer are not wired on Next. Order placement (COD, guest COD, Stripe checkout)
-  and Payunit customer POST routes require **`X-Idempotency-Key`** and use the same in-memory
-  idempotency behavior as Express when Redis is unavailable; COD routes also run the same
-  **duplicate-order** fingerprint check as Express `duplicateOrderGuard`. Redis-backed
-  idempotency across multiple Next instances is still optional and not implemented in Next yet.
+  Note: Express Redis cache middleware is a no-op in Next (`cacheNoop.js`). **Multer** is not
+  wired on Next (uploads use Next multipart handling on specific routes). Order placement and
+  Payunit POST routes use **in-memory rate limits** matching Express defaults (`ordersLimiter` /
+  `paymentsLimiter`); Stripe and Payunit webhooks use **`webhooks`** limits (same windows as
+  Express). Those routes also require **`X-Idempotency-Key`** where Express does, with the same
+  in-memory idempotency behavior as Express when Redis is unavailable; COD routes run the same
+  **duplicate-order** fingerprint check. Redis-backed idempotency / rate limits across multiple
+  Next instances remain optional.
 
   Stripe: `fullstack/config/stripe.js` uses `new Stripe(secret)` (Stripe SDK v22). Webhook
   route verifies signature with raw body then calls the same `webhookStripe` handler.

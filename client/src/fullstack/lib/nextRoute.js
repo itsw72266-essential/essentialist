@@ -37,11 +37,12 @@ export function asPublicGet(handler) {
   };
 }
 
-export function asPublicGetWithParams(handler) {
+export function asPublicGetWithParams(handler, routeOpts = {}) {
   return async (request, context) => {
     try {
       const params = await context.params;
       const result = await invokeController(handler, request, {
+        ...routeOpts,
         body: {},
         routeParams: params,
       });
@@ -260,7 +261,7 @@ export function asAdminPatchWithParams(handler) {
   };
 }
 
-export function asAuthGetWithParams(handler) {
+export function asAuthGetWithParams(handler, routeOpts = {}) {
   return async (request, context) => {
     const auth = resolveAuthUserId(request, { required: true });
     if (auth.error) {
@@ -269,6 +270,7 @@ export function asAuthGetWithParams(handler) {
     try {
       const params = await context.params;
       const result = await invokeController(handler, request, {
+        ...routeOpts,
         body: {},
         userId: auth.userId,
         routeParams: params,

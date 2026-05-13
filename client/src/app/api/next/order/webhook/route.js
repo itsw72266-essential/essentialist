@@ -7,6 +7,7 @@ import {
   createExpressLikeRequest,
   createExpressResponse,
 } from "@/fullstack/lib/invokeController";
+import { enforceRateLimit } from "@/fullstack/lib/rateLimiterMemory";
 
 const STRIPE_WEBHOOK_SECRET =
   process.env.STRIPE_WEBHOOK_SECRET ||
@@ -14,6 +15,11 @@ const STRIPE_WEBHOOK_SECRET =
   process.env.STRIPE_ENPOINT_WEBHOOK_SECRET_KEY;
 
 export async function POST(request) {
+  const limited = await enforceRateLimit("webhooks", request);
+  if (limited) {
+    return NextResponse.json(limited.body, { status: limited.status });
+  }
+
   if (!STRIPE_WEBHOOK_SECRET) {
     return NextResponse.json(
       { message: "Webhook secret not configured.", error: true, success: false },

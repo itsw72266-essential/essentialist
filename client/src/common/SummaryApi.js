@@ -244,7 +244,19 @@ const SummaryApi = {
   CashOnDeliveryOrder: { url: '/api/next/order/cash-on-delivery', method: 'post' },
   GuestCashOnDeliveryOrder: { url: '/api/next/order/guest-cod', method: 'post' },
   guestOrderCreate: { url: '/api/next/order/guest-cod', method: 'post' },
-  guestOrderReceipt: { url: '/api/guest-orders', method: 'get' },
+  guestOrderReceipt: (orderId, integrityToken) => {
+    if (orderId == null || String(orderId).trim() === '') {
+      throw new Error('SummaryApi.guestOrderReceipt: orderId is required.')
+    }
+    return {
+      url: `/api/next/order/receipt/${encodeURIComponent(orderId)}${
+        integrityToken
+          ? `?token=${encodeURIComponent(integrityToken)}`
+          : ''
+      }`,
+      method: 'get',
+    }
+  },
   payment_url: { url: '/api/next/order/checkout', method: 'post' },
   guestStripePayment: { url: '/api/next/order/guest-checkout', method: 'post' },
   payunitMtn: { url: '/api/next/payments/mtn', method: 'post' },
