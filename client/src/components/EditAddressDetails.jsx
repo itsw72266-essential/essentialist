@@ -6,7 +6,7 @@ import SummaryApi from '@/backend/contracts/summaryApi'
 import toast from 'react-hot-toast'
 import AxiosToastError from '@/lib/axiosToastError'
 import { IoClose } from "react-icons/io5";
-import { useGlobalContext } from '../providers/GlobalProvider'
+import { useGlobalContext } from '@/providers/ReactQueryProvider'
 
 const EditAddressDetails = ({close, data}) => {
     const { register, handleSubmit,reset } = useForm({

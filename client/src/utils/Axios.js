@@ -76,7 +76,7 @@
 
 
 import axios from "axios";
-import SummaryApi, { baseURL as summaryApiBaseURL } from "../common/SummaryApi";
+import SummaryApi, { baseURL as summaryApiBaseURL } from "@/backend/contracts/summaryApi";
 import i18n, { getCurrentLocale } from "@/lib/i18n";
 
 const axiosBaseURL = summaryApiBaseURL || "";

@@ -132,8 +132,8 @@ Import conventions (app code):
   - Browser: **`import apiClient from "@/lib/apiClient"`** (default export = axios), or named `apiClient`.
   - Contracts: `@/backend/contracts/summaryApi` or `@/common/SummaryApi`.
   - Toasts on axios errors: **`@/lib/axiosToastError`** (or `@/utils/AxiosToastError`).
-  - Intentional: `client/src/utils/Axios.js` imports `../common/SummaryApi` for baseURL + refresh routes
-    (avoid circular imports if SummaryApi ever imported the client).
+  - Intentional: `client/src/utils/Axios.js` imports `@/backend/contracts/summaryApi` for baseURL + refresh routes
+    (re-export of `common/SummaryApi`; avoids duplicate path conventions).
   - utils/indexnow.js and hooks/useIndexNow.js use `@/backend/contracts/summaryApi`.
 
 Live imports of `@/utils/Axios` outside `utils/Axios.js`: discouraged; prefer `@/lib/apiClient`.
