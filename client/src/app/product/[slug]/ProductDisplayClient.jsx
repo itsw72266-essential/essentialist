@@ -276,11 +276,13 @@ import dynamic from "next/dynamic";
 import Divider from "../../../components/Divider";
 import AddToCartButton from "../../../components/AddToCartButton";
 import { pricewithDiscount } from "../../../utils/PriceWithDiscount";
-import { productQueryOptions, ratingQueryOptions } from "./queries";
+import { productQueryOptions, reviewStatsQueryOptions } from "./queries";
 import ProductGallery from "./ProductGallery.client";
 
-const RatingBlock = dynamic(() => import("./RatingBlock.client"), {
-  loading: () => <RatingSkeleton />,
+const ReviewsSection = dynamic(() => import("./ReviewsSection.client"), {
+  loading: () => (
+    <div className="mt-12 h-32 animate-pulse rounded-xl bg-slate-100" />
+  ),
 });
 
 function FCFA(amount) {
@@ -305,10 +307,37 @@ function formatProductDescription(text) {
   return styledParagraphs.join('');
 }
 
+function ReadOnlyStars({ value, size = 18 }) {
+  const display = Number(value || 0);
+  return (
+    <div className="flex items-center gap-0.5" aria-hidden="true">
+      {[0, 1, 2, 3, 4].map((i) => {
+        const full = display >= i + 1;
+        const half = !full && display >= i + 0.5;
+        return (
+          <svg key={i} width={size} height={size} viewBox="0 0 20 20" className="inline-block">
+            <defs>
+              <linearGradient id={`pdpHalf${i}`} x1="0" x2="1" y1="0" y2="0">
+                <stop offset="50%" stopColor="#f472b6" />
+                <stop offset="50%" stopColor="#e5e7eb" />
+              </linearGradient>
+            </defs>
+            <path
+              d="M10 1.8l2.47 5.01 5.53.8-4 3.9.94 5.5L10 14.9 5.06 17l.94-5.5-4-3.9 5.53-.8L10 1.8z"
+              fill={full ? "#f472b6" : half ? `url(#pdpHalf${i})` : "#e5e7eb"}
+              stroke="#fbcfe8"
+            />
+          </svg>
+        );
+      })}
+    </div>
+  );
+}
+
 export default function ProductDisplayClient({
   productId,
   initialProduct,
-  initialRating,
+  initialReviewStats,
   initialDataUpdatedAt,
 }) {
   const { data: productData, isLoading: isProductLoading, isError: isProductError } = useQuery({
@@ -316,9 +345,9 @@ export default function ProductDisplayClient({
     initialData: initialProduct,
     initialDataUpdatedAt,
   });
-  const { data: ratingSnapshot, isLoading: isRatingLoading } = useQuery({
-    ...ratingQueryOptions(productId),
-    initialData: initialRating,
+  const { data: reviewStats } = useQuery({
+    ...reviewStatsQueryOptions(productId),
+    initialData: initialReviewStats,
     initialDataUpdatedAt,
   });
 
@@ -349,7 +378,10 @@ export default function ProductDisplayClient({
         <aside className="space-y-6">
           <Badge />
           <h1 className="text-xl font-bold lg:text-3xl leading-tight">{productData.name}</h1>
-          <RatingSummary ratingSnapshot={isRatingLoading ? { average: 0, count: 0 } : (ratingSnapshot ?? { average: 0, count: 0 })} productId={productId} />
+          <RatingSummary
+            reviewStats={reviewStats ?? { average: 0, count: 0 }}
+            productName={productData.name}
+          />
           <Divider />
           <div className="flex flex-wrap items-end justify-between gap-4">
             <PriceBlock label="Bulk Price" amount={pricewithDiscount(productData.bulkPrice ?? productData.price, productData.discount ?? 0)} baseAmount={productData.bulkPrice ?? productData.price} discount={productData.discount} />
@@ -366,17 +398,61 @@ export default function ProductDisplayClient({
       <div className="mt-16 w-full border-t border-slate-200 pt-12">
         <DescriptionBlock product={productData} />
       </div>
-      
-      {/* BREATHING ROOM MOVED TO THE VERY BOTTOM */}
+
+      <section id="reviews" className="mt-16 scroll-mt-24 border-t border-slate-200 pt-10">
+        <h2 className="text-xl font-bold text-slate-900 mb-2">Customer reviews</h2>
+        <p className="text-sm text-slate-600 mb-6">
+          Share your experience with {productData.name}. Reviews help other shoppers choose with confidence.
+        </p>
+        <ReviewsSection productId={productId} />
+      </section>
+
       <div className="h-40 w-full" />
     </main>
   );
 }
 
 function Badge() { return <span className="inline-flex rounded-full bg-pink-100 border border-pink-200 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-pink-700">Fast Cameroon Delivery</span>; }
-function RatingSummary({ ratingSnapshot, productId }) {
-  const average = Number(ratingSnapshot?.average ?? 0).toFixed(1);
-  return <div className="space-y-1"><div className="flex items-center gap-2 text-sm"><span className="text-xl font-bold">{average}</span><span className="text-slate-400">/ 5.0</span></div><RatingBlock productId={productId} /></div>;
+function RatingSummary({ reviewStats, productName }) {
+  const count = Number(reviewStats?.count ?? 0) || 0;
+  const average = Number(reviewStats?.average ?? 0);
+
+  if (count <= 0) {
+    return (
+      <div className="space-y-2">
+        <p className="text-sm text-slate-600">
+          No reviews yet for this product.
+        </p>
+        <a
+          href="#reviews"
+          className="inline-flex text-sm font-semibold text-pink-600 hover:text-pink-700 underline-offset-2 hover:underline"
+        >
+          Write the first review
+        </a>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-2">
+      <div className="flex flex-wrap items-center gap-3">
+        <ReadOnlyStars value={average} />
+        <div className="flex items-baseline gap-2 text-sm">
+          <span className="text-2xl font-bold text-slate-900">{average.toFixed(1)}</span>
+          <span className="text-slate-500">/ 5</span>
+          <span className="text-slate-600">
+            ({count} review{count === 1 ? "" : "s"})
+          </span>
+        </div>
+      </div>
+      <a
+        href="#reviews"
+        className="inline-flex text-sm font-medium text-pink-600 hover:text-pink-700 underline-offset-2 hover:underline"
+      >
+        See or add a review for {productName}
+      </a>
+    </div>
+  );
 }
 function PriceBlock({ label, amount, baseAmount, discount }) {
   return <div className="flex flex-col gap-1"><h2 className="text-[10px] font-extrabold uppercase text-slate-400 tracking-widest">{label}</h2><span className="text-xl font-bold text-slate-900 sm:text-2xl">{FCFA(amount)}</span>{discount > 0 && <div className="flex items-center gap-1 text-[10px]"><span className="text-slate-400 line-through">{FCFA(baseAmount)}</span><span className="text-pink-500 font-bold">-{discount}%</span></div>}</div>;
@@ -410,4 +486,3 @@ function WhyShopWithUs() {
   return <div className="grid gap-3">{perks.map((p) => (<div key={p.title} className="flex items-center gap-3 p-2 rounded-lg border border-slate-100 bg-white"><img src={p.icon} alt={p.title} className="h-10 w-10 object-cover rounded" /><div><h3 className="font-bold text-slate-800 text-xs">{p.title}</h3></div></div>))}</div>;
 }
 function PageSkeleton() { return <div className="container mx-auto p-10 animate-pulse bg-slate-50 h-screen rounded-xl" />; }
-function RatingSkeleton() { return <div className="h-6 w-32 bg-slate-200 rounded animate-pulse" />; }

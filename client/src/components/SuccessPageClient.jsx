@@ -29,9 +29,20 @@ import { DisplayPriceInRupees } from "../utils/DisplayPriceInRupees";
 import { handleClearCart } from "../store/cartProduct";
 import SummaryApi, { callSummaryApi } from "@/backend/contracts/summaryApi";
 import { useGlobalContext } from "@/providers/ReactQueryProvider";
+import Swal from "sweetalert2";
+import "sweetalert2/dist/sweetalert2.min.css";
+import { valideURLConvert } from "../utils/valideURLConvert";
 
 const RECEIPT_PUBLIC_KEY_RAW =
   process.env.NEXT_PUBLIC_RECEIPT_PUBLIC_KEY ?? "";
+
+function escapeHtml(text) {
+  return String(text ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
 
 const RECEIPT_PUBLIC_KEY = RECEIPT_PUBLIC_KEY_RAW.replace(/\\n/g, "\n").trim();
 
@@ -330,12 +341,26 @@ export default function SuccessPageClient({ searchParams: initialParams }) {
               item.lineTotal ??
               unitPrice * quantity
           ) || 0;
+        const rawPid =
+          item.productId ??
+          item.product?._id ??
+          item.product?.id ??
+          item.product_details?._id ??
+          item.product_details?.id ??
+          null;
+        const resolvedProductId =
+          rawPid == null
+            ? null
+            : typeof rawPid === "object" && rawPid?._id != null
+            ? String(rawPid._id)
+            : String(rawPid);
         return {
           lineId:
             item.lineId ??
             item.sku ??
             item.productId ??
             `LINE-${index + 1}`,
+          productId: resolvedProductId,
           name:
             item.product_details?.name ??
             item.name ??
@@ -1025,6 +1050,56 @@ export default function SuccessPageClient({ searchParams: initialParams }) {
     () => Boolean(normalizedReceipt?.items?.length),
     [normalizedReceipt]
   );
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (verificationStatus !== "verified") return;
+    if (!normalizedReceipt?.items?.length) return;
+
+    const orderKey = String(normalizedReceipt.orderId ?? "");
+    if (!orderKey) return;
+
+    const storageKey = `postPurchaseReviewPrompt:${orderKey}`;
+    if (window.sessionStorage.getItem(storageKey)) return;
+
+    const seen = new Set();
+    const links = [];
+    for (const item of normalizedReceipt.items) {
+      const pid = item.productId;
+      if (!pid || seen.has(pid)) continue;
+      seen.add(pid);
+      const slug = `${valideURLConvert(item.name)}-${pid}`;
+      const href = `/product/${slug}#reviews`;
+      links.push({ href, label: item.name });
+    }
+    if (!links.length) return;
+
+    window.sessionStorage.setItem(storageKey, "1");
+
+    const listHtml = links
+      .map(
+        (l) =>
+          `<li class="text-left py-1"><a class="text-pink-600 font-semibold hover:underline" href="${escapeHtml(l.href)}">${escapeHtml(l.label)}</a></li>`
+      )
+      .join("");
+
+    const timer = window.setTimeout(() => {
+      Swal.fire({
+        icon: "success",
+        title: "Thank you for your purchase",
+        html: `<p class="text-slate-600 text-sm mb-2 text-left">We would love your feedback. Choose a product below to leave a short review — it helps other shoppers.</p><ul class="list-none m-0 p-0 max-h-48 overflow-y-auto">${listHtml}</ul>`,
+        confirmButtonText: "Close",
+        confirmButtonColor: "#db2777",
+        showCloseButton: true,
+        customClass: {
+          popup: "text-left rounded-2xl",
+          confirmButton: "rounded-lg px-5 font-semibold",
+        },
+      });
+    }, 800);
+
+    return () => window.clearTimeout(timer);
+  }, [verificationStatus, normalizedReceipt]);
   const hasAddress = useMemo(() => {
     if (!normalizedReceipt?.address) return false;
     return Object.values(normalizedReceipt.address).some((value) =>

@@ -290,14 +290,6 @@ const SummaryApi = {
     method: 'get',
   }),
   getProductsByIds: { url: '/api/next/product/get-by-ids', method: 'post' },
-  ratingsGet: {
-    url: (productId) => `/api/next/ratings/${productId}`,
-    method: 'get',
-  },
-  ratingsUpsert: { url: '/api/next/ratings', method: 'post' },
-  ratingsDelete: {
-    url: (productId) => `/api/next/ratings/${productId}`,
-    method: 'delete' },
   reviewsList: {
     url: (productId, q = '') => `/api/next/reviews/product/${productId}${q}`,
     method: 'get',
@@ -375,6 +367,11 @@ const SummaryApi = {
       url: `/api/next/reviews/public/product/${productId}`,
       method: 'get',
     }),
+    /** POST body: `{ productIds: string[] }` (max 50). Returns `{ [productId]: { average, count } }`. */
+    batchProductStats: {
+      url: '/api/next/reviews/public/batch-stats',
+      method: 'post',
+    },
     create: { url: '/api/next/reviews', method: 'post' },
     deleteMine: (productId, subjectType = 'product') => ({
       url: `/api/next/reviews/product/${productId}?subjectType=${subjectType}`,

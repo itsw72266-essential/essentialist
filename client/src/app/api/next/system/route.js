@@ -35,8 +35,9 @@ export async function GET() {
       payments:
         "/api/next/payments/mtn|orange|guest-mtn|guest-orange|webhook|status/[id]|order-status/[id]|guest-order-status/[id]|invoice|disburse",
       admin: "/api/next/admin/dashboard|summary|orders|guest-orders|…",
-      ratings: "/api/next/ratings/*",
-      reviews: "/api/next/reviews/*",
+      ratings: "/api/next/ratings/* (legacy; prefer reviews)",
+      reviews:
+        "/api/next/reviews/* incl. GET …/public/product/[id], POST …/public/batch-stats",
       blog: "/api/next/blog/*",
       file: "/api/next/file/upload",
       indexnow: "/api/next/indexnow/*",

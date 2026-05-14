@@ -253,9 +253,7 @@ const CardSkeleton = () => (
     <div className="flex-grow flex flex-col px-2 space-y-2">
       <div className="flex items-center justify-between mb-1">
         <div className="rounded-full bg-gray-200 h-5 w-16" />
-        <div className="flex space-x-1">
-          {[...Array(5)].map((_, i) => <div key={i} className="w-4 h-4 bg-gray-300 rounded-full" />)}
-        </div>
+        <div className="h-4 w-20 bg-gray-200 rounded" />
       </div>
       <div className="h-8 bg-gray-200 rounded w-3/4" />
       <div className="h-4 bg-gray-200 rounded w-1/2 mb-3" />
@@ -345,7 +343,7 @@ const CardProduct = React.memo(({ data, isLoading = false, priority = false }) =
             </svg>
             10 min
           </div>
-          <CardProductRating productId={data._id} initial={data.rating} />
+          <CardProductRating productId={data._id} />
         </div>
 
         <h3 className="font-bold text-gray-900 text-sm line-clamp-2 mb-1 transition-colors duration-300 group-hover:text-pink-600">

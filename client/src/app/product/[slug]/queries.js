@@ -3,7 +3,7 @@ import { cache } from "react";
 import SummaryApi, { apiFetch } from "@/backend/contracts/summaryApi";
 
 export const productQueryKey = (productId) => ["product-details", productId];
-export const ratingQueryKey = (productId) => ["product-ratings", productId];
+export const reviewStatsQueryKey = (productId) => ["product-review-stats", productId];
 
 async function fetchProductImpl(productId) {
   if (!productId) {
@@ -26,31 +26,28 @@ async function fetchProductImpl(productId) {
   return response.data;
 }
 
-async function fetchRatingsImpl(productId) {
+async function fetchReviewStatsImpl(productId) {
   if (!productId) {
-    return {
-      average: 0,
-      count: 0,
-      myRating: null,
-    };
+    return { average: 0, count: 0 };
   }
 
-  const response = await apiFetch(SummaryApi.ratingsGet.url(productId), {
-    method: SummaryApi.ratingsGet.method.toUpperCase(),
+  const endpoint = SummaryApi.reviews.listByProduct(productId);
+  const response = await apiFetch(endpoint.url, {
+    method: endpoint.method.toUpperCase(),
+    params: { page: 1, limit: 1 },
+    credentials: "omit",
   });
 
-  return (
-    response?.data ?? {
-      average: 0,
-      count: 0,
-      myRating: null,
-    }
-  );
+  const stats = response?.data?.stats ?? { average: 0, count: 0 };
+  return {
+    average: Number(stats.average) || 0,
+    count: Number(stats.count) || 0,
+  };
 }
 
 /** Dedupe within one RSC request (generateMetadata + page both need the same rows). */
 export const fetchProduct = cache(fetchProductImpl);
-export const fetchRatings = cache(fetchRatingsImpl);
+export const fetchReviewStats = cache(fetchReviewStatsImpl);
 
 export function productQueryOptions(productId) {
   return {
@@ -61,10 +58,10 @@ export function productQueryOptions(productId) {
   };
 }
 
-export function ratingQueryOptions(productId) {
+export function reviewStatsQueryOptions(productId) {
   return {
-    queryKey: ratingQueryKey(productId),
-    queryFn: () => fetchRatings(productId),
+    queryKey: reviewStatsQueryKey(productId),
+    queryFn: () => fetchReviewStats(productId),
     staleTime: 30_000,
     retry: 1,
   };

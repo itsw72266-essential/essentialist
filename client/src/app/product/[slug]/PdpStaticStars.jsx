@@ -1,6 +1,9 @@
 'use client'
 
 export default function PdpStaticStars({ average = 0, count = 0, size = 18 }) {
+  const c = Number(count || 0)
+  if (!c) return null
+
   const avg = Number(average || 0)
   const stars = [0, 1, 2, 3, 4].map((i) => {
     const full = avg >= i + 1
@@ -9,7 +12,7 @@ export default function PdpStaticStars({ average = 0, count = 0, size = 18 }) {
   })
 
   return (
-    <div className="flex items-center gap-2" aria-label="Product rating summary">
+    <div className="flex items-center gap-2" aria-label="Product review summary">
       <div className="flex items-center gap-0.5">
         {stars.map((s, idx) => (
           <Star key={idx} filled={s.full} half={s.half} size={size} />
@@ -17,7 +20,7 @@ export default function PdpStaticStars({ average = 0, count = 0, size = 18 }) {
       </div>
       <div className="text-sm text-gray-700">
         <span className="font-semibold">{avg.toFixed(2)}</span>
-        <span className="ml-1 text-gray-500">({count} {count === 1 ? 'rating' : 'ratings'})</span>
+        <span className="ml-1 text-gray-500">({c} {c === 1 ? 'review' : 'reviews'})</span>
       </div>
     </div>
   )

@@ -898,7 +898,7 @@ import { unstable_cache } from "next/cache"
 import ProductDisplayClient from "./ProductDisplayClient"
 import ProductRecommendations from "../../../components/ProductRecommendations"
 import { pricewithDiscount } from "../../../utils/PriceWithDiscount"
-import { fetchProduct, fetchRatings } from "./queries"
+import { fetchProduct, fetchReviewStats } from "./queries"
 
 // --- Configuration ---
 const DEFAULT_PRICE_VALIDITY_DAYS = 90
@@ -974,13 +974,10 @@ function safeJsonLdString(data) {
  * Build detailed review entries with proper schema
  * Supports both user reviews and fallback verification
  */
-function buildReviewEntries(product, aggregateRating, url) {
+/** Rich-result review snippets only when the product payload embeds real review text. */
+function buildReviewEntries(product, url) {
   const productName = product?.name ?? "Product"
   const sku = product?._id ?? product?.sku ?? undefined
-  const fallbackRatingValue =
-    Number(aggregateRating?.ratingValue) > 0
-      ? aggregateRating.ratingValue
-      : "5"
 
   const candidateReviews = Array.isArray(product?.reviews)
     ? product.reviews
@@ -988,9 +985,9 @@ function buildReviewEntries(product, aggregateRating, url) {
       ? product.recentReviews
       : []
 
-  const normalizedReviews = candidateReviews
+  return candidateReviews
     .filter(Boolean)
-    .slice(0, 5) // Include up to 5 reviews for richer schema
+    .slice(0, 5)
     .map((review, index) => {
       const body = stripHtml(
         review.reviewBody ??
@@ -1003,15 +1000,16 @@ function buildReviewEntries(product, aggregateRating, url) {
 
       const authorName =
         review.author?.name ?? review.user?.name ?? "Verified Buyer"
-      const ratingValue =
-        normalizePositiveNumber(review.rating ?? review.ratingValue) ??
-        Number(fallbackRatingValue)
+      const ratingValue = normalizePositiveNumber(
+        review.rating ?? review.ratingValue
+      )
+      if (!ratingValue) return null
 
       return {
         "@type": "Review",
         "@context": "https://schema.org",
         name: review.title ?? `${productName} review by ${authorName}`,
-        reviewBody: body.substring(0, 500), // Limit for schema.org
+        reviewBody: body.substring(0, 500),
         datePublished: new Date(review.createdAt || Date.now())
           .toISOString()
           .split("T")[0],
@@ -1034,30 +1032,6 @@ function buildReviewEntries(product, aggregateRating, url) {
       }
     })
     .filter(Boolean)
-
-  // If we have user reviews, use them; otherwise provide quality assurance
-  if (normalizedReviews.length > 0) return normalizedReviews
-
-  return [
-    {
-      "@type": "Review",
-      "@context": "https://schema.org",
-      name: `${productName} - Verified Authentic`,
-      reviewBody: `100% authentic ${productName} from ${BUSINESS_CONFIG.name}. Inspected for freshness, packaging integrity, and authenticity. Money-back guarantee included. Fast delivery in ${BUSINESS_CONFIG.city} and nationwide ${BUSINESS_CONFIG.country}.`,
-      datePublished: new Date().toISOString().split("T")[0],
-      author: {
-        "@type": "Organization",
-        name: "Essentialist Quality Assurance Team",
-        url: BUSINESS_CONFIG.url,
-      },
-      reviewRating: {
-        "@type": "Rating",
-        ratingValue: fallbackRatingValue,
-        bestRating: "5",
-        worstRating: "1",
-      },
-    },
-  ]
 }
 
 /**
@@ -1139,9 +1113,9 @@ const getCachedProduct = unstable_cache(
   { revalidate: 60 },
 )
 
-const getCachedRatings = unstable_cache(
-  async (productId) => fetchRatings(productId),
-  ["product-ratings"],
+const getCachedReviewStats = unstable_cache(
+  async (productId) => fetchReviewStats(productId),
+  ["product-review-stats"],
   { revalidate: 30 },
 )
 
@@ -1352,7 +1326,7 @@ function RecommendationsSkeleton() {
  * Comprehensive Structured Data for Product
  * Includes: Product, Breadcrumb, FAQ, Aggregate Rating, Reviews
  */
-function StructuredData({ product, slug, rating }) {
+function StructuredData({ product, slug, reviewStats }) {
   if (!product) return null
 
   const url = `https://www.esmakeupstore.com/product/${slug}`
@@ -1363,22 +1337,21 @@ function StructuredData({ product, slug, rating }) {
   const offerPriceNumber = resolveOfferPrice(product)
   const priceValidUntil = getPriceValidUntilDate(product?.priceValidUntil)
   const isInStock = Number(product?.stock ?? 0) > 0
-  const stockLevel = Number(product?.stock ?? 0)
   const brandName =
     typeof product.brand === "object" ? product.brand?.name : product.brand
 
-  // --- Aggregate Rating with Safe Handling ---
-  const aggregateRating = {
-    "@type": "AggregateRating",
-    ratingValue: (
-      normalizePositiveNumber(rating?.average ?? product?.ratingAverage) ?? 5
-    ).toFixed(1),
-    reviewCount: String(
-      Math.max(1, toNumber(rating?.count ?? product?.ratingCount))
-    ),
-    bestRating: "5",
-    worstRating: "1",
-  }
+  const reviewStatsCount = Math.max(
+    0,
+    Math.round(toNumber(reviewStats?.count ?? product?.reviewsCount)),
+  )
+  const reviewStatsAvg = normalizePositiveNumber(
+    reviewStats?.average ?? product?.reviewsAverage,
+  )
+  const hasPublishedReviews = reviewStatsCount > 0 && reviewStatsAvg
+
+  const embeddedReviewSnippets = hasPublishedReviews
+    ? buildReviewEntries(product, url)
+    : []
 
   // --- 1. Product Schema (Google Shopping + Rich Results) ---
   const productJsonLd = {
@@ -1441,8 +1414,20 @@ function StructuredData({ product, slug, rating }) {
         ],
       },
     },
-    aggregateRating: aggregateRating,
-    review: buildReviewEntries(product, aggregateRating, url),
+    ...(hasPublishedReviews
+      ? {
+          aggregateRating: {
+            "@type": "AggregateRating",
+            ratingValue: reviewStatsAvg.toFixed(1),
+            reviewCount: String(reviewStatsCount),
+            bestRating: "5",
+            worstRating: "1",
+          },
+          ...(embeddedReviewSnippets.length > 0
+            ? { review: embeddedReviewSnippets }
+            : {}),
+        }
+      : {}),
     sku: product._id,
     mpn: product.sku || product._id,
     color: product.color || undefined,
@@ -1529,7 +1514,7 @@ export default async function ProductDisplayPage({ params }) {
   if (!productId) return notFound()
 
   let productData
-  let ratingSnapshot = { average: 0, count: 0, myRating: null }
+  let reviewStatsSnapshot = { average: 0, count: 0 }
   try {
     productData = await getCachedProduct(productId)
   } catch (error) {
@@ -1539,9 +1524,9 @@ export default async function ProductDisplayPage({ params }) {
   }
 
   try {
-    ratingSnapshot = await getCachedRatings(productId)
+    reviewStatsSnapshot = await getCachedReviewStats(productId)
   } catch {
-    // Ratings are optional; do not fail the PDP if the ratings route errors.
+    // Review stats are optional; do not fail the PDP if the route errors.
   }
 
   const dataUpdatedAt = Date.now()
@@ -1551,13 +1536,17 @@ export default async function ProductDisplayPage({ params }) {
       <style dangerouslySetInnerHTML={{ __html: tabularStyles }} />
 
       {/* Structured Data */}
-      <StructuredData product={productData} slug={slug} rating={ratingSnapshot} />
+      <StructuredData
+        product={productData}
+        slug={slug}
+        reviewStats={reviewStatsSnapshot}
+      />
 
       {/* Main Product Display */}
       <ProductDisplayClient
         productId={productId}
         initialProduct={productData}
-        initialRating={ratingSnapshot}
+        initialReviewStats={reviewStatsSnapshot}
         initialDataUpdatedAt={dataUpdatedAt}
       />
 
