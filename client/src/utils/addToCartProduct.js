@@ -1,7 +1,7 @@
 import toast from "react-hot-toast"
 import SummaryApi from "@/backend/contracts/summaryApi"
 import Axios from "@/lib/apiClient"
-import AxiosToastError from "@/backend/http/axiosToastError"
+import AxiosToastError from "@/lib/axiosToastError"
 
 // ---- Add this key for guest cart ----
 const GUEST_CART_KEY = "guest_cart"

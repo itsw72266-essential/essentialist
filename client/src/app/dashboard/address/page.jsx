@@ -8,7 +8,7 @@ import EditAddressDetails from '../../../components/EditAddressDetails';
 import Axios from '@/lib/apiClient';
 import SummaryApi from '@/backend/contracts/summaryApi';
 import toast from 'react-hot-toast';
-import AxiosToastError from '@/backend/http/axiosToastError';
+import AxiosToastError from '@/lib/axiosToastError';
 import { useGlobalContext } from '@/providers/ReactQueryProvider';
 // import { useGlobalContext } from '../../../providers/GlobalProvider';
 

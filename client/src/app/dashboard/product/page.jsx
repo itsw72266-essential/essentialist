@@ -1,7 +1,7 @@
 "use client"
 import React, { useEffect, useState } from 'react'
 import SummaryApi from '@/backend/contracts/summaryApi'
-import AxiosToastError from '@/backend/http/axiosToastError'
+import AxiosToastError from '@/lib/axiosToastError'
 import Axios from '@/lib/apiClient'
 import Loading from '../../../components/Loading'
 import ProductCardAdmin from '../../../components/ProductCardAdmin'

@@ -154,7 +154,7 @@ import { FaRegUserCircle } from "react-icons/fa";
 import UserProfileAvatarEdit from '../../../components/UserProfileAvatarEdit';
 import Axios from '@/lib/apiClient';
 import SummaryApi from '@/backend/contracts/summaryApi';
-import AxiosToastError from '@/backend/http/axiosToastError';
+import AxiosToastError from '@/lib/axiosToastError';
 import toast from 'react-hot-toast';
 import { setUserDetails } from '../../../store/userSlice';
 import fetchUserDetails from '../../../utils/fetchUserDetails';

@@ -5,7 +5,7 @@ import uploadImage from './../utils/UploadImage';
 import { useSelector } from 'react-redux';
 import Axios from '@/lib/apiClient';
 import SummaryApi from '@/backend/contracts/summaryApi';
-import AxiosToastError from '@/backend/http/axiosToastError';
+import AxiosToastError from '@/lib/axiosToastError';
 import toast from 'react-hot-toast';
 
 const EditSubCategory = ({close,data,fetchData}) => {

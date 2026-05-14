@@ -6,7 +6,7 @@ import toast from "react-hot-toast";
 
 import Axios from "@/lib/apiClient";
 import SummaryApi from "@/backend/contracts/summaryApi";
-import AxiosToastError from "@/backend/http/axiosToastError";
+import AxiosToastError from "@/lib/axiosToastError";
 
 const reviewKeys = {
   all: ["reviews"],

@@ -1,5 +1,5 @@
 /**
- * Resolves the legacy Express base origin for server-side Route Handlers (BFF).
+ * Resolves an optional **separate Express** base origin (e.g. `server/`) for ops probes only.
  * Prefer private `API_URL` on the server; fall back to `NEXT_PUBLIC_API_URL`.
  */
 export function getLegacyExpressOrigin() {

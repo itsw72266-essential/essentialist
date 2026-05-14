@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form"
 import Axios from '@/lib/apiClient'
 import SummaryApi from '@/backend/contracts/summaryApi'
 import toast from 'react-hot-toast'
-import AxiosToastError from '@/backend/http/axiosToastError'
+import AxiosToastError from '@/lib/axiosToastError'
 import { IoClose } from "react-icons/io5";
 import { useGlobalContext } from '../providers/GlobalProvider'
 

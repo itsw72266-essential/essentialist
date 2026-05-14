@@ -1,7 +1,7 @@
 "use client"
 import React, { useEffect, useState } from 'react'
 import UploadSubCategoryModel from '../../../components/UploadSubCategoryModel'
-import AxiosToastError from '@/backend/http/axiosToastError'
+import AxiosToastError from '@/lib/axiosToastError'
 import Axios from '@/lib/apiClient'
 import SummaryApi from '@/backend/contracts/summaryApi'
 import DisplayTable from '../../../components/DisplayTable'

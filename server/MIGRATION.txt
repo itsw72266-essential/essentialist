@@ -1,13 +1,19 @@
-This directory remains the authoritative Express backend.
+This directory is the **Express** reference implementation (same domain logic as
+`client/src/fullstack/` + Route Handlers under `/api/next/*`).
 
-Next.js client code is consolidating HTTP/API access under client/src/backend/ (see docs/next-fullstack-migration.txt). Route Handlers may call the same Express deployment via fetchLegacyExpress() — they do not replace server/ by default.
+Next.js storefront runtime:
+  - **Production API** is served by the **Next app** (`client/`) at **`/api/next/*`**.
+  - Browser HTTP uses **`@/lib/apiClient`** (axios + cookies + refresh); errors use **`@/lib/axiosToastError`**.
+  - See **docs/next-fullstack-migration.txt** for the full map of routes and env (`MONGODB_URI`, JWT secrets, Payunit, Stripe webhooks, etc.).
 
-Parallel Next-native API: client/src/fullstack/ + /api/next/* (user, cart, address,
-  category, subcategory, product, brand, order, payments (Payunit), admin stats + guest summary,
-  ratings, reviews, blog, file upload, indexnow, sitemap-data). server/ is not edited.
+Express (`server/`) is **optional** for the live site: keep it for scripts, local tools,
+or a separate process. It is **not** required when `NEXT_PUBLIC_API_URL` / `API_URL`
+point at the Next deployment.
 
-Cutover: client SummaryApi + Axios use /api/next/... on the Next origin. Set
-  NEXT_PUBLIC_API_URL / API_URL to that origin for SSR and builds. Stripe webhook URL:
-  /api/next/order/webhook. Payunit: /api/next/payments/webhook (or PAYUNIT_NOTIFY_URL).
+Cutover reminders (unchanged behavior vs Express):
+  - Stripe webhook: **`/api/next/order/webhook`**
+  - Payunit webhook: **`/api/next/payments/webhook`** (or `PAYUNIT_NOTIFY_URL`)
+  - Guest COD / guest orders: **`POST /api/next/order/guest-cod`**; alias **`POST /api/guest-orders`**
 
-Do not remove or disable routes here during migration. New Next Route Handlers should duplicate behavior only behind feature flags or after parity tests.
+Do not remove routes here without verifying Next parity. New behavior should land in
+`client/src/fullstack/` first, then Express can follow or stay frozen for reference.

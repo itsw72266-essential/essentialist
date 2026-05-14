@@ -3,7 +3,7 @@ import { guestCodOrderPostOpts } from "@/fullstack/lib/orderAndPaymentRouteOpts"
 import { asPublicPost } from "@/fullstack/lib/nextRoute";
 import { NextResponse } from "next/server";
 
-/** Legacy path used by SummaryApi; same handler as `/api/next/order/guest-cod`. */
+/** Back-compat alias: same handler as `POST /api/next/order/guest-cod` (SummaryApi may still reference this path). */
 export const POST = asPublicPost(
   GuestCashOnDeliveryOrderController,
   guestCodOrderPostOpts,

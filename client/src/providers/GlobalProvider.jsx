@@ -4,7 +4,7 @@ import Axios from "@/lib/apiClient";
 import SummaryApi from "@/backend/contracts/summaryApi";
 import { useDispatch, useSelector } from "react-redux";
 import { handleAddItemCart } from "../store/cartProduct";
-import AxiosToastError from "@/backend/http/axiosToastError";
+import AxiosToastError from "@/lib/axiosToastError";
 import toast from "react-hot-toast";
 import { pricewithDiscount } from "../utils/PriceWithDiscount";
 import { handleAddAddress } from "../store/addressSlice";

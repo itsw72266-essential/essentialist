@@ -6,7 +6,7 @@ import { useSelector } from 'react-redux';
 import Axios from '@/lib/apiClient';
 import SummaryApi from '@/backend/contracts/summaryApi';
 import toast from 'react-hot-toast';
-import AxiosToastError from '@/backend/http/axiosToastError';
+import AxiosToastError from '@/lib/axiosToastError';
 import { useEffect } from 'react';
 
 const UploadSubCategoryModel = ({close, fetchData}) => {

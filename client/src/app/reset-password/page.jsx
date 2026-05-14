@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import SummaryApi from "@/backend/contracts/summaryApi";
 import toast from "react-hot-toast";
-import AxiosToastError from "@/backend/http/axiosToastError";
+import AxiosToastError from "@/lib/axiosToastError";
 import Axios from "@/lib/apiClient";
 
 const ResetPassword = () => {

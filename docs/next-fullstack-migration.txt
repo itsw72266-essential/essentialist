@@ -29,13 +29,14 @@ Frontend — backend integration surface:
   client/src/backend/
     config/runtimePublicEnv.js     — env accessors
     config/upstreamOrigin.js       — getLegacyExpressOrigin() for optional ops probes only
-    http/axiosToastError.js        — re-export of src/utils/AxiosToastError.js
+    http/axiosToastError.js        — REMOVED; use @/lib/axiosToastError
     contracts/summaryApi.js      — re-export of src/common/SummaryApi.js
     services/legacyExpressGateway.js — optional fetch to Express (e.g. LEGACY_EXPRESS_HEALTH_PROBE)
     index.js                       — barrel exports (httpClient → ../lib/apiClient.js)
 
 Browser HTTP (canonical):
-  client/src/lib/apiClient.js      — re-export of utils/Axios.js (import this from app/components/hooks)
+  client/src/lib/apiClient.js          — re-export of utils/Axios.js
+  client/src/lib/axiosToastError.js    — re-export of utils/AxiosToastError.js
 
 Path aliases (client/jsconfig.json):
   @/*         → client/src/*
@@ -130,7 +131,7 @@ Ops / overlap:
 Import conventions (app code):
   - Browser: **`import apiClient from "@/lib/apiClient"`** (default export = axios), or named `apiClient`.
   - Contracts: `@/backend/contracts/summaryApi` or `@/common/SummaryApi`.
-  - Toasts on axios errors: `@/backend/http/axiosToastError` (or `@/utils/AxiosToastError`).
+  - Toasts on axios errors: **`@/lib/axiosToastError`** (or `@/utils/AxiosToastError`).
   - Intentional: `client/src/utils/Axios.js` imports `../common/SummaryApi` for baseURL + refresh routes
     (avoid circular imports if SummaryApi ever imported the client).
   - utils/indexnow.js and hooks/useIndexNow.js use `@/backend/contracts/summaryApi`.
@@ -143,5 +144,6 @@ Conventions:
 
 Completed checklist:
   - All app modules import **`@/lib/apiClient`** instead of **`@/backend/http/legacyClient`**.
+  - Toast helper imports use **`@/lib/axiosToastError`** (removed `backend/http/axiosToastError.js`).
   - **`/api/system/migration-status`** reports **`next_api_complete`**.
   - **`/api/legacy/health`** does not call Express unless **`LEGACY_EXPRESS_HEALTH_PROBE=true`**.

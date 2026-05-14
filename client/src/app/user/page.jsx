@@ -8,7 +8,7 @@ import Axios from '@/lib/apiClient';
 import SummaryApi from '@/backend/contracts/summaryApi';
 import { logout } from '../../store/userSlice';
 import toast from 'react-hot-toast';
-import AxiosToastError from '@/backend/http/axiosToastError';
+import AxiosToastError from '@/lib/axiosToastError';
 import { HiOutlineExternalLink } from "react-icons/hi";
 import isAdmin from '../../utils/isAdmin';
 import { useRouter } from 'next/navigation';

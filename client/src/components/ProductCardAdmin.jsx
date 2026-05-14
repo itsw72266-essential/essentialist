@@ -5,7 +5,7 @@ import CofirmBox from './CofirmBox'
 import { IoClose } from 'react-icons/io5'
 import SummaryApi from '@/backend/contracts/summaryApi'
 import Axios from '@/lib/apiClient'
-import AxiosToastError from '@/backend/http/axiosToastError'
+import AxiosToastError from '@/lib/axiosToastError'
 import toast from 'react-hot-toast'
 
 const ProductCardAdmin = ({ data, fetchProductData }) => {

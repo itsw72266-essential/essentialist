@@ -4,7 +4,7 @@ import React, { useState, Suspense, useEffect } from "react";
 import { FaRegEyeSlash, FaRegEye } from "react-icons/fa6";
 import toast from "react-hot-toast";
 import SummaryApi from "@/backend/contracts/summaryApi";
-import AxiosToastError from "@/backend/http/axiosToastError";
+import AxiosToastError from "@/lib/axiosToastError";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import fetchUserDetails from "@/utils/fetchUserDetails";

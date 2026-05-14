@@ -7,7 +7,7 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import toast from "react-hot-toast";
-import AxiosToastError from "@/backend/http/axiosToastError";
+import AxiosToastError from "@/lib/axiosToastError";
 import {
   adminCreateReview,
   adminDeleteComment,

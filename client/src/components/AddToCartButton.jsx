@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react'
 // import { useGlobalContext } from '../providers/GlobalProvider'
 import toast from 'react-hot-toast'
-import AxiosToastError from '@/backend/http/axiosToastError'
+import AxiosToastError from '@/lib/axiosToastError'
 import Loading from './Loading'
 import { useSelector } from 'react-redux'
 import { FaMinus, FaPlus } from "react-icons/fa6";

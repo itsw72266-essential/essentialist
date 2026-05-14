@@ -5,7 +5,7 @@ import toast from 'react-hot-toast';
 
 import AdminPermision from '../../../layouts/AdminPermission';
 import Axios from '@/lib/apiClient';
-import AxiosToastError from '@/backend/http/axiosToastError';
+import AxiosToastError from '@/lib/axiosToastError';
 import SummaryApi from '@/backend/contracts/summaryApi';
 
 import BlogEditor from '../../../components/blog/BlogEditor';

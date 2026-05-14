@@ -5,7 +5,7 @@ import uploadImage from '../utils/UploadImage';
 import Axios from '@/lib/apiClient';
 import SummaryApi from '@/backend/contracts/summaryApi';
 import toast from 'react-hot-toast'
-import AxiosToastError from '@/backend/http/axiosToastError';
+import AxiosToastError from '@/lib/axiosToastError';
 
 const UploadCategoryModel = ({close, fetchData}) => {
     const [data,setData] = useState({

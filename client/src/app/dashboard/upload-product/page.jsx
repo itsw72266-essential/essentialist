@@ -610,7 +610,7 @@ import ViewImage from '../../../components/ViewImage';
 import AddFieldComponent from '../../../components/AddFieldComponent';
 import Axios from '@/lib/apiClient';
 import SummaryApi from '@/backend/contracts/summaryApi';
-import AxiosToastError from '@/backend/http/axiosToastError';
+import AxiosToastError from '@/lib/axiosToastError';
 import successAlert from '../../../utils/SuccessAlert';
 import AdminPermission from '../../../components/AdminPermission';
 import { setAllBrands, setLoadingBrands } from '../../../store/productSlice';

@@ -4,7 +4,7 @@ import { IoClose } from "react-icons/io5";
 import uploadImage from './../utils/UploadImage';
 import SummaryApi from '@/backend/contracts/summaryApi';
 import toast from 'react-hot-toast'
-import AxiosToastError from '@/backend/http/axiosToastError';
+import AxiosToastError from '@/lib/axiosToastError';
 import Axios from '@/lib/apiClient';
 
 const EditCategory = ({close, fetchData,data : CategoryData}) => {

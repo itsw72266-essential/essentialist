@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Axios from "@/lib/apiClient";
 import SummaryApi from "@/backend/contracts/summaryApi";
-import AxiosToastError from "@/backend/http/axiosToastError";
+import AxiosToastError from "@/lib/axiosToastError";
 
 const ForgotPassword = () => {
   const [data, setData] = useState({ email: "" });

@@ -9,7 +9,7 @@ import SummaryApi from '@/backend/contracts/summaryApi'
 import EditCategory from '../../../components/EditCategory'
 import CofirmBox from '../../../components/CofirmBox'
 import toast from 'react-hot-toast'
-import AxiosToastError from '@/backend/http/axiosToastError'
+import AxiosToastError from '@/lib/axiosToastError'
 import AdminPermission from '../../../components/AdminPermission'
 
 const CategoryPage = () => {

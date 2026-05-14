@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { DisplayPriceInRupees } from "../../utils/DisplayPriceInRupees";
 import { useSelector, useDispatch } from "react-redux";
-import AxiosToastError from "../../backend/http/axiosToastError";
+import AxiosToastError from "@/lib/axiosToastError";
 import Axios from "@/lib/apiClient";
 import SummaryApi from "@/backend/contracts/summaryApi";
 import toast from "react-hot-toast";

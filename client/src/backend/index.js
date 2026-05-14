@@ -13,7 +13,7 @@
 export * from "./config/runtimePublicEnv.js";
 export { getLegacyExpressOrigin } from "./config/upstreamOrigin.js";
 export { default as httpClient } from "../lib/apiClient.js";
-export { default as AxiosToastError } from "./http/axiosToastError.js";
+export { default as AxiosToastError } from "../lib/axiosToastError.js";
 export * from "./contracts/summaryApi.js";
 export {
   LEGACY_EXPRESS_ENTRY,

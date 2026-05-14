@@ -13,7 +13,7 @@ import SummaryApi from '@/backend/contracts/summaryApi';
 import Axios from '@/lib/apiClient';
 import uploadImage from '../../../utils/UploadImage';
 import successAlert from '../../../utils/SuccessAlert';
-import AxiosToastError from '@/backend/http/axiosToastError';
+import AxiosToastError from '@/lib/axiosToastError';
 import AdminPermission from '../../../components/AdminPermission';
 import Loading from '../../../components/Loading';
 import { setAllBrands, setLoadingBrands } from '../../../store/productSlice';
