@@ -614,6 +614,14 @@ function stripMarkdown(text = '') {
     .trim()
 }
 
+function isPrerenderFetchAbort(error) {
+  const digest = error?.digest
+  if (digest === 'HANGING_PROMISE_REJECTION') return true
+  if (digest === 'NEXT_PRERENDER_INTERRUPTED') return true
+  const msg = String(error?.message || '')
+  return /prerender is complete/i.test(msg)
+}
+
 async function fetchJson(url, init = {}) {
   if (!CAN_USE_REMOTE_API) return null
 
@@ -628,6 +636,7 @@ async function fetchJson(url, init = {}) {
     }
     return res.json()
   } catch (error) {
+    if (isPrerenderFetchAbort(error)) return null
     console.warn('[brand page] fetchJson failed', { url, error })
     return null
   }

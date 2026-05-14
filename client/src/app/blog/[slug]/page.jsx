@@ -173,6 +173,7 @@
 import Link from "next/link"
 import { notFound } from "next/navigation"
 import sanitizeHtml from "sanitize-html"
+import { getServerSideApiBaseUrl } from "@/lib/serverApiOrigin"
 
 // --- Configuration ---
 const BUSINESS_CONFIG = {
@@ -187,11 +188,19 @@ const BUSINESS_CONFIG = {
 }
 
 const API_BASE_URL =
+  getServerSideApiBaseUrl() ||
   process.env.NEXT_PUBLIC_API_URL ||
   process.env.API_URL ||
   process.env.NEXT_PUBLIC_SITE_URL ||
   process.env.SITE_URL ||
   "http://localhost:3000"
+
+function isPrerenderFetchAbort(error) {
+  const digest = error?.digest
+  if (digest === "HANGING_PROMISE_REJECTION") return true
+  if (digest === "NEXT_PRERENDER_INTERRUPTED") return true
+  return /prerender is complete/i.test(String(error?.message || ""))
+}
 
 /**
  * Fetch blog post
@@ -212,6 +221,7 @@ async function fetchBlog(slug) {
 
     return response.json()
   } catch (error) {
+    if (isPrerenderFetchAbort(error)) return null
     console.error(`Blog details error for slug "${slug}":`, error)
     return null
   }
