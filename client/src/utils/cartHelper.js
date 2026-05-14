@@ -1,6 +1,6 @@
 import toast from "react-hot-toast"
 import SummaryApi from "@/backend/contracts/summaryApi"
-import Axios from "@/backend/http/legacyClient"
+import Axios from "@/lib/apiClient"
 import AxiosToastError from "@/backend/http/axiosToastError"
 
 // -- Guest cart key in localStorage --

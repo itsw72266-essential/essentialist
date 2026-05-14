@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { FaRegEyeSlash, FaRegEye } from "react-icons/fa6";
 import toast from 'react-hot-toast';
-import Axios from '@/backend/http/legacyClient';
+import Axios from '@/lib/apiClient';
 import SummaryApi from '@/backend/contracts/summaryApi';
 import AxiosToastError from '@/backend/http/axiosToastError';
 import Link from 'next/link';

@@ -204,7 +204,7 @@
 
 import React, { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import Axios from "@/backend/http/legacyClient";
+import Axios from "@/lib/apiClient";
 import SummaryApi from "@/backend/contracts/summaryApi";
 import CardProduct from "./CardProduct";
 import { valideURLConvert } from "../utils/valideURLConvert";

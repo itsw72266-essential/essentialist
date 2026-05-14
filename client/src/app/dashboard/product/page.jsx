@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react'
 import SummaryApi from '@/backend/contracts/summaryApi'
 import AxiosToastError from '@/backend/http/axiosToastError'
-import Axios from '@/backend/http/legacyClient'
+import Axios from '@/lib/apiClient'
 import Loading from '../../../components/Loading'
 import ProductCardAdmin from '../../../components/ProductCardAdmin'
 import { IoSearchOutline } from "react-icons/io5";

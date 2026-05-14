@@ -3,10 +3,20 @@ import { NextResponse } from "next/server";
 import { fetchLegacyExpress } from "@/backend/services/legacyExpressGateway";
 
 /**
- * Proxies Express `GET /health` through Next for ops / future dashboards.
- * Read-only; does not change Express behavior.
+ * Next runtime health. Optional Express probe: set `LEGACY_EXPRESS_HEALTH_PROBE=true`
+ * and `API_URL` / `NEXT_PUBLIC_API_URL` to the Express origin to include upstream `/health`.
  */
 export async function GET() {
+  const probeLegacy = process.env.LEGACY_EXPRESS_HEALTH_PROBE === "true";
+
+  if (!probeLegacy) {
+    return NextResponse.json({
+      ok: true,
+      nextRuntime: true,
+      legacyExpress: "probe_disabled",
+    });
+  }
+
   try {
     const upstream = await fetchLegacyExpress("/health", {
       headers: { Accept: "application/json" },
@@ -15,7 +25,8 @@ export async function GET() {
       return NextResponse.json(
         {
           ok: false,
-          error: "Missing API_URL or NEXT_PUBLIC_API_URL for upstream health check",
+          error:
+            "Legacy probe enabled but missing API_URL / NEXT_PUBLIC_API_URL for Express origin",
         },
         { status: 503 },
       );

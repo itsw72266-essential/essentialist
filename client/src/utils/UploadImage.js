@@ -1,4 +1,4 @@
-import Axios from '@/backend/http/legacyClient'
+import Axios from '@/lib/apiClient'
 import SummaryApi from '@/backend/contracts/summaryApi'
 
 const uploadImage = async(image)=>{

@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
 import AdminPermision from '../../../layouts/AdminPermission';
-import Axios from '@/backend/http/legacyClient';
+import Axios from '@/lib/apiClient';
 import AxiosToastError from '@/backend/http/axiosToastError';
 import SummaryApi from '@/backend/contracts/summaryApi';
 

@@ -1,4 +1,4 @@
-import Axios from "@/backend/http/legacyClient";
+import Axios from "@/lib/apiClient";
 
 const REVIEW_TOKEN_HEADER = "x-review-token";
 const SUBJECT_TYPES = [

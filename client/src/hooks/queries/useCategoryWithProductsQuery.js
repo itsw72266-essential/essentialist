@@ -3,7 +3,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 
-import Axios from "@/backend/http/legacyClient";
+import Axios from "@/lib/apiClient";
 import SummaryApi from "@/backend/contracts/summaryApi";
 import { valideURLConvert } from "@/utils/valideURLConvert";
 

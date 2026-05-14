@@ -4,7 +4,7 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Divider from './Divider';
-import Axios from '@/backend/http/legacyClient';
+import Axios from '@/lib/apiClient';
 import SummaryApi from '@/backend/contracts/summaryApi';
 import { logout } from '../store/userSlice';
 import toast from 'react-hot-toast';

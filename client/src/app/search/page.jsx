@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import SummaryApi from '@/backend/contracts/summaryApi'
-import Axios from '@/backend/http/legacyClient'
+import Axios from '@/lib/apiClient'
 import AxiosToastError from '@/backend/http/axiosToastError'
 import CardProduct from './../../components/CardProduct'
 import InfiniteScroll from 'react-infinite-scroll-component'

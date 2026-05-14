@@ -1,16 +1,18 @@
-Essentialist — Next.js full-stack migration (incremental)
+Essentialist — Next.js full-stack migration (**runtime API complete**)
+
+Status (2026):
+  - **Production API** is served by **Next Route Handlers** under **`/api/next/*`**
+    (`client/src/fullstack/` + `client/src/app/api/next/`).
+  - **Browser HTTP** uses **`@/lib/apiClient`** (axios instance in `client/src/utils/Axios.js`:
+    SummaryApi baseURL, cookies, 401 refresh). Do not import `@/backend/http/legacyClient` (removed).
+  - **`server/` (Express)** remains in the repo for **reference, scripts, or optional sidecars**;
+    the Next app does **not** require Express for store API traffic when env points at Next.
 
 Are we moving `server/` (Express) into Next.js?
-  You asked for a **complete full-stack Next.js app** without relying on an
-  external Express process for those routes, while **`server/` stays intact**
-  (reference + reuse for another app). The approach is **dual track**:
-  - **`server/`** — unchanged; keep committing and running it as today.
-  - **`client/src/fullstack/`** — new home for Zod schemas, Mongoose models,
-    controllers, and Route Handlers that implement the same behavior against
-    the **same `MONGODB_URI`** (and shared secrets like `RESEND_API`) when you
-    wire traffic to `/api/next/...`.
-  - **`client/src/backend/`** — legacy HTTP surface + optional **proxies** to
-    Express (`/api/legacy/...`) during transition.
+  Original plan was **dual track** while routes were ported:
+  - **`server/`** — Express + Mongo + routes (unchanged on disk; see server/MIGRATION.txt).
+  - **`client/src/fullstack/`** — Mongoose models, controllers, Route Handlers vs **same `MONGODB_URI`**.
+  - **`client/src/backend/`** — contracts (`summaryApi`), optional **Express probe** (`legacyExpressGateway.js`).
 
 Git branch (workspace):
   feat/next-fullstack-migration
@@ -20,18 +22,20 @@ If you connect a remote after a fresh `git init` in this workspace:
   git fetch
   (merge or rebase as needed — history may not match an older remote)
 
-Canonical backend (unchanged):
+Optional Express (`server/`):
   server/ — Express + Mongo + routes and jobs (see server/MIGRATION.txt)
 
 Frontend — backend integration surface:
   client/src/backend/
     config/runtimePublicEnv.js     — env accessors
-    config/upstreamOrigin.js       — getLegacyExpressOrigin() for server BFF fetches
-    http/legacyClient.js             — re-export of src/utils/Axios.js
-    http/axiosToastError.js          — re-export of src/utils/AxiosToastError.js
-    contracts/summaryApi.js        — re-export of src/common/SummaryApi.js
-    services/legacyExpressGateway.js — extension point for future gateways
-    index.js                         — barrel exports
+    config/upstreamOrigin.js       — getLegacyExpressOrigin() for optional ops probes only
+    http/axiosToastError.js        — re-export of src/utils/AxiosToastError.js
+    contracts/summaryApi.js      — re-export of src/common/SummaryApi.js
+    services/legacyExpressGateway.js — optional fetch to Express (e.g. LEGACY_EXPRESS_HEALTH_PROBE)
+    index.js                       — barrel exports (httpClient → ../lib/apiClient.js)
+
+Browser HTTP (canonical):
+  client/src/lib/apiClient.js      — re-export of utils/Axios.js (import this from app/components/hooks)
 
 Path aliases (client/jsconfig.json):
   @/*         → client/src/*
@@ -118,31 +122,26 @@ Next-native full-stack (implements API in Next; `server/` not imported or modifi
   `next build` does not throw). Optional `PAYUNIT_MODE` (default `test`). Install
   `@payunit/nodejs-sdk` in the client app.
 
-Suggested next steps:
-  1. Point remaining SummaryApi paths at `/api/next/...` as each surface is verified (Payunit
-     payment URLs already target `/api/next/payments/*`).
-  2. Point the browser client at `/api/next/...` per domain when tested.
-  3. Add Route Handlers under app/api/legacy/... using fetchLegacyExpress() during overlap.
-  4. Optional: monorepo workspaces root package.json for client + server.
+Ops / overlap:
+  client/src/app/api/system/migration-status/route.js — Next JSON probe (`migration: next_api_complete`)
+  client/src/app/api/legacy/health/route.js — Next-only by default; set `LEGACY_EXPRESS_HEALTH_PROBE=true`
+    and `API_URL` / `NEXT_PUBLIC_API_URL` to Express origin to include upstream GET /health
 
-Next.js Route Handlers (legacy proxy examples):
-  client/src/app/api/system/migration-status/route.js — Next-only JSON probe
-  client/src/app/api/legacy/health/route.js — read-only proxy to Express GET /health
-    (env: API_URL, then NEXT_PUBLIC_API_URL)
+Import conventions (app code):
+  - Browser: **`import apiClient from "@/lib/apiClient"`** (default export = axios), or named `apiClient`.
+  - Contracts: `@/backend/contracts/summaryApi` or `@/common/SummaryApi`.
+  - Toasts on axios errors: `@/backend/http/axiosToastError` (or `@/utils/AxiosToastError`).
+  - Intentional: `client/src/utils/Axios.js` imports `../common/SummaryApi` for baseURL + refresh routes
+    (avoid circular imports if SummaryApi ever imported the client).
+  - utils/indexnow.js and hooks/useIndexNow.js use `@/backend/contracts/summaryApi`.
 
-Import migration status (app code):
-  - Prefer: @/backend/http/legacyClient, @/backend/contracts/summaryApi,
-    @/backend/http/axiosToastError (or imports from @/backend/index.js barrel).
-  - Intentional exception: client/src/utils/Axios.js still imports
-    ../common/SummaryApi directly for refresh-token wiring — avoids a circular
-    graph if legacyClient re-exported Axios while Axios imported only from @backend.
-  - utils/indexnow.js and hooks/useIndexNow.js use @/backend/contracts/summaryApi
-    (replaces a broken ../api/SummaryApi path; useIndexNow now imports baseURL).
-
-Live imports of @/utils/Axios, @/common/SummaryApi, or relative .../utils/Axios
-outside backend/ and utils/Axios.js: none (only commented leftovers in a few files).
+Live imports of `@/utils/Axios` outside `utils/Axios.js`: discouraged; prefer `@/lib/apiClient`.
 
 Conventions:
-  - New code that calls Express should use @backend (or @/backend/...) paths.
-  - Do not delete client/src/common/SummaryApi.js or client/src/utils/Axios.js
-    until refresh logic is relocated and parity is tested.
+  - Optional Express probes: `@/backend/services/legacyExpressGateway` (server-side only).
+  - Keep `client/src/common/SummaryApi.js` and `client/src/utils/Axios.js`; refresh logic lives there.
+
+Completed checklist:
+  - All app modules import **`@/lib/apiClient`** instead of **`@/backend/http/legacyClient`**.
+  - **`/api/system/migration-status`** reports **`next_api_complete`**.
+  - **`/api/legacy/health`** does not call Express unless **`LEGACY_EXPRESS_HEALTH_PROBE=true`**.

@@ -10,7 +10,7 @@ import { IoClose, IoSearchOutline } from 'react-icons/io5';
 import { MdDelete, MdEdit, MdOutlinePublishedWithChanges } from 'react-icons/md';
 
 import SummaryApi from '@/backend/contracts/summaryApi';
-import Axios from '@/backend/http/legacyClient';
+import Axios from '@/lib/apiClient';
 import uploadImage from '../../../utils/UploadImage';
 import successAlert from '../../../utils/SuccessAlert';
 import AxiosToastError from '@/backend/http/axiosToastError';

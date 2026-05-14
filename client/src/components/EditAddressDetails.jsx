@@ -1,7 +1,7 @@
 "use client";
 import React from 'react'
 import { useForm } from "react-hook-form"
-import Axios from '@/backend/http/legacyClient'
+import Axios from '@/lib/apiClient'
 import SummaryApi from '@/backend/contracts/summaryApi'
 import toast from 'react-hot-toast'
 import AxiosToastError from '@/backend/http/axiosToastError'

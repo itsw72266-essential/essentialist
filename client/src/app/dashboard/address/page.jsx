@@ -5,7 +5,7 @@ import AddAddress from '../../../components/AddAddress'
 import { MdDelete } from "react-icons/md";
 import { MdEdit } from "react-icons/md";
 import EditAddressDetails from '../../../components/EditAddressDetails';
-import Axios from '@/backend/http/legacyClient';
+import Axios from '@/lib/apiClient';
 import SummaryApi from '@/backend/contracts/summaryApi';
 import toast from 'react-hot-toast';
 import AxiosToastError from '@/backend/http/axiosToastError';

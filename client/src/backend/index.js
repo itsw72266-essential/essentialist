@@ -1,20 +1,18 @@
 /**
  * @fileoverview Backend integration surface for the Next.js app.
  *
- * Import from `@backend/...` (or `@/backend/...`) for code that talks to Express.
- * App code is migrated off direct `@/common/SummaryApi` / `@/utils/Axios` imports;
- * `utils/Axios.js` still imports `common/SummaryApi` for refresh-token config only.
+ * Browser HTTP: import from `@/lib/apiClient` (axios + cookies + refresh).
+ * `utils/Axios.js` imports `common/SummaryApi` only for baseURL / refresh routes.
  *
  * Layout:
  * - `config/` — env accessors
- * - `http/` — HTTP client (legacy Axios)
  * - `contracts/` — API definitions (re-export of SummaryApi)
- * - `services/` — future gateways / orchestration
+ * - `services/` — optional legacy Express gateway (ops only)
  */
 
 export * from "./config/runtimePublicEnv.js";
 export { getLegacyExpressOrigin } from "./config/upstreamOrigin.js";
-export { default as httpClient } from "./http/legacyClient.js";
+export { default as httpClient } from "../lib/apiClient.js";
 export { default as AxiosToastError } from "./http/axiosToastError.js";
 export * from "./contracts/summaryApi.js";
 export {

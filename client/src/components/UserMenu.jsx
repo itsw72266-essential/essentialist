@@ -209,7 +209,7 @@ import {
 import { useTranslation } from 'react-i18next';
 
 import Divider from './Divider';
-import Axios from '@/backend/http/legacyClient';
+import Axios from '@/lib/apiClient';
 import SummaryApi from '@/backend/contracts/summaryApi';
 import AxiosToastError from '@/backend/http/axiosToastError';
 import isAdmin from '../utils/isAdmin';

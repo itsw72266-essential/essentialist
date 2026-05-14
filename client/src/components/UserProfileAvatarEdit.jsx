@@ -2,7 +2,7 @@
 import React, { useState } from 'react'
 import { FaRegUserCircle } from 'react-icons/fa'
 import { useDispatch, useSelector } from 'react-redux'
-import Axios from '@/backend/http/legacyClient'
+import Axios from '@/lib/apiClient'
 import SummaryApi from '@/backend/contracts/summaryApi'
 import AxiosToastError from '@/backend/http/axiosToastError'
 import { updatedAvatar } from '../store/userSlice'

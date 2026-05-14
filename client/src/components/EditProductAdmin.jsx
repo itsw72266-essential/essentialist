@@ -615,7 +615,7 @@ import uploadImage from './../utils/UploadImage';
 import Loading from '../components/Loading';
 import ViewImage from '../components/ViewImage';
 import AddFieldComponent from '../components/AddFieldComponent';
-import Axios from '@/backend/http/legacyClient';
+import Axios from '@/lib/apiClient';
 import SummaryApi from '@/backend/contracts/summaryApi';
 import AxiosToastError from '@/backend/http/axiosToastError';
 import successAlert from './../utils/SuccessAlert';

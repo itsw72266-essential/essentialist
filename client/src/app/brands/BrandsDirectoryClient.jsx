@@ -906,7 +906,7 @@ import {
   useSubCategoriesQuery
 } from '@/hooks/queries/useCatalogQueries'
 import SummaryApi from '@/backend/contracts/summaryApi'
-import Axios from '@/backend/http/legacyClient'
+import Axios from '@/lib/apiClient'
 
 const SITE_URL = 'https://www.esmakeupstore.com/brands'
 const ROOT_URL = 'https://www.esmakeupstore.com'

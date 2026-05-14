@@ -5,7 +5,7 @@ import { useDispatch } from 'react-redux';
 import fetchUserDetails from '../utils/fetchUserDetails';
 import { setUserDetails } from '../store/userSlice';
 import { setAllCategory, setAllSubCategory, setLoadingCategory } from '../store/productSlice';
-import Axios from '@/backend/http/legacyClient';
+import Axios from '@/lib/apiClient';
 import SummaryApi from '@/backend/contracts/summaryApi';
 import {
   readPersistedUser,

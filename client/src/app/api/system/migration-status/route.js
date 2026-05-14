@@ -8,7 +8,8 @@ export async function GET() {
   return NextResponse.json({
     ok: true,
     nextRuntime: true,
-    migration: "incremental",
-    legacyApi: "Express app in server/ remains canonical",
+    migration: "next_api_complete",
+    runtimeApi: "Route Handlers under /api/next/* (see docs/next-fullstack-migration.txt)",
+    express: "Optional: server/ for jobs or LEGACY_EXPRESS_HEALTH_PROBE on /api/legacy/health",
   });
 }

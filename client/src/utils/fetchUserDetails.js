@@ -1,4 +1,4 @@
-import httpClient from "@/backend/http/legacyClient";
+import httpClient from "@/lib/apiClient";
 import SummaryApi from "@/backend/contracts/summaryApi";
 
 const fetchUserDetails = async () => {

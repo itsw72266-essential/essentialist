@@ -12,7 +12,7 @@ import { useDispatch } from "react-redux";
 import { setUserDetails } from "@/store/userSlice";
 import { motion } from "framer-motion";
 import Image from "next/image";
-import Axios from "@/backend/http/legacyClient";
+import Axios from "@/lib/apiClient";
 import {
   AUTH_PROVIDER,
   getLastAuthProvider,

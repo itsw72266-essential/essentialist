@@ -1,7 +1,6 @@
 /**
- * BFF helpers: Next Route Handlers and server code call **Express in `server/`**
- * through this layer. Express remains the source of truth until a route is
- * intentionally re-implemented in Next (after parity checks).
+ * Optional ops: server-side `fetch` to a **separate** Express process (`server/`).
+ * Not used for storefront API traffic (that goes to `/api/next/*` on this app).
  *
  * @see docs/next-fullstack-migration.txt
  */

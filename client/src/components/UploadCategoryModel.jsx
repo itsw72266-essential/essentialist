@@ -2,7 +2,7 @@
 import React, { useState } from 'react'
 import { IoClose } from "react-icons/io5";
 import uploadImage from '../utils/UploadImage';
-import Axios from '@/backend/http/legacyClient';
+import Axios from '@/lib/apiClient';
 import SummaryApi from '@/backend/contracts/summaryApi';
 import toast from 'react-hot-toast'
 import AxiosToastError from '@/backend/http/axiosToastError';
