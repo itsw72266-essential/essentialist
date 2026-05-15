@@ -1069,7 +1069,7 @@ export default function SuccessPageClient({ searchParams: initialParams }) {
       if (!pid || seen.has(pid)) continue;
       seen.add(pid);
       const slug = `${valideURLConvert(item.name)}-${pid}`;
-      const href = `/product/${slug}#reviews`;
+      const href = `/product/${slug}?writeReview=1#reviews`;
       links.push({ href, label: item.name });
     }
     if (!links.length) return;

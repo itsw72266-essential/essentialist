@@ -404,7 +404,7 @@ export default function ProductDisplayClient({
         <p className="text-sm text-slate-600 mb-6">
           Share your experience with {productData.name}. Reviews help other shoppers choose with confidence.
         </p>
-        <ReviewsSection productId={productId} />
+        <ReviewsSection productId={productId} productName={productData.name} />
       </section>
 
       <div className="h-40 w-full" />
@@ -423,12 +423,16 @@ function RatingSummary({ reviewStats, productName }) {
         <p className="text-sm text-slate-600">
           No reviews yet for this product.
         </p>
-        <a
-          href="#reviews"
+        <button
+          type="button"
+          onClick={() => {
+            document.getElementById('reviews')?.scrollIntoView({ behavior: 'smooth' })
+            window.dispatchEvent(new CustomEvent('essentialist:open-review-modal'))
+          }}
           className="inline-flex text-sm font-semibold text-pink-600 hover:text-pink-700 underline-offset-2 hover:underline"
         >
           Write the first review
-        </a>
+        </button>
       </div>
     );
   }
@@ -445,12 +449,16 @@ function RatingSummary({ reviewStats, productName }) {
           </span>
         </div>
       </div>
-      <a
-        href="#reviews"
+      <button
+        type="button"
+        onClick={() => {
+          document.getElementById('reviews')?.scrollIntoView({ behavior: 'smooth' })
+          window.dispatchEvent(new CustomEvent('essentialist:open-review-modal'))
+        }}
         className="inline-flex text-sm font-medium text-pink-600 hover:text-pink-700 underline-offset-2 hover:underline"
       >
         See or add a review for {productName}
-      </a>
+      </button>
     </div>
   );
 }

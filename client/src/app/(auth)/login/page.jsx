@@ -171,7 +171,11 @@ const Login = () => {
           email: "",
           password: "",
         });
-        router.push("/");
+        const redirectTo =
+          searchParams.get("redirect")?.trim() ||
+          searchParams.get("from")?.trim() ||
+          "/";
+        router.push(redirectTo.startsWith("/") ? redirectTo : "/");
       }
     } catch (error) {
       AxiosToastError(error);
