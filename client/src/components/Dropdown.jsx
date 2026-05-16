@@ -165,6 +165,7 @@ import SummaryApi, { callSummaryApi } from "@/backend/contracts/summaryApi";
 import { useTranslation } from "react-i18next";
 import "@/lib/i18n";
 import { getLocalizedContent } from "@/helpers/localizeContent";
+import { getAdaptiveTextClasses } from "@/lib/localeTypography";
 
 const normalizeCollection = (payload) => {
   if (!payload) return [];
@@ -345,7 +346,13 @@ const Dropdown = () => {
                     key={category._id}
                     className="break-inside-avoid"
                   >
-                    <div className="font-bold text-black pb-2 mb-3 text-base tracking-wide border-b border-pink-100 uppercase">
+                    <div
+                      className={getAdaptiveTextClasses(
+                        categoryLabel,
+                        "navCategory",
+                        i18n.language,
+                      )}
+                    >
                       {categoryLabel}
                     </div>
                     <div className="space-y-0.5">
@@ -365,7 +372,11 @@ const Dropdown = () => {
                             href={url}
                             key={subCat._id}
                             prefetch={false}
-                            className="block text-sm text-black font-semibold md:font-normal rounded-md hover:bg-pink-50 hover:text-pink-400 cursor-pointer p-1.5"
+                            className={getAdaptiveTextClasses(
+                              subLabel,
+                              "navSubcategory",
+                              i18n.language,
+                            )}
                             onClick={() => setIsHovered(false)}
                           >
                             {subLabel}

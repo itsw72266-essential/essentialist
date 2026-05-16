@@ -4,6 +4,7 @@
 import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useDispatch } from "react-redux";
+import { useTranslation } from "react-i18next";
 
 import Axios from "@/lib/apiClient";
 import SummaryApi from "@/backend/contracts/summaryApi";
@@ -27,6 +28,7 @@ export function useCategoriesQuery({
   ...queryOptions
 } = {}) {
   const dispatch = useDispatch();
+  const { i18n } = useTranslation();
 
   // Empty initialData would mark the query "fresh" for staleTime and skip the
   // network fetch — bad when parent passes [] as placeholder. Only seed cache
@@ -35,7 +37,7 @@ export function useCategoriesQuery({
     Array.isArray(initialData) && initialData.length > 0 ? initialData : undefined;
 
   const queryResult = useQuery({
-    queryKey: ["categories"],
+    queryKey: ["categories", i18n.language],
     enabled,
     initialData: seededInitialData,
     queryFn: async () => {
@@ -64,12 +66,13 @@ export function useSubCategoriesQuery({
   ...queryOptions
 } = {}) {
   const dispatch = useDispatch();
+  const { i18n } = useTranslation();
 
   const seededInitialData =
     Array.isArray(initialData) && initialData.length > 0 ? initialData : undefined;
 
   const queryResult = useQuery({
-    queryKey: ["sub-categories"],
+    queryKey: ["sub-categories", i18n.language],
     enabled,
     initialData: seededInitialData,
     queryFn: async () => {

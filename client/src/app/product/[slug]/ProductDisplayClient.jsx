@@ -278,6 +278,7 @@ import AddToCartButton from "../../../components/AddToCartButton";
 import { pricewithDiscount } from "../../../utils/PriceWithDiscount";
 import { productQueryOptions, reviewStatsQueryOptions } from "./queries";
 import ProductGallery from "./ProductGallery.client";
+import { getLocalizedProductName } from "@/helpers/localizeContent";
 
 const ReviewsSection = dynamic(() => import("./ReviewsSection.client"), {
   loading: () => (
@@ -340,7 +341,7 @@ export default function ProductDisplayClient({
   initialReviewStats,
   initialDataUpdatedAt,
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { data: productData, isLoading: isProductLoading, isError: isProductError } = useQuery({
     ...productQueryOptions(productId),
     initialData: initialProduct,
@@ -360,12 +361,14 @@ export default function ProductDisplayClient({
     return [productData.image].filter(Boolean);
   }, [productData.image]);
 
+  const productName = getLocalizedProductName(productData, i18n.language);
+
   return (
     <main className="container mx-auto p-4 pb-4 text-slate-900 font-medium">
       <nav className="mb-4 flex flex-wrap items-center gap-2 text-[11px] text-slate-500 uppercase">
         <span className="hover:text-pink-600">{typeof productData.brand === 'object' ? productData.brand?.name : productData.brand}</span>
         <span>/</span>
-        <span className="font-bold text-slate-900">{productData.name?.substring(0, 30)}...</span>
+        <span className="font-bold text-slate-900 break-words line-clamp-1">{productName}</span>
       </nav>
 
       <div className="grid gap-6 lg:grid-cols-2 lg:gap-12">
@@ -373,15 +376,15 @@ export default function ProductDisplayClient({
           <div className="absolute left-2 top-2 z-10">
             <span className="bg-pink-500 text-white text-[10px] font-bold px-2 py-1 rounded shadow-sm uppercase">{t("product.bestseller")}</span>
           </div>
-          <ProductGallery images={images} productName={productData.name} />
+          <ProductGallery images={images} productName={productName} />
         </div>
 
         <aside className="space-y-6">
           <Badge />
-          <h1 className="text-xl font-bold lg:text-3xl leading-tight">{productData.name}</h1>
+          <h1 className="text-xl font-bold lg:text-3xl leading-tight break-words">{productName}</h1>
           <RatingSummary
             reviewStats={reviewStats ?? { average: 0, count: 0 }}
-            productName={productData.name}
+            productName={productName}
           />
           <Divider />
           <div className="flex flex-wrap items-end justify-between gap-4">
@@ -401,7 +404,7 @@ export default function ProductDisplayClient({
       </div>
 
       <section id="reviews" className="mt-8 scroll-mt-24 border-t border-slate-200 pt-6 pb-2">
-        <ReviewsSection productId={productId} productName={productData.name} />
+        <ReviewsSection productId={productId} productName={productName} />
       </section>
     </main>
   );

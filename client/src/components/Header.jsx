@@ -72,7 +72,7 @@ const Header = () => {
         { title: t('header.newHot'), path: '/new-arrival' },
         { title: t('header.blog'), path: '/blog' },
         { title: t('header.contactUs'), path: '/contact' }
-    ], [t]);
+    ], [t, i18n.language]);
 
     const calculateDeliveryDate = useCallback(() => {
         const now = new Date();

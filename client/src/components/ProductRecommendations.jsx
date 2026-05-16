@@ -209,6 +209,7 @@ import "@/lib/i18n";
 import Axios from "@/lib/apiClient";
 import SummaryApi from "@/backend/contracts/summaryApi";
 import CardProduct from "./CardProduct";
+import { getLocalizedProductName } from "@/helpers/localizeContent";
 import { valideURLConvert } from "../utils/valideURLConvert";
 
 const HISTORY_KEY = "browsing_history_products";
@@ -232,7 +233,10 @@ const setHistory = (products) => {
 };
 
 const CompactHistoryCard = ({ product, onClick }) => {
+  const { i18n } = useTranslation();
   if (!product) return null;
+  const displayName = getLocalizedProductName(product, i18n.language);
+
   return (
     <div
       className="flex-shrink-0 w-36 cursor-pointer group"
@@ -241,12 +245,12 @@ const CompactHistoryCard = ({ product, onClick }) => {
       <div className="h-36 bg-slate-100 rounded-lg md:rounded-lg sm:rounded-full flex items-center justify-center p-2 overflow-hidden border border-gray-200">
         <img
           src={product.image && product.image[0]}
-          alt={product.name}
+          alt={displayName}
           className="h-full w-full object-contain group-hover:scale-105 transition-transform duration-300"
         />
       </div>
-      <h3 className="text-xs text-gray-700 mt-2 line-clamp-2 h-8">
-        {product.name}
+      <h3 className="text-xs text-gray-700 mt-2 line-clamp-2 break-words h-8">
+        {displayName}
       </h3>
     </div>
   );

@@ -8,10 +8,27 @@ import { valideURLConvert } from '../utils/valideURLConvert'
 import Link from 'next/link'
 import { useTranslation } from 'react-i18next'
 import '@/lib/i18n'
+import { useCategoriesQuery } from '@/hooks/queries/useCatalogQueries'
+import { getLocalizedContent } from '@/helpers/localizeContent'
+import { useAdaptiveTextClasses } from '@/hooks/useAdaptiveTextClasses'
 
 // No fetch/loading; render pre-fetched products directly for instant load
 const CategoryWiseProductDisplay = ({ id, name, products = [], subCategories = [] }) => {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
+  const { data: categories = [] } = useCategoriesQuery({ syncToRedux: false })
+
+  const displayName = useMemo(() => {
+    const cat = categories.find((c) => String(c._id) === String(id))
+    if (cat) {
+      const localized = getLocalizedContent(cat, 'name', i18n.language)
+      if (localized) return localized
+    }
+    return name
+  }, [categories, id, i18n.language, name])
+
+  const headingClasses = useAdaptiveTextClasses(displayName, 'sectionHeading')
+  const seeAllClasses = useAdaptiveTextClasses(t('common.seeAll'), 'seeAllLink')
+
   const [redirectURL, setRedirectURL] = useState(`/${valideURLConvert(name)}-${id}`)
   const containerRef = useRef()
 
@@ -45,15 +62,15 @@ const CategoryWiseProductDisplay = ({ id, name, products = [], subCategories = [
   return (
     <div className="mb-12">
       {/* Header: Restored original Next.js flex justify-between (title left, See All right) */}
-      <div className="container mx-auto px-2 flex items-center justify-between p-2">
-        <h2 className="font-bold text-[20px] md:text-[40px]">
-          {name}
+      <div className="container mx-auto px-2 flex items-center justify-between gap-2 p-2">
+        <h2 className={headingClasses}>
+          {displayName}
         </h2>
         <Link
           href={redirectURL}
           prefetch={true} // Prefetch for instant navigation (background load on hover)
-          className="text-pink-400 hover:text-green-400 font-bold md:text-[20px] text-[16px] transition-colors duration-300 p-4 flex items-center gap-2 hover:gap-3"
-          aria-label={`View all ${name} products`}
+          className={`text-pink-400 hover:text-green-400 transition-colors duration-300 p-2 sm:p-4 flex items-center gap-2 hover:gap-3 ${seeAllClasses}`}
+          aria-label={`View all ${displayName} products`}
         >
           {t('common.seeAll')}
           <FaArrowRight className="transition-all duration-300" />

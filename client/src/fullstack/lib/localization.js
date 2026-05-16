@@ -105,23 +105,54 @@ export const localizeDocument = (
   return output;
 };
 
-export const localizeDocuments = (documents, fields = [], locale = DEFAULT_LOCALE) => {
-  if (!Array.isArray(documents)) return localizeDocument(documents, fields, locale);
-  return documents.map((document) => localizeDocument(document, fields, locale));
+export const localizeDocuments = (
+  documents,
+  fields = [],
+  locale = DEFAULT_LOCALE,
+  options = {},
+) => {
+  if (!Array.isArray(documents)) {
+    return localizeDocument(documents, fields, locale, options);
+  }
+  return documents.map((document) =>
+    localizeDocument(document, fields, locale, options),
+  );
 };
 
 const CATEGORY_FIELDS = ["name"];
 const SUBCATEGORY_FIELDS = ["name"];
 const BRAND_FIELDS = ["name", "description"];
 const PRODUCT_FIELDS = ["name", "unit", "description", "specifications", "more_details"];
+/** Keep nested translations so client cards can switch locale without refetching lists. */
+const PRODUCT_LOCALIZE_OPTIONS = { stripTranslations: false };
 
 export const localizeProduct = (product, locale = DEFAULT_LOCALE) => {
   if (!product || typeof product !== "object") return product;
 
-  const output = localizeDocument(product, PRODUCT_FIELDS, locale);
-  output.category = localizeDocuments(output.category, CATEGORY_FIELDS, locale);
-  output.subCategory = localizeDocuments(output.subCategory, SUBCATEGORY_FIELDS, locale);
-  output.brand = localizeDocument(output.brand, BRAND_FIELDS, locale);
+  const output = localizeDocument(
+    product,
+    PRODUCT_FIELDS,
+    locale,
+    PRODUCT_LOCALIZE_OPTIONS,
+  );
+  output.category = localizeDocuments(
+    output.category,
+    CATEGORY_FIELDS,
+    locale,
+    PRODUCT_LOCALIZE_OPTIONS,
+  );
+  output.subCategory = localizeDocuments(
+    output.subCategory,
+    SUBCATEGORY_FIELDS,
+    locale,
+    PRODUCT_LOCALIZE_OPTIONS,
+  );
+  output.brand = localizeDocument(
+    output.brand,
+    BRAND_FIELDS,
+    locale,
+    PRODUCT_LOCALIZE_OPTIONS,
+  );
 
   return output;
 };

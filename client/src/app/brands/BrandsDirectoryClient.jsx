@@ -897,7 +897,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useQuery } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 
+import '@/lib/i18n'
 import BrandSearch from '../../components/BrandSearch'
 import { valideURLConvert } from '../../utils/valideURLConvert'
 import {
@@ -919,8 +921,10 @@ const MAX_PRODUCTS_FOR_STRUCTURED_DATA = 20
 const ITEMS_PER_PAGE = 20 
 
 function useProductCatalogQuery({ enabled }) {
+  const { i18n } = useTranslation()
+
   return useQuery({
-    queryKey: ['product-catalog'],
+    queryKey: ['product-catalog', i18n.language],
     enabled,
     queryFn: async () => {
       const response = await Axios({

@@ -2,7 +2,9 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 
+import "@/lib/i18n";
 import Axios from "@/lib/apiClient";
 import SummaryApi from "@/backend/contracts/summaryApi";
 import { valideURLConvert } from "@/utils/valideURLConvert";
@@ -15,8 +17,10 @@ const extractList = (response) => {
 };
 
 export function useCategoryWithProductsQuery(slug) {
+  const { i18n } = useTranslation();
+
   return useQuery({
-    queryKey: ["category-client-block", slug],
+    queryKey: ["category-client-block", slug, i18n.language],
     enabled: Boolean(slug),
     queryFn: async () => {
       const categoryResponse = await Axios(SummaryApi.getCategory);

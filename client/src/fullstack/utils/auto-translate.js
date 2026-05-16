@@ -85,6 +85,7 @@ const TRANSLATION_SYSTEM = `You are a professional translator for Essentialist M
 Translate JSON values from English to French. Return ONLY valid JSON with the exact same keys and structure.
 Do not translate JSON keys. Preserve HTML tags; translate only human-readable text inside HTML.
 Do not translate brand names, product SKUs, or URLs unless they are plain English phrases.
+For shop category names (e.g. "Eye Makeup", "Lip Makeup"), translate to natural French menu labels (e.g. "Maquillage yeux", "Maquillage lèvres"). Keep ALL CAPS if the source is ALL CAPS.
 For arrays of strings (e.g. tags), translate each element. Leave empty values unchanged.`;
 
 function buildPrompt(payload) {

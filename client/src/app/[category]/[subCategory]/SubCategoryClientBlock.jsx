@@ -472,6 +472,8 @@ import React, { useMemo, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
+import "@/lib/i18n";
 import CardProduct from "../../../components/CardProduct";
 import { valideURLConvert } from "../../../utils/valideURLConvert";
 import SummaryApi, { callSummaryApi } from "@/backend/contracts/summaryApi";
@@ -619,6 +621,7 @@ export default function SubCategoryClientBlock({
   subCategoryNameFromSlug,
 }) {
   const mobileContentRef = useRef(null);
+  const { i18n } = useTranslation();
 
   useEffect(() => {
     document.documentElement.style.scrollBehavior = 'auto';
@@ -656,7 +659,7 @@ export default function SubCategoryClientBlock({
     error: productsError,
     refetch: refetchProducts,
   } = useInfiniteQuery({
-    queryKey: ["products-infinite", categoryId, subCategoryId],
+    queryKey: ["products-infinite", categoryId, subCategoryId, i18n.language],
     queryFn: async ({ pageParam = 1 }) => {
       const response = await callSummaryApi(SummaryApi.getProductByCategoryAndSubCategory, {
         payload: { categoryId, subCategoryId, page: pageParam, limit: PAGE_SIZE },

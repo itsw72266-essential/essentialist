@@ -4,9 +4,15 @@ import Image from 'next/image'
 import { useTranslation } from 'react-i18next'
 
 import '@/lib/i18n'
+import { useAdaptiveTextClasses } from '@/hooks/useAdaptiveTextClasses'
 
 export default function HomeHero() {
   const { t } = useTranslation()
+  const heroTitleClasses = useAdaptiveTextClasses(t('home.heroTitle'), 'heroTitle')
+  const heroSubtitleClasses = useAdaptiveTextClasses(
+    t('home.heroSubtitle'),
+    'heroSubtitle',
+  )
 
   return (
     <div className="container mx-auto px-4 pt-4">
@@ -42,12 +48,12 @@ export default function HomeHero() {
       </div>
 
       <div className="max-w-4xl mx-auto mt-6 mb-8 px-4 flex flex-col items-center text-center">
-        <h1 className="font-bold text-2xl md:text-3xl lg:text-4xl mb-3 text-gray-900 leading-tight">
+        <h1 className={heroTitleClasses}>
           <span className="text-pink-600">{t('home.heroTitle')}</span>
           {' — '}
           {t('home.heroTitleAccent')}
         </h1>
-        <p className="text-gray-600 text-base md:text-lg leading-relaxed">
+        <p className={heroSubtitleClasses}>
           {t('home.heroSubtitle')}
         </p>
       </div>

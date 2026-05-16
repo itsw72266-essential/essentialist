@@ -1,8 +1,13 @@
 // client\src\app\product\[slug]\queries.js
 import { cache } from "react";
 import SummaryApi, { apiFetch } from "@/backend/contracts/summaryApi";
+import { getCurrentLocale } from "@/lib/i18n";
 
-export const productQueryKey = (productId) => ["product-details", productId];
+export const productQueryKey = (productId) => [
+  "product-details",
+  productId,
+  typeof window !== "undefined" ? getCurrentLocale() : "en",
+];
 export const reviewStatsQueryKey = (productId) => ["product-review-stats", productId];
 
 async function fetchProductImpl(productId) {

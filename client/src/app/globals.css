@@ -16,6 +16,17 @@ body {
   @apply bg-background text-foreground;
 }
 
+/* Longer French copy: wrap safely and slightly tighten rhythm in compact UI */
+html[lang="fr"] .locale-compact {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  hyphens: auto;
+}
+
+html[lang="fr"] [data-locale-compact="true"] {
+  font-size: calc(1em * var(--locale-text-scale, 0.94));
+}
+
 /* Custom Scrollbar */
 .scrollbar-none {
   -ms-overflow-style: none;

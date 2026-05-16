@@ -6,6 +6,7 @@
 
 // import ProductRecommendations from '../components/ProductRecommendations'
 import HomeHero from '../components/home/HomeHero.client'
+import HomeCategoryGrid from '../components/home/HomeCategoryGrid.client'
 // import TikTokGallery from '../components/TikTokGallery'
 // import CategorySectionsInfinite from '../components/CategorySectionsInfinite'
 // import { valideURLConvert } from '../utils/valideURLConvert'
@@ -52,7 +53,7 @@ import HomeHero from '../components/home/HomeHero.client'
 //     keywords: [
 //       'Essentialist makeup store',
 //       'cosmetic products',
-//       'produits de beauté',
+//       'produits de beaut?',
 //       'makeup store',
 //       'skin essentials',
 //       'professional makeup',
@@ -98,7 +99,7 @@ import HomeHero from '../components/home/HomeHero.client'
 //       'og:site_name:pretty': 'Essentialist Makeup Store',
 //       'al:android:package': 'com.fsn.esmakeupstore',
 //       'al:android:app_name': 'Essentialist Makeup Store: Makeup Shopping App',
-//       'al:ios:app_name': 'Essentialist Makeup Store — Makeup Shopping',
+//       'al:ios:app_name': 'Essentialist Makeup Store ??? Makeup Shopping',
 //       'msvalidate.01': '1D7D3FCABB171743A8EB32440530AC76',
 //     },
 //   }
@@ -386,15 +387,12 @@ import HomeHero from '../components/home/HomeHero.client'
  * 2026 SEO/GEO/AEO Optimized Home Page
  */
 
-import Image from "next/image";
-import Link from "next/link";
 import { Suspense } from "react";
 import { cacheLife } from "next/cache";
 
 import ProductRecommendations from "../components/ProductRecommendations";
 import TikTokGallery from "../components/TikTokGallery";
 import CategorySectionsInfinite from "../components/CategorySectionsInfinite";
-import { valideURLConvert } from "../utils/valideURLConvert";
 import {
   getCategories,
   getSubCategories,
@@ -409,7 +407,7 @@ const BUSINESS_CONFIG = {
   email: "contact@esmakeupstore.com",
   whatsapp: "237655225569",
   address: {
-    street: "Bonamoussadi, Carrefour Maçon",
+    street: "Bonamoussadi, Carrefour Ma?on",
     city: "Douala",
     region: "Littoral",
     country: "Cameroon",
@@ -425,7 +423,7 @@ const BUSINESS_CONFIG = {
     saturday: "10:00-16:00",
     sunday: "closed",
   },
-  deliveryAreas: ["Douala", "Yaoundé", "Cameroon"],
+  deliveryAreas: ["Douala", "Yaound?", "Cameroon"],
   currency: "XAF",
 };
 
@@ -447,7 +445,7 @@ const CONTENT_KEYWORDS = {
 };
 
 const DEFAULT_TITLE =
-  "Best Makeup Store in Cameroon | Essentialist — Shop NYX, Smashbox, Bobbi Brown in Douala";
+  "Best Makeup Store in Cameroon | Essentialist ??? Shop NYX, Smashbox, Bobbi Brown in Douala";
 const DEFAULT_DESC =
   "Shop authentic makeup and cosmetic products in Cameroon. Professional makeup, setting powders, foundations, and more. Fast delivery to Douala and nationwide. Premium brands at affordable prices.";
 const OG_IMAGE = "https://www.esmakeupstore.com/assets/logo.jpg";
@@ -598,7 +596,7 @@ function StructuredData({ categoryProducts = [] }) {
         name: "Do you deliver makeup in Cameroon?",
         acceptedAnswer: {
           "@type": "Answer",
-          text: "Yes. Essentialist Makeup Store delivers to Douala, Yaoundé, and nationwide across Cameroon. Order via WhatsApp at +237 655 225 569 or shop online at esmakeupstore.com.",
+          text: "Yes. Essentialist Makeup Store delivers to Douala, Yaound?, and nationwide across Cameroon. Order via WhatsApp at +237 655 225 569 or shop online at esmakeupstore.com.",
         },
       },
       {
@@ -630,11 +628,6 @@ function StructuredData({ categoryProducts = [] }) {
   );
 }
 
-function buildCategoryUrl(catId, catName, subCategory) {
-  if (!catId || !catName || !subCategory) return "#";
-  return `/${valideURLConvert(catName)}-${catId}/${valideURLConvert(subCategory.name)}-${subCategory._id}`;
-}
-
 export default async function Home() {
   "use cache";
   cacheLife("minutes", 5);
@@ -659,41 +652,7 @@ export default async function Home() {
           <HomeHero />          {/* FIX 2: PRODUCT RECOMMENDATIONS MOVED BELOW HERO */}
           <ProductRecommendations />
 
-          {/* Category Grid — full cell width circles (larger); original column counts + gap */}
-          <div className="container mx-auto px-4 my-8 grid grid-cols-4 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4">
-            {Array.isArray(categoryData) &&
-              categoryData.slice(0, 16).map((cat) => {
-                if (!cat?._id) return null;
-                const subcategory = subCategoryData?.find((sub) =>
-                  sub.category?.some((c) => c._id === cat._id),
-                );
-                const href = buildCategoryUrl(cat._id, cat.name, subcategory);
-                return (
-                  <Link
-                    key={cat._id}
-                    href={href}
-                    className="block w-full text-center transition-transform hover:scale-105"
-                  >
-                    <div className="relative aspect-square w-full rounded-full bg-gray-100 overflow-hidden shadow-sm ring-2 ring-gray-200/75">
-                      <div className="absolute inset-0 flex items-center justify-center p-2 sm:p-3">
-                        <Image
-                          src={cat.image || "/placeholder.png"}
-                          alt={cat.name}
-                          width={256}
-                          height={256}
-                          unoptimized={true}
-                          sizes="(max-width: 640px) 22vw, 12vw"
-                          className="max-h-full max-w-full w-auto h-auto object-contain object-center"
-                        />
-                      </div>
-                    </div>
-                    <div className="text-[10px] sm:text-xs font-bold text-gray-700 mt-2 line-clamp-2 min-h-[2.4em] uppercase tracking-tighter leading-tight px-0.5">
-                      {cat.name}
-                    </div>
-                  </Link>
-                );
-              })}
-          </div>
+          <HomeCategoryGrid />
 
           <CategorySectionsInfinite
             categoryProducts={categoryProducts || []}

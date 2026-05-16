@@ -866,7 +866,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useQuery } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 
+import '@/lib/i18n'
 import SummaryApi from '@/backend/contracts/summaryApi'
 import Axios from '@/lib/apiClient'
 import { valideURLConvert } from '../../../utils/valideURLConvert'
@@ -1245,8 +1247,10 @@ function useBrandDetailsQuery(brandSlug, { enabled = true, initialData } = {}) {
 }
 
 function useBrandProductsQuery(brand, enabled) {
+  const { i18n } = useTranslation()
+
   return useQuery({
-    queryKey: ['brand-products', brand?._id || brand?.slug || brand?.name],
+    queryKey: ['brand-products', brand?._id || brand?.slug || brand?.name, i18n.language],
     enabled: enabled && Boolean(brand),
     queryFn: async () => {
       if (Array.isArray(brand?.products) && brand.products.length) {
