@@ -245,6 +245,7 @@ import React from 'react'
 import { useTranslation } from 'react-i18next'
 import '@/lib/i18n'
 import { getLocalizedContent, getLocalizedProductName } from '@/helpers/localizeContent'
+import { linkPrefetch } from '@/lib/devPerformance'
 
 const CardSkeleton = () => (
   <div className="relative flex flex-col border border-gray-200 overflow-hidden py-1 lg:p-2 rounded-lg bg-white shadow-sm animate-pulse">
@@ -316,7 +317,7 @@ const CardProduct = React.memo(({ data, isLoading = false, priority = false }) =
       href={productUrl}
       className={cardClasses}
       onClick={handleAddToCartClick}
-      prefetch={true}
+      prefetch={linkPrefetch}
       // style prop removed because it is now safely handled by Tailwind in `cardClasses`
     >
       <div className="relative overflow-hidden rounded-lg aspect-square mb-3">

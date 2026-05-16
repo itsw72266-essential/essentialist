@@ -19,11 +19,20 @@ function buildCategoryUrl(catId, catName, subCategory) {
   return `/${valideURLConvert(catName)}-${catId}/${valideURLConvert(subCategory.name)}-${subCategory._id}`;
 }
 
-export default function HomeCategoryGrid() {
+export default function HomeCategoryGrid({
+  initialCategories,
+  initialSubCategories,
+}) {
   const { i18n } = useTranslation();
   const { data: categories = [], isLoading: categoriesLoading } =
-    useCategoriesQuery({ syncToRedux: true });
-  const { data: subCategories = [] } = useSubCategoriesQuery({ syncToRedux: true });
+    useCategoriesQuery({
+      syncToRedux: false,
+      initialData: initialCategories,
+    });
+  const { data: subCategories = [] } = useSubCategoriesQuery({
+    syncToRedux: false,
+    initialData: initialSubCategories,
+  });
 
   const items = useMemo(() => {
     if (!Array.isArray(categories)) return [];

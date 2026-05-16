@@ -8,23 +8,20 @@ import { valideURLConvert } from '../utils/valideURLConvert'
 import Link from 'next/link'
 import { useTranslation } from 'react-i18next'
 import '@/lib/i18n'
-import { useCategoriesQuery } from '@/hooks/queries/useCatalogQueries'
-import { getLocalizedContent } from '@/helpers/localizeContent'
 import { useAdaptiveTextClasses } from '@/hooks/useAdaptiveTextClasses'
+import { linkPrefetch } from '@/lib/devPerformance'
 
 // No fetch/loading; render pre-fetched products directly for instant load
-const CategoryWiseProductDisplay = ({ id, name, products = [], subCategories = [] }) => {
-  const { t, i18n } = useTranslation()
-  const { data: categories = [] } = useCategoriesQuery({ syncToRedux: false })
+const CategoryWiseProductDisplay = ({
+  id,
+  name,
+  categoryLabel,
+  products = [],
+  subCategories = [],
+}) => {
+  const { t } = useTranslation()
 
-  const displayName = useMemo(() => {
-    const cat = categories.find((c) => String(c._id) === String(id))
-    if (cat) {
-      const localized = getLocalizedContent(cat, 'name', i18n.language)
-      if (localized) return localized
-    }
-    return name
-  }, [categories, id, i18n.language, name])
+  const displayName = categoryLabel ?? name
 
   const headingClasses = useAdaptiveTextClasses(displayName, 'sectionHeading')
   const seeAllClasses = useAdaptiveTextClasses(t('common.seeAll'), 'seeAllLink')
@@ -68,7 +65,7 @@ const CategoryWiseProductDisplay = ({ id, name, products = [], subCategories = [
         </h2>
         <Link
           href={redirectURL}
-          prefetch={true} // Prefetch for instant navigation (background load on hover)
+          prefetch={linkPrefetch}
           className={`text-pink-400 hover:text-green-400 transition-colors duration-300 p-2 sm:p-4 flex items-center gap-2 hover:gap-3 ${seeAllClasses}`}
           aria-label={`View all ${displayName} products`}
         >

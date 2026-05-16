@@ -652,7 +652,10 @@ export default async function Home() {
           <HomeHero />          {/* FIX 2: PRODUCT RECOMMENDATIONS MOVED BELOW HERO */}
           <ProductRecommendations />
 
-          <HomeCategoryGrid />
+          <HomeCategoryGrid
+            initialCategories={categoryData}
+            initialSubCategories={subCategoryData}
+          />
 
           <CategorySectionsInfinite
             categoryProducts={categoryProducts || []}

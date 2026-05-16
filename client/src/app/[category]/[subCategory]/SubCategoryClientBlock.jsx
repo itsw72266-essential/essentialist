@@ -477,6 +477,7 @@ import "@/lib/i18n";
 import CardProduct from "../../../components/CardProduct";
 import { valideURLConvert } from "../../../utils/valideURLConvert";
 import SummaryApi, { callSummaryApi } from "@/backend/contracts/summaryApi";
+import { linkPrefetch } from "@/lib/devPerformance";
 
 const PAGE_SIZE = 12;
 
@@ -724,7 +725,7 @@ export default function SubCategoryClientBlock({
                     key={sub?._id}
                     href={`/${categorySlug}/${valideURLConvert(sub?.name)}-${sub?._id}`}
                     scroll={false} 
-                    prefetch={true} 
+                    prefetch={linkPrefetch} 
                     className={`group relative w-full p-2 flex flex-col items-center md:flex-row md:h-16 box-border md:gap-4 border-b transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white ${
                       isActive ? "bg-pink-50 text-pink-600 border-pink-200" : "hover:bg-pink-50/50 text-gray-600"
                     }`}
@@ -819,7 +820,7 @@ export default function SubCategoryClientBlock({
                       key={sub._id}
                       href={`/${categorySlug}/${valideURLConvert(sub.name)}-${sub._id}`}
                       scroll={false} 
-                      prefetch={true} 
+                      prefetch={linkPrefetch} 
                       className={`flex items-center gap-3 p-3 rounded-xl transition-all duration-200 border ${
                         isActive ? "bg-pink-50 text-pink-600 border-pink-200 font-bold shadow-sm" : "bg-white border-transparent text-slate-600 hover:bg-pink-50 hover:text-pink-600"
                       }`}

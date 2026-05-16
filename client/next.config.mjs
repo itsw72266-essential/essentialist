@@ -32,7 +32,8 @@ const nextConfig = {
   },
   // API routes import mongoose; keep it out of the bundler graph where possible.
   serverExternalPackages: ["mongoose"],
-  reactStrictMode: true,
+  // Strict Mode doubles renders in dev; keep on in production only.
+  reactStrictMode: process.env.NODE_ENV === "production",
   images: {
     unoptimized: true, // 👈 THIS IS THE FIX! It stops Vercel from using your quota.
     remotePatterns: [

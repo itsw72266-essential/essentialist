@@ -3,6 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
 import { normalizeLocale } from "@/lib/i18n";
+import { isLocaleSensitiveQuery } from "@/lib/localeQueries";
 
 export function useLanguageSync() {
   const { i18n } = useTranslation();
@@ -22,7 +23,11 @@ export function useLanguageSync() {
 
     const handleLanguageChange = (language) => {
       applyLanguage(language);
-      queryClient.invalidateQueries();
+      // Refetch only locale-bound catalog queries (not cart, user, orders, etc.).
+      void queryClient.invalidateQueries({
+        predicate: (query) => isLocaleSensitiveQuery(query),
+        refetchType: "active",
+      });
     };
 
     i18n.on("languageChanged", handleLanguageChange);

@@ -301,6 +301,7 @@ import {
   ORDERS_QUERY_KEY,
 } from "@/hooks/queries/useOrdersQuery";
 import { useLanguageSync } from "@/hooks/useLanguageSync";
+import { enableReactQueryDevtools } from "@/lib/devPerformance";
 
 const GlobalContext = createContext(null);
 export const useGlobalContext = () => useContext(GlobalContext);
@@ -322,7 +323,7 @@ export default function ReactQueryProvider({ children }) {
   return (
     <QueryClientProvider client={client}>
       <GlobalStateProvider>{children}</GlobalStateProvider>
-      {process.env.NODE_ENV !== "production" ? (
+      {enableReactQueryDevtools ? (
         <ReactQueryDevtools initialIsOpen={false} />
       ) : null}
     </QueryClientProvider>

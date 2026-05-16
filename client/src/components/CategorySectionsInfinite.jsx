@@ -1,6 +1,11 @@
 'use client'
 
-import React, { Suspense, useEffect, useMemo, useRef, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+
+import '@/lib/i18n'
+import { useCategoriesQuery } from '@/hooks/queries/useCatalogQueries'
+import { getLocalizedContent } from '@/helpers/localizeContent'
 import CategoryWiseProductDisplay from './CategoryWiseProductDisplay'
 import CardLoading from './CardLoading'
 
@@ -43,6 +48,22 @@ export default function CategorySectionsInfinite({
   categoryProducts = [],
   subCategoryData = [],
 }) {
+  const { i18n } = useTranslation()
+  const { data: categories = [] } = useCategoriesQuery({ syncToRedux: false })
+
+  const localizedCategoryNames = useMemo(() => {
+    const map = new Map()
+    if (!Array.isArray(categories)) return map
+    for (const cat of categories) {
+      if (!cat?._id) continue
+      map.set(
+        String(cat._id),
+        getLocalizedContent(cat, 'name', i18n.language) || cat.name || '',
+      )
+    }
+    return map
+  }, [categories, i18n.language])
+
   const INITIAL_COUNT = 4
   const BATCH_SIZE = 4
 
@@ -102,15 +123,18 @@ export default function CategorySectionsInfinite({
     <div className="lg:block">
       {visibleItems.map(({ category, products }) => {
         if (!category || !category._id) return null
+        const categoryId = String(category._id)
+        const categoryLabel =
+          localizedCategoryNames.get(categoryId) || category.name
         return (
-          <Suspense key={`${category._id}-products`} fallback={<CategoryFallback />}>
-            <CategoryWiseProductDisplay
-              id={category._id}
-              name={category.name}
-              products={products || []}
-              subCategories={subCategoryData || []}
-            />
-          </Suspense>
+          <CategoryWiseProductDisplay
+            key={`${categoryId}-products`}
+            id={category._id}
+            name={category.name}
+            categoryLabel={categoryLabel}
+            products={products || []}
+            subCategories={subCategoryData || []}
+          />
         )
       })}
 
