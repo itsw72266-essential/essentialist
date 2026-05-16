@@ -6,7 +6,8 @@
     "dev": "cross-env BROWSERSLIST_IGNORE_OLD_DATA=true BASELINE_BROWSER_MAPPING_IGNORE_OLD_DATA=true NODE_OPTIONS=--require=./scripts/suppress-browser-data-warnings.cjs next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "backfill:fr": "node scripts/backfill-french-translations.mjs"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
@@ -14,6 +15,7 @@
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
     "@formatjs/intl-localematcher": "^0.6.2",
+    "@google/generative-ai": "^0.24.1",
     "@payunit/nodejs-sdk": "^1.3.2",
     "@radix-ui/react-avatar": "^1.1.10",
     "@radix-ui/react-checkbox": "^1.3.3",
