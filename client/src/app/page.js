@@ -466,7 +466,7 @@ export async function generateMetadata() {
 
   const topCategories = categoryNames.join(", ");
   const dynTitle = topCategories
-    ? `Best Makeup Store in Cameroon | Shop ${topCategories} & More — Essentialist Douala`
+    ? `Best Makeup Store in Cameroon | Shop ${topCategories} & More. Essentialist Douala`
     : DEFAULT_TITLE;
 
   const dynDesc = topCategories
@@ -656,7 +656,7 @@ export default async function Home() {
         <StructuredData categoryProducts={categoryProducts} />
 
         <section className="bg-white">
-          <HomeHero />\n\n          {/* FIX 2: PRODUCT RECOMMENDATIONS MOVED BELOW HERO */}
+          <HomeHero />          {/* FIX 2: PRODUCT RECOMMENDATIONS MOVED BELOW HERO */}
           <ProductRecommendations />
 
           {/* Category Grid — full cell width circles (larger); original column counts + gap */}
