@@ -1,11 +1,25 @@
 /**
  * Shared Gemini client for text generation (translation, moderation, etc.).
- * Model defaults to gemini-3-flash-preview; override with GEMINI_MODEL.
+ * Defaults to models with the most free-tier headroom for bulk translation.
+ * Override primary model with GEMINI_MODEL in .env.
  */
 
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const DEFAULT_MODEL = "gemini-3-flash-preview";
+/** Best for high-volume backfill (500 RPD on free tier). */
+const DEFAULT_MODEL = "gemini-3.1-flash-lite-preview";
+
+/**
+ * Ordered by typical free-tier availability (avoid models you already maxed out).
+ * Gemini 3 Flash is last — often hits 20 RPD quickly.
+ */
+const QUOTA_FRIENDLY_MODELS = [
+  "gemini-3.1-flash-lite-preview",
+  "gemini-2.5-flash",
+  "gemini-2.5-flash-lite",
+  "gemini-2.0-flash",
+  "gemini-3-flash-preview",
+];
 
 /** Fix common .env typo (emini-* → gemini-*). */
 export function normalizeGeminiModel(value) {
@@ -19,13 +33,7 @@ export const GEMINI_MODEL = normalizeGeminiModel(process.env.GEMINI_MODEL);
 
 const MODEL_FALLBACK_CHAIN = [
   ...new Set(
-    [
-      GEMINI_MODEL,
-      DEFAULT_MODEL,
-      "gemini-2.5-flash-preview",
-      "gemini-2.0-flash",
-      "gemini-1.5-flash-latest",
-    ].map(normalizeGeminiModel),
+    [GEMINI_MODEL, ...QUOTA_FRIENDLY_MODELS].map(normalizeGeminiModel),
   ),
 ];
 

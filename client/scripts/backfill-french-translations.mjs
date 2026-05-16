@@ -22,7 +22,7 @@ function parseArgs(argv) {
   const options = {
     entities: ["products", "brands", "categories", "subcategories", "blogs"],
     batchSize: 25,
-    delayMs: 400,
+    delayMs: 1200,
     onlyMissing: true,
   };
 
