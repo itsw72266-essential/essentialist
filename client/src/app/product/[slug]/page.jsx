@@ -894,13 +894,8 @@
 
 import { notFound } from "next/navigation"
 import { unstable_cache } from "next/cache"
-import dynamic from "next/dynamic"
 import ProductDisplayClient from "./ProductDisplayClient"
-
-const ProductRecommendations = dynamic(
-  () => import("../../../components/ProductRecommendations"),
-  { loading: () => null, ssr: false },
-)
+import ProductRecommendationsLazy from "./ProductRecommendationsLazy.client"
 import { pricewithDiscount } from "../../../utils/PriceWithDiscount"
 import { fetchProduct, fetchReviewStats } from "./queries"
 
@@ -1555,7 +1550,7 @@ export default async function ProductDisplayPage({ params }) {
       />
 
       {/* Product Recommendations */}
-      <ProductRecommendations
+      <ProductRecommendationsLazy
         currentProductId={productId}
         currentProductData={productData}
       />
