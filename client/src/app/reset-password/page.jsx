@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { Suspense, useEffect, useState } from "react";
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa6";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -8,8 +8,11 @@ import SummaryApi from "@/backend/contracts/summaryApi";
 import toast from "react-hot-toast";
 import AxiosToastError from "@/lib/axiosToastError";
 import Axios from "@/lib/apiClient";
+import { useTranslation } from "react-i18next";
+import "@/lib/i18n";
 
-const ResetPassword = () => {
+const ResetPasswordForm = () => {
+  const { t } = useTranslation();
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -26,7 +29,6 @@ const ResetPassword = () => {
   const success = searchParams.get("success");
   const emailFromQuery = searchParams.get("email");
 
-  // Enforce access only if success=1 is present
   useEffect(() => {
     if (success !== "1" || !emailFromQuery) {
       router.replace("/");
@@ -51,7 +53,7 @@ const ResetPassword = () => {
     e.preventDefault();
 
     if (data.newPassword !== data.confirmPassword) {
-      toast.error("New password and confirm password must be same.");
+      toast.error(t("auth.passwordMismatch"));
       return;
     }
 
@@ -82,10 +84,11 @@ const ResetPassword = () => {
   return (
     <section className="w-full container mx-auto px-2">
       <div className="bg-white my-4 w-full max-w-lg mx-auto rounded p-7">
-        <p className="font-semibold text-lg">Enter Your Password </p>
+        <p className="font-semibold text-lg">{t("auth.resetTitle")}</p>
+        <p className="text-sm text-gray-600 mt-1">{t("auth.resetSubtitle")}</p>
         <form className="grid gap-4 py-4" onSubmit={handleSubmit}>
           <div className="grid gap-1">
-            <label htmlFor="newPassword">New Password :</label>
+            <label htmlFor="newPassword">{t("auth.newPassword")}</label>
             <div className="bg-blue-50 p-2 border rounded flex items-center focus-within:border-primary-200">
               <input
                 type={showPassword ? "text" : "password"}
@@ -94,19 +97,23 @@ const ResetPassword = () => {
                 name="newPassword"
                 value={data.newPassword}
                 onChange={handleChange}
-                placeholder="Enter your new password"
+                placeholder="••••••••"
               />
-              <div
+              <button
+                type="button"
                 onClick={() => setShowPassword((prev) => !prev)}
                 className="cursor-pointer"
+                aria-label={
+                  showPassword ? t("auth.hidePassword") : t("auth.showPassword")
+                }
               >
                 {showPassword ? <FaRegEye /> : <FaRegEyeSlash />}
-              </div>
+              </button>
             </div>
           </div>
 
           <div className="grid gap-1">
-            <label htmlFor="confirmPassword">Confirm Password :</label>
+            <label htmlFor="confirmPassword">{t("auth.confirmPassword")}</label>
             <div className="bg-blue-50 p-2 border rounded flex items-center focus-within:border-primary-200">
               <input
                 type={showConfirmPassword ? "text" : "password"}
@@ -115,18 +122,25 @@ const ResetPassword = () => {
                 name="confirmPassword"
                 value={data.confirmPassword}
                 onChange={handleChange}
-                placeholder="Enter your confirm password"
+                placeholder="••••••••"
               />
-              <div
+              <button
+                type="button"
                 onClick={() => setShowConfirmPassword((prev) => !prev)}
                 className="cursor-pointer"
+                aria-label={
+                  showConfirmPassword
+                    ? t("auth.hidePassword")
+                    : t("auth.showPassword")
+                }
               >
                 {showConfirmPassword ? <FaRegEye /> : <FaRegEyeSlash />}
-              </div>
+              </button>
             </div>
           </div>
 
           <button
+            type="submit"
             disabled={!valideValue}
             className={`${
               valideValue
@@ -134,17 +148,17 @@ const ResetPassword = () => {
                 : "bg-gray-500"
             } text-white py-2 rounded font-semibold my-3 tracking-wide`}
           >
-            Change Password
+            {t("auth.resetSubmit")}
           </button>
         </form>
 
         <p>
-          Already have account?{" "}
+          {t("auth.alreadyHaveAccount")}{" "}
           <Link
             href="/login"
             className="font-semibold text-green-700 hover:text-yellow-400"
           >
-            Login
+            {t("auth.signInLink")}
           </Link>
         </p>
       </div>
@@ -152,4 +166,10 @@ const ResetPassword = () => {
   );
 };
 
-export default ResetPassword;
+export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={null}>
+      <ResetPasswordForm />
+    </Suspense>
+  );
+}

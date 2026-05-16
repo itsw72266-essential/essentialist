@@ -2,6 +2,7 @@ import toast from "react-hot-toast"
 import SummaryApi from "@/backend/contracts/summaryApi"
 import Axios from "@/lib/apiClient"
 import AxiosToastError from "@/lib/axiosToastError"
+import { t } from "@/lib/translate"
 
 // -- Guest cart key in localStorage --
 const GUEST_CART_KEY = "guest_cart"
@@ -53,7 +54,7 @@ export const addToCartProduct = async (product, qty = 1) => {
             })
         }
         setGuestCart(cart)
-        toast.success("Added to cart")
+        toast.success(t("cart.added"))
         return { success: true, message: "Added to cart" }
     }
     try {
@@ -84,7 +85,7 @@ export const updateCartProductQty = async (cartItemId, newQty, product) => {
                 : item
         )
         setGuestCart(cart)
-        toast.success("Cart updated")
+        toast.success(t("cart.updated"))
         return { success: true }
     }
     try {
@@ -97,7 +98,7 @@ export const updateCartProductQty = async (cartItemId, newQty, product) => {
         })
         const { data: responseData } = response
         if (responseData.success) {
-            toast.success("Cart updated")
+            toast.success(t("cart.updated"))
         }
         return responseData
     } catch (error) {
@@ -113,7 +114,7 @@ export const deleteCartProduct = async (cartItemId, product) => {
             item._id !== (product?._id || cartItemId)
         )
         setGuestCart(cart)
-        toast.success("Removed from cart")
+        toast.success(t("cart.removed"))
         return { success: true }
     }
     try {
@@ -125,7 +126,7 @@ export const deleteCartProduct = async (cartItemId, product) => {
         })
         const { data: responseData } = response
         if (responseData.success) {
-            toast.success("Removed from cart")
+            toast.success(t("cart.removed"))
         }
         return responseData
     } catch (error) {

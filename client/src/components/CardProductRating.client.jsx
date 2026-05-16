@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 import {
   REVIEW_STATS_UPDATED_EVENT,
@@ -34,6 +35,7 @@ function Star({ filled, half, size = 14, gradId }) {
 }
 
 export default function CardProductRating({ productId }) {
+  const { t } = useTranslation()
   const halfGradId = useId().replace(/:/g, '')
   const rootRef = useRef(null)
   const [visible, setVisible] = useState(false)
@@ -102,7 +104,10 @@ export default function CardProductRating({ productId }) {
       {ready && count > 0 ? (
         <span
           className="flex items-center gap-1"
-          aria-label={`Average rating ${avg.toFixed(1)} from ${count} reviews`}
+          aria-label={t('product.reviews.ratingAria', {
+            average: avg.toFixed(1),
+            count,
+          })}
         >
           <span className="flex items-center gap-0.5">
             {stars.map((st, idx) => (

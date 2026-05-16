@@ -1,6 +1,9 @@
 'use client'
 
+import { useTranslation } from 'react-i18next'
+
 export default function PdpStaticStars({ average = 0, count = 0, size = 18 }) {
+  const { t } = useTranslation()
   const c = Number(count || 0)
   if (!c) return null
 
@@ -12,7 +15,7 @@ export default function PdpStaticStars({ average = 0, count = 0, size = 18 }) {
   })
 
   return (
-    <div className="flex items-center gap-2" aria-label="Product review summary">
+    <div className="flex items-center gap-2" aria-label={t('product.reviews.summaryAria')}>
       <div className="flex items-center gap-0.5">
         {stars.map((s, idx) => (
           <Star key={idx} filled={s.full} half={s.half} size={size} />
@@ -20,7 +23,7 @@ export default function PdpStaticStars({ average = 0, count = 0, size = 18 }) {
       </div>
       <div className="text-sm text-gray-700">
         <span className="font-semibold">{avg.toFixed(2)}</span>
-        <span className="ml-1 text-gray-500">({c} {c === 1 ? 'review' : 'reviews'})</span>
+        <span className="ml-1 text-gray-500">({t('product.reviews.count', { count: c })})</span>
       </div>
     </div>
   )

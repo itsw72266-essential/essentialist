@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useState, Suspense, useEffect } from "react";
+import { useTranslation } from "react-i18next";
+import "@/lib/i18n";
 import { FaRegEyeSlash, FaRegEye } from "react-icons/fa6";
 import toast from "react-hot-toast";
 import SummaryApi from "@/backend/contracts/summaryApi";
@@ -92,6 +94,7 @@ function GoogleMark({ className }) {
 }
 
 const Login = () => {
+  const { t } = useTranslation();
   const [data, setData] = useState({
     email: "",
     password: "",
@@ -187,7 +190,7 @@ const Login = () => {
   const handleGoogleSignIn = () => {
     const startUrl = process.env.NEXT_PUBLIC_GOOGLE_SIGNIN_URL?.trim();
     if (!startUrl) {
-      toast("Google sign-in is not configured yet.", { icon: "ℹ️" });
+      toast(t("auth.googleNotConfigured"), { icon: "ℹ️" });
       return;
     }
     window.location.assign(startUrl);
@@ -199,7 +202,7 @@ const Login = () => {
         <div className="relative h-40 md:h-auto md:w-1/2 bg-pink-400">
           <Image
             src="/assets/staymattebutnotflatpowderfoundationmain.jpg"
-            alt="Cosmetics sale banner"
+            alt=""
             fill
             className="object-cover"
             priority
@@ -217,17 +220,15 @@ const Login = () => {
         >
           <div className="mb-8 text-center">
             <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-800 mb-2">
-              Welcome Back
+              {t("auth.welcomeBack")}
             </h1>
-            <p className="text-black">
-              Sign in to continue your beauty experience
-            </p>
+            <p className="text-black">{t("auth.signInSubtitle")}</p>
           </div>
 
           <div className="relative w-full mb-2">
             {lastAuthMethod === AUTH_PROVIDER.GOOGLE && (
               <span className="pointer-events-none absolute -top-2 right-3 z-10 rounded-full border border-zinc-600 bg-zinc-950 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white">
-                Last used
+                {t("auth.lastUsed")}
               </span>
             )}
             <button
@@ -236,7 +237,7 @@ const Login = () => {
               className="flex w-full items-center justify-center gap-3 rounded-lg border border-zinc-600/80 bg-zinc-800 py-3 px-4 text-sm font-medium text-white shadow-sm transition hover:bg-zinc-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
             >
               <GoogleMark className="h-5 w-5 shrink-0" />
-              Continue with Google
+              {t("auth.continueGoogle")}
             </button>
           </div>
 
@@ -246,7 +247,7 @@ const Login = () => {
             </div>
             <div className="relative flex justify-center text-xs">
               <span className="bg-white px-3 font-medium uppercase tracking-wide text-gray-500">
-                Or with email
+                {t("auth.orWithEmail")}
               </span>
             </div>
           </div>
@@ -257,7 +258,7 @@ const Login = () => {
                 htmlFor="email"
                 className="block text-sm font-medium text-gray-700 mb-1"
               >
-                Email Address
+                {t("auth.emailAddress")}
               </label>
               <input
                 type="email"
@@ -267,7 +268,7 @@ const Login = () => {
                 value={data.email}
                 onChange={handleChange}
                 autoComplete="email"
-                placeholder="name@example.com"
+                placeholder={t("auth.emailPlaceholder")}
                 required
               />
             </div>
@@ -278,13 +279,13 @@ const Login = () => {
                   htmlFor="password"
                   className="text-sm font-medium text-black"
                 >
-                  Password
+                  {t("auth.password")}
                 </label>
                 <Link
                   href="/forgot-password"
                   className="text-xs text-pink-500 hover:text-pink-600 font-medium transition-colors"
                 >
-                  Forgot password?
+                  {t("auth.forgotPassword")}
                 </Link>
               </div>
               <div className="relative mt-1">
@@ -301,7 +302,9 @@ const Login = () => {
                 />
                 <button
                   type="button"
-                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  aria-label={
+                    showPassword ? t("auth.hidePassword") : t("auth.showPassword")
+                  }
                   onClick={() => setShowPassword((prev) => !prev)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
                   tabIndex={-1}
@@ -344,21 +347,21 @@ const Login = () => {
                       d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                     ></path>
                   </svg>
-                  Signing in...
+                  {t("auth.signingIn")}
                 </span>
               ) : (
-                "Sign In"
+                t("auth.signIn")
               )}
             </motion.button>
           </form>
 
           <p className="mt-7 text-center text-sm text-black">
-            Don&apos;t have an account?{" "}
+            {t("auth.noAccount")}{" "}
             <Link
               href="/register"
               className="font-semibold text-pink-500 hover:text-pink-600 transition-colors"
             >
-              Create an account
+              {t("auth.createAccount")}
             </Link>
           </p>
         </motion.div>

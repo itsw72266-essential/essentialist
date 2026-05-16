@@ -14,6 +14,13 @@ import {
   localizeProducts,
   sanitizeTranslations,
 } from '../../lib/localization.js';
+import {
+  PRODUCT_TRANSLATION_FIELDS,
+  autoTranslateProduct,
+  needsFrenchSync,
+  scheduleAutoTranslate,
+  shouldRunLazyTranslate,
+} from '../../utils/auto-translate.js';
 
 const PRODUCT_CACHE_NAMESPACES = [
   'products:list',
@@ -47,14 +54,6 @@ const setCacheHeaders = (res, { maxAge, sMaxAge }) => {
   res.set('Cache-Control', `public, max-age=${maxAge}, s-maxage=${sMaxAge}`);
   res.set('Vary', buildVaryHeader());
 };
-
-const PRODUCT_TRANSLATION_FIELDS = [
-  'name',
-  'unit',
-  'description',
-  'specifications',
-  'more_details',
-];
 
 const safeInvalidateCacheNamespaces = async (namespaces) => {
   try {
@@ -320,6 +319,10 @@ export const createProductController = async (request, response) => {
 
     await safeInvalidateCacheNamespaces(PRODUCT_CACHE_NAMESPACES);
 
+    scheduleAutoTranslate(() =>
+      autoTranslateProduct(saveProduct._id, saveProduct.toObject?.() ?? saveProduct),
+    );
+
     return response.json({
       message: "Product Created Successfully",
       data: saveProduct,
@@ -557,6 +560,14 @@ export const getProductDetails = async (request, response) => {
       });
     }
 
+    if (
+      locale === "fr" &&
+      needsFrenchSync(product, PRODUCT_TRANSLATION_FIELDS) &&
+      shouldRunLazyTranslate(`product:${productId}`)
+    ) {
+      scheduleAutoTranslate(() => autoTranslateProduct(productId, product));
+    }
+
     setCacheHeaders(response, PRODUCT_DETAILS_CACHE);
 
     return response.json({
@@ -659,6 +670,10 @@ export const updateProductDetails = async (request, response) => {
     const updatedProduct = await product.save();
 
     await safeInvalidateCacheNamespaces(PRODUCT_CACHE_NAMESPACES);
+
+    scheduleAutoTranslate(() =>
+      autoTranslateProduct(updatedProduct._id, updatedProduct.toObject?.() ?? updatedProduct),
+    );
 
     return response.json({
       message: "updated successfully",

@@ -31,6 +31,7 @@ import SummaryApi, { callSummaryApi } from "@/backend/contracts/summaryApi";
 import { useGlobalContext } from "@/providers/ReactQueryProvider";
 import Swal from "sweetalert2";
 import "sweetalert2/dist/sweetalert2.min.css";
+import { useTranslation } from "react-i18next";
 import { valideURLConvert } from "../utils/valideURLConvert";
 
 const RECEIPT_PUBLIC_KEY_RAW =
@@ -46,24 +47,24 @@ function escapeHtml(text) {
 
 const RECEIPT_PUBLIC_KEY = RECEIPT_PUBLIC_KEY_RAW.replace(/\\n/g, "\n").trim();
 
-const VERIFICATION_THEMES = {
+const VERIFICATION_THEME_META = {
   verified: {
-    label: "Receipt verified",
+    labelKey: "success.receipt.verified",
     tone: "border-emerald-200 bg-emerald-50 text-emerald-700",
     icon: ShieldCheck,
   },
   pending: {
-    label: "Verifying…",
+    labelKey: "success.receipt.verifying",
     tone: "border-sky-200 bg-sky-50 text-sky-700",
     icon: Loader2,
   },
   unverified: {
-    label: "Awaiting verification",
+    labelKey: "success.receipt.awaiting",
     tone: "border-amber-200 bg-amber-50 text-amber-700",
     icon: AlertTriangle,
   },
   failed: {
-    label: "Verification failed",
+    labelKey: "success.receipt.failed",
     tone: "border-rose-200 bg-rose-50 text-rose-700",
     icon: AlertTriangle,
   },
@@ -145,6 +146,7 @@ async function importSpkiPublicKey(base64Key) {
 }
 
 export default function SuccessPageClient({ searchParams: initialParams }) {
+  const { t, i18n } = useTranslation();
   const searchParamsHook = useSearchParams();
   const dispatch = useDispatch();
   const { fetchCartItem, fetchOrder } = useGlobalContext();
@@ -158,9 +160,7 @@ export default function SuccessPageClient({ searchParams: initialParams }) {
   const [serverError, setServerError] = useState("");
   const [isServerFetchAttempted, setIsServerFetchAttempted] = useState(false);
   const [verificationStatus, setVerificationStatus] = useState("pending");
-  const [verificationMessage, setVerificationMessage] = useState(
-    "We are verifying your receipt."
-  );
+  const [verificationMessage, setVerificationMessage] = useState("");
   const [isVerifying, setIsVerifying] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
   const [guestFetchError, setGuestFetchError] = useState("");
@@ -1020,13 +1020,13 @@ export default function SuccessPageClient({ searchParams: initialParams }) {
       normalizedReceipt.subTotal !== normalizedReceipt.totalAmount
     ) {
       rows.push({
-        label: "Subtotal",
+        label: t("success.receipt.subtotal"),
         value: DisplayPriceInRupees(normalizedReceipt.subTotal),
       });
     }
     if (normalizedReceipt.discountAmount) {
       rows.push({
-        label: "Discount",
+        label: t("success.receipt.discount"),
         value: `- ${DisplayPriceInRupees(
           Math.abs(normalizedReceipt.discountAmount)
         )}`,
@@ -1034,12 +1034,12 @@ export default function SuccessPageClient({ searchParams: initialParams }) {
     }
     if (normalizedReceipt.taxAmount) {
       rows.push({
-        label: "Tax",
+        label: t("success.receipt.tax"),
         value: DisplayPriceInRupees(normalizedReceipt.taxAmount),
       });
     }
     rows.push({
-      label: "Total",
+      label: t("success.receipt.total"),
       value: DisplayPriceInRupees(normalizedReceipt.totalAmount),
       emphasize: true,
     });
@@ -1086,9 +1086,9 @@ export default function SuccessPageClient({ searchParams: initialParams }) {
     const timer = window.setTimeout(() => {
       Swal.fire({
         icon: "success",
-        title: "Thank you for your purchase",
-        html: `<p class="text-slate-600 text-sm mb-2 text-left">We would love your feedback. Choose a product below to leave a short review — it helps other shoppers.</p><ul class="list-none m-0 p-0 max-h-48 overflow-y-auto">${listHtml}</ul>`,
-        confirmButtonText: "Close",
+        title: t("success.postPurchaseReview.title"),
+        html: `<p class="text-slate-600 text-sm mb-2 text-left">${escapeHtml(t("success.postPurchaseReview.body"))}</p><ul class="list-none m-0 p-0 max-h-48 overflow-y-auto">${listHtml}</ul>`,
+        confirmButtonText: t("success.postPurchaseReview.close"),
         confirmButtonColor: "#db2777",
         showCloseButton: true,
         customClass: {
@@ -1099,7 +1099,7 @@ export default function SuccessPageClient({ searchParams: initialParams }) {
     }, 800);
 
     return () => window.clearTimeout(timer);
-  }, [verificationStatus, normalizedReceipt]);
+  }, [verificationStatus, normalizedReceipt, t, i18n.language]);
   const hasAddress = useMemo(() => {
     if (!normalizedReceipt?.address) return false;
     return Object.values(normalizedReceipt.address).some((value) =>
@@ -1113,9 +1113,23 @@ export default function SuccessPageClient({ searchParams: initialParams }) {
     );
   }, [normalizedReceipt]);
 
-  const verificationTheme =
-    VERIFICATION_THEMES[verificationStatus] ?? VERIFICATION_THEMES.pending;
+  const verificationMeta =
+    VERIFICATION_THEME_META[verificationStatus] ??
+    VERIFICATION_THEME_META.pending;
+  const verificationTheme = useMemo(
+    () => ({
+      ...verificationMeta,
+      label: t(verificationMeta.labelKey),
+    }),
+    [verificationMeta, t, i18n.language],
+  );
   const VerificationIcon = verificationTheme.icon;
+
+  useEffect(() => {
+    if (!verificationMessage) {
+      setVerificationMessage(t("success.receipt.verifyingReceipt"));
+    }
+  }, [t, i18n.language, verificationMessage]);
 
   const totalAmountDisplay = normalizedReceipt
     ? DisplayPriceInRupees(normalizedReceipt.totalAmount)

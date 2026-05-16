@@ -244,6 +244,7 @@ import CardProductRating from './CardProductRating.client'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import '@/lib/i18n'
+import { getLocalizedProductName } from '@/helpers/localizeContent'
 
 const CardSkeleton = () => (
   <div className="relative flex flex-col border border-gray-200 overflow-hidden py-1 lg:p-2 rounded-lg bg-white shadow-sm animate-pulse">
@@ -269,7 +270,11 @@ const CardSkeleton = () => (
 )
 
 const CardProduct = React.memo(({ data, isLoading = false, priority = false }) => {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
+  const displayName = useMemo(
+    () => getLocalizedProductName(data, i18n.language),
+    [data, i18n.language]
+  )
 
   if (isLoading) {
     return <CardSkeleton />
@@ -315,7 +320,7 @@ const CardProduct = React.memo(({ data, isLoading = false, priority = false }) =
         <Image
           src={imageSrc}
           className="w-full h-full object-contain transition-transform duration-500 ease-in-out group-hover:scale-105"
-          alt={data.name}
+          alt={displayName}
           width={400}
           height={400}
           priority={priority}
@@ -347,7 +352,7 @@ const CardProduct = React.memo(({ data, isLoading = false, priority = false }) =
         </div>
 
         <h3 className="font-bold text-gray-900 text-sm line-clamp-2 mb-1 transition-colors duration-300 group-hover:text-pink-600">
-          {data.name}
+          {displayName}
         </h3>
 
         {data.unit && (

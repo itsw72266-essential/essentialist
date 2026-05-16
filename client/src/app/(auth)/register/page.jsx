@@ -8,9 +8,11 @@ import AxiosToastError from '@/lib/axiosToastError';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-// import bannerMobile from "/public/assets/NYX-PMU-Makeup-Face-TOTAL-CONTROL-PRO-DROP-FOUNDATION-Foundation-Golden-TCPDF13-000-0800897206956-Open.jpg";
+import { useTranslation } from 'react-i18next';
+import '@/lib/i18n';
 
 const Register = () => {
+    const { t } = useTranslation();
     const [data, setData] = useState({
         name: "",
         email: "",
@@ -37,7 +39,7 @@ const Register = () => {
         setIsLoading(true);
 
         if(data.password !== data.confirmPassword){
-            toast.error("Password and confirm password must be same");
+            toast.error(t('auth.passwordMismatch'));
             setIsLoading(false);
             return;
         }
@@ -79,40 +81,39 @@ const Register = () => {
             >
                 <img
                     src="/assets/NYX-PMU-Makeup-Face-TOTAL-CONTROL-PRO-DROP-FOUNDATION-Foundation-Golden-TCPDF13-000-0800897206956-Open.jpg"
-                    alt="Makeup Banner"
+                    alt={t('auth.createAccountTitle')}
                     className="w-20 h-20 object-cover rounded-full mb-3 border-4 border-pink-200 shadow"
                     loading="lazy"
                 />
-                <h1 className="text-2xl font-bold text-gray-800 mb-1">Create Account</h1>
-                <p className="text-sm text-gray-500 mb-6">Welcome to <span className="text-pink-500 font-semibold">EssentialistMakeupStore</span></p>
+                <h1 className="text-2xl font-bold text-gray-800 mb-1">{t('auth.createAccountTitle')}</h1>
+                <p className="text-sm text-gray-500 mb-6 text-center">{t('auth.createAccountSubtitle')}</p>
 
                 <form className="w-full space-y-4" onSubmit={handleSubmit} autoComplete="off">
                     <div>
-                        <label htmlFor="name" className="block text-sm font-semibold text-gray-700 mb-1">Full Name</label>
+                        <label htmlFor="name" className="block text-sm font-semibold text-gray-700 mb-1">{t('auth.fullName')}</label>
                         <input
                             type="text"
                             id="name"
                             name="name"
                             value={data.name}
                             onChange={handleChange}
-                            placeholder="Jane Doe"
                             className="w-full px-3 py-2 border-2 border-gray-400 text-gray-700 text-base rounded-lg focus:border-pink-500 focus:outline-none placeholder-gray-400 font-medium transition"
                         />
                     </div>
                     <div>
-                        <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-1">Email</label>
+                        <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-1">{t('auth.email')}</label>
                         <input
                             type="email"
                             id="email"
                             name="email"
                             value={data.email}
                             onChange={handleChange}
-                            placeholder="you@example.com"
+                            placeholder={t('auth.emailPlaceholder')}
                             className="w-full px-3 py-2 border-2 border-gray-400 text-gray-700 text-base rounded-lg focus:border-pink-500 focus:outline-none placeholder-gray-400 font-medium transition"
                         />
                     </div>
                     <div>
-                        <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-1">Password</label>
+                        <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-1">{t('auth.password')}</label>
                         <div className="relative">
                             <input
                                 type={showPassword ? "text" : "password"}
@@ -128,14 +129,14 @@ const Register = () => {
                                 tabIndex={-1}
                                 onClick={() => setShowPassword(prev => !prev)}
                                 className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-pink-500"
-                                aria-label="Toggle password visibility"
+                                aria-label={showPassword ? t('auth.hidePassword') : t('auth.showPassword')}
                             >
                                 {showPassword ? <FaRegEye size={18} /> : <FaRegEyeSlash size={18} />}
                             </button>
                         </div>
                     </div>
                     <div>
-                        <label htmlFor="confirmPassword" className="block text-sm font-semibold text-gray-700 mb-1">Confirm Password</label>
+                        <label htmlFor="confirmPassword" className="block text-sm font-semibold text-gray-700 mb-1">{t('auth.confirmPassword')}</label>
                         <div className="relative">
                             <input
                                 type={showConfirmPassword ? "text" : "password"}
@@ -151,7 +152,7 @@ const Register = () => {
                                 tabIndex={-1}
                                 onClick={() => setShowConfirmPassword(prev => !prev)}
                                 className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-pink-500"
-                                aria-label="Toggle confirm password visibility"
+                                aria-label={showConfirmPassword ? t('auth.hidePassword') : t('auth.showPassword')}
                             >
                                 {showConfirmPassword ? <FaRegEye size={18} /> : <FaRegEyeSlash size={18} />}
                             </button>
@@ -174,16 +175,16 @@ const Register = () => {
                                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                 </svg>
-                                Registering...
+                                {t('auth.registering')}
                             </span>
-                        ) : 'Sign Up'}
+                        ) : t('auth.createAccount')}
                     </motion.button>
                 </form>
 
                 <p className="mt-5 text-center text-sm text-gray-600">
-                    Already have an account?{' '}
+                    {t('auth.alreadyHaveAccount')}{' '}
                     <Link href="/login" className="font-semibold text-pink-500 hover:text-pink-600 transition">
-                        Sign in
+                        {t('auth.signInLink')}
                     </Link>
                 </p>
             </motion.div>

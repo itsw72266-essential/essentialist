@@ -73,7 +73,16 @@ export const sanitizeTranslations = (translations = {}, allowedFields = []) => {
   );
 };
 
-export const localizeDocument = (document, fields = [], locale = DEFAULT_LOCALE) => {
+/**
+ * Merge translations.fr.* over English fields for the requested locale.
+ * By default strips the nested `translations` object from API payloads (Educaire-style).
+ */
+export const localizeDocument = (
+  document,
+  fields = [],
+  locale = DEFAULT_LOCALE,
+  { stripTranslations = true } = {},
+) => {
   if (!document || typeof document !== "object") return document;
 
   const output = { ...document };
@@ -86,6 +95,10 @@ export const localizeDocument = (document, fields = [], locale = DEFAULT_LOCALE)
         output[field] = translation[field];
       }
     });
+  }
+
+  if (stripTranslations) {
+    delete output.translations;
   }
 
   output._locale = normalizedLocale;

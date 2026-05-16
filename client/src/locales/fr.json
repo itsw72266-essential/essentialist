@@ -57,6 +57,7 @@
     "newHot": "NOUVEAUTES",
     "blog": "BLOG",
     "contactUs": "CONTACT",
+    "shopAllMakeup": "TOUT LE MAQUILLAGE",
     "salesOffers": "PROMOS",
     "offers": "Offres",
     "clearance": "Destockage",
@@ -112,7 +113,8 @@
     "signUp": "S'inscrire",
     "cantFind": "Vous ne trouvez pas un produit sur notre site ? Dites-le-nous",
     "here": "ici !",
-    "rights": "Tous droits reserves."
+    "rights": "Tous droits reserves.",
+    "language": "Langue"
   },
   "product": {
     "product": "Produit",
@@ -122,10 +124,65 @@
     "addToCartFull": "Ajouter au panier",
     "description": "Description",
     "specifications": "Caracteristiques",
-    "reviews": "Avis",
+    "reviewsTab": "Avis",
     "relatedProducts": "Produits similaires",
     "inStock": "En stock",
-    "outOfStock": "Rupture de stock"
+    "outOfStock": "Rupture de stock",
+    "loadError": "Impossible de charger le produit.",
+    "bestseller": "Meilleure vente",
+    "fastDelivery": "Livraison rapide au Cameroun",
+    "bulkPrice": "Prix en gros",
+    "sellingPrice": "Prix de vente",
+    "authentic": "100 % authentique et importe",
+    "whatStandsOut": "Points forts",
+    "productDescription": "Description du produit",
+    "productDetails": "Details du produit",
+    "noDescription": "Aucune description disponible pour ce produit.",
+    "perks": {
+      "fastDelivery": "Livraison rapide",
+      "bestPrices": "Meilleurs prix",
+      "authenticProducts": "Produits authentiques"
+    },
+    "reviews": {
+      "sectionTitle": "Avis clients",
+      "sectionIntro": "Partagez votre experience avec {{productName}}. Vos avis aident les autres clientes a choisir en toute confiance.",
+      "leaveReview": "Laisser un avis",
+      "noReviewsYet": "Aucun avis publie pour le moment.",
+      "count_one": "{{count}} avis",
+      "count_other": "{{count}} avis",
+      "submitFailed": "Echec de la publication de l'avis",
+      "customer": "Cliente",
+      "overall": "Moyenne des avis publies :",
+      "beFirst": "Soyez la premiere a partager votre experience. Cliquez sur \"Laisser un avis\" ci-dessus.",
+      "loading": "Chargement des avis…",
+      "verifiedPurchase": "Achat verifie",
+      "modal": {
+        "title": "Comment evaluez-vous ce produit ?",
+        "introWithProduct": "Votre avis sur {{productName}} aide les autres clientes a choisir en toute confiance.",
+        "introGeneric": "Votre avis aide les autres clientes a choisir en toute confiance.",
+        "headlineOptional": "Titre (optionnel)",
+        "headlinePlaceholder": "Resumez votre experience",
+        "experienceOptional": "Dites-nous en plus (optionnel)",
+        "experiencePlaceholder": "Qu'avez-vous aime ? Que pourrait-on ameliorer ?",
+        "maybeLater": "Plus tard",
+        "submit": "Publier l'avis",
+        "submitting": "Publication…",
+        "ratingRequired": "Veuillez selectionner une note.",
+        "thankYou": "Merci — votre avis a ete publie."
+      },
+      "writeFirst": "Ecrire le premier avis",
+      "seeOrAdd": "Voir ou ajouter un avis pour {{productName}}",
+      "noReviewsProduct": "Pas encore d'avis pour ce produit.",
+      "ratingAria": "Note moyenne {{average}} sur {{count}} avis",
+      "summaryAria": "Resume des avis produit"
+    }
+  },
+  "success": {
+    "postPurchaseReview": {
+      "title": "Merci pour votre achat",
+      "body": "Votre avis compte. Choisissez un produit ci-dessous pour laisser un court avis — cela aide les autres clientes.",
+      "close": "Fermer"
+    }
   },
   "cart": {
     "cart": "Panier",

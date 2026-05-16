@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
+import { useTranslation } from "react-i18next";
+import "@/lib/i18n";
 import { DisplayPriceInRupees } from "../../utils/DisplayPriceInRupees";
 import { useSelector, useDispatch } from "react-redux";
 import AxiosToastError from "@/lib/axiosToastError";
@@ -25,7 +27,7 @@ const randomUUID = () => {
 
 const generateIdempotencyKey = (scope) => `${scope}-${randomUUID()}`;
 
-const buildSuccessUrl = (orderId, token, text = "Order") => {
+const buildSuccessUrl = (orderId, token, text) => {
   let url = `/success?text=${encodeURIComponent(text)}`;
   if (orderId) {
     url += `&orderId=${encodeURIComponent(orderId)}`;
@@ -61,6 +63,7 @@ const mapAddressToForm = (address) => ({
 });
 
 const CheckoutPage = () => {
+  const { t } = useTranslation();
   const {
     notDiscountTotalPrice,
     totalPrice,
@@ -140,7 +143,7 @@ const CheckoutPage = () => {
         }
       } catch (error) {
         console.error("Failed to load addresses:", error);
-        toast.error("Failed to load your saved addresses");
+        toast.error(t("checkout.failedLoadAddresses"));
       } finally {
         setIsAddressLoaded(true);
       }
@@ -188,20 +191,20 @@ const CheckoutPage = () => {
   const requireAddress = () => {
     if (isAuthenticated) {
       if (!addressList.length) {
-        toast.error("Please add an address before proceeding with your order.", {
+        toast.error(t("checkout.addAddressBeforeOrder"), {
           position: "top-center",
         });
         setShowAddressForm(true);
         return false;
       }
       if (!selectedAddress?._id) {
-        toast.error("Select your address before placing your order.", {
+        toast.error(t("checkout.selectAddressBeforeOrder"), {
           position: "top-center",
         });
         return false;
       }
     } else if (!guestAddress) {
-      toast.error("Please add your delivery information before proceeding.", {
+      toast.error(t("checkout.addDeliveryInfo"), {
         position: "top-center",
       });
       setShowAddressForm(true);
@@ -238,8 +241,8 @@ const CheckoutPage = () => {
         if (response.data?.success) {
           toast.success(
             editingAddressId
-              ? "Address updated successfully"
-              : "Address saved successfully"
+              ? t("checkout.addressUpdated")
+              : t("checkout.addressSaved")
           );
 
           setShowAddressForm(false);
@@ -264,7 +267,7 @@ const CheckoutPage = () => {
         if (typeof window !== "undefined") {
           localStorage.setItem("guestAddress", JSON.stringify(payload));
         }
-        toast.success("Delivery information saved");
+        toast.success(t("checkout.deliveryInfoSaved"));
         setShowAddressForm(false);
       }
     } catch (error) {
@@ -307,12 +310,16 @@ const CheckoutPage = () => {
 
           persistReceiptSnapshot(orderPayload, { orderId, integrityToken });
 
-          toast.success(responseData.message || "Order placed successfully");
+          toast.success(responseData.message || t("checkout.orderPlaced"));
 
           if (fetchCartItem) fetchCartItem();
           if (fetchOrder) fetchOrder();
 
-          const successUrl = buildSuccessUrl(orderId, integrityToken, "Order");
+          const successUrl = buildSuccessUrl(
+            orderId,
+            integrityToken,
+            t("common.order")
+          );
           router.push(successUrl);
         }
       } else {
@@ -346,11 +353,15 @@ const CheckoutPage = () => {
             localStorage.removeItem("guest_cart");
           }
 
-          toast.success(responseData.message || "Order placed successfully");
+          toast.success(responseData.message || t("checkout.orderPlaced"));
 
           if (fetchCartItem) fetchCartItem();
 
-          const successUrl = buildSuccessUrl(orderId, integrityToken, "Order");
+          const successUrl = buildSuccessUrl(
+            orderId,
+            integrityToken,
+            t("common.order")
+          );
           router.push(successUrl);
         }
       }
@@ -367,7 +378,7 @@ const CheckoutPage = () => {
 
     try {
       setLoadingBtn((prev) => ({ ...prev, online: true }));
-      const loadingToast = toast.loading("Loading payment gateway...");
+      const loadingToast = toast.loading(t("checkout.loadingPayment"));
 
       const stripePublicKey = process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY;
       const { loadStripe } = await import("@stripe/stripe-js");
@@ -413,7 +424,7 @@ const CheckoutPage = () => {
       });
 
       if (redirectResult.error) {
-        toast.error(redirectResult.error.message || "Unable to redirect");
+        toast.error(redirectResult.error.message || t("checkout.unableRedirect"));
       }
 
       if (fetchCartItem) fetchCartItem();
@@ -439,7 +450,7 @@ const CheckoutPage = () => {
       selectedAddress?.name ??
       guestAddress?.name ??
       user?.name ??
-      "Customer";
+      t("common.customer");
 
     const basePayload = {
       amount: totalPrice,
@@ -484,8 +495,8 @@ const CheckoutPage = () => {
       setLoadingBtn((prev) => ({ ...prev, [buttonKey]: true }));
       const loadingToast = toast.loading(
         channel === "mtn"
-          ? "Redirecting to MTN MoMo..."
-          : "Redirecting to Orange Money..."
+          ? t("checkout.redirectMtn")
+          : t("checkout.redirectOrange")
       );
 
       const response = await Axios({
@@ -511,7 +522,7 @@ const CheckoutPage = () => {
       if (paymentUrl) {
         window.location.href = paymentUrl;
       } else {
-        throw new Error("Failed to initiate Payunit payment");
+        throw new Error(t("checkout.payunitFailed"));
       }
     } catch (error) {
       toast.dismiss();
@@ -550,10 +561,11 @@ const CheckoutPage = () => {
         >
           {loadingBtn.mtn ? (
             <span className="flex items-center">
-              <span className="loader mr-2"></span>Processing...
+              <span className="loader mr-2"></span>
+              {t("orders.statusProcessing")}
             </span>
           ) : (
-            "MTN Mobile Money"
+            t("checkout.mtnMoMo")
           )}
         </button>
 
@@ -569,10 +581,11 @@ const CheckoutPage = () => {
         >
           {loadingBtn.orange ? (
             <span className="flex items-center">
-              <span className="loader mr-2"></span>Processing...
+              <span className="loader mr-2"></span>
+              {t("orders.statusProcessing")}
             </span>
           ) : (
-            "Orange Money"
+            t("checkout.orangeMoney")
           )}
         </button>
 
@@ -590,10 +603,11 @@ const CheckoutPage = () => {
         >
           {loadingBtn.cod ? (
             <span className="flex items-center">
-              <span className="loader mr-2"></span>Processing...
+              <span className="loader mr-2"></span>
+              {t("orders.statusProcessing")}
             </span>
           ) : (
-            "Cash on Delivery"
+            t("checkout.cashOnDelivery")
           )}
         </button>
       </div>
@@ -612,7 +626,9 @@ const CheckoutPage = () => {
         className={`border ${
           errors[id] ? "border-red-500 bg-red-50" : "bg-blue-50"
         } p-2 rounded border-gray-400 focus:outline-none focus:ring-2`}
-        {...register(id, { required: required ? `${label} is required` : false })}
+        {...register(id, {
+          required: required ? `${label}: ${t("common.required")}` : false,
+        })}
       />
       {errors[id] && (
         <p className="text-red-500 text-xs mt-1">{errors[id].message}</p>
@@ -641,25 +657,24 @@ const CheckoutPage = () => {
             </svg>
           </div>
           <div className="ml-3">
-            <h3 className="text-sm font-medium text-blue-800">Guest Checkout</h3>
+            <h3 className="text-sm font-medium text-blue-800">
+              {t("checkout.title")}
+            </h3>
             <div className="mt-2 text-sm text-blue-700">
-              <p>
-                You're checking out as a guest. Want to save your information for
-                next time?
-              </p>
+              <p>{t("checkout.guestCheckoutHint")}</p>
             </div>
             <div className="mt-3 flex gap-2">
               <button
                 onClick={() => router.push("/login?from=/checkout")}
                 className="px-3 py-1.5 bg-blue-100 text-blue-800 text-xs font-medium rounded hover:bg-blue-200"
               >
-                Login
+                {t("auth.signIn")}
               </button>
               <button
                 onClick={() => router.push("/register?from=/checkout")}
                 className="px-3 py-1.5 bg-blue-500 text-white text-xs font-medium rounded hover:bg-blue-600"
               >
-                Create Account
+                {t("auth.createAccount")}
               </button>
             </div>
           </div>
@@ -677,8 +692,8 @@ const CheckoutPage = () => {
             <div className="flex justify-between items-center mb-4 flex-wrap gap-2">
               <h3 className="text-xl font-semibold text-gray-800">
                 {isAuthenticated
-                  ? "Your Delivery Address"
-                  : "Delivery Information"}
+                  ? t("checkout.yourDeliveryAddress")
+                  : t("checkout.deliveryInformation")}
               </h3>
               <div className="flex items-center gap-2 flex-wrap">
                 {isAuthenticated &&
@@ -689,7 +704,7 @@ const CheckoutPage = () => {
                       onClick={() => openEditAddress(selectedAddress)}
                       className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center gap-1 bg-white py-1 px-3 rounded-full shadow-sm"
                     >
-                      Edit Selected
+                      {t("checkout.editAddress")}
                     </button>
                   )}
                 {isAddressLoaded &&
@@ -714,7 +729,9 @@ const CheckoutPage = () => {
                           d="M12 4v16m8-8H4"
                         />
                       </svg>
-                      {isAuthenticated ? "Add New Address" : "Update Information"}
+                      {isAuthenticated
+                        ? t("checkout.addNewAddress")
+                        : t("checkout.updateInformation")}
                     </button>
                   )}
                 {showAddressForm &&
@@ -738,7 +755,7 @@ const CheckoutPage = () => {
                           d="M6 18L18 6M6 6l12 12"
                         />
                       </svg>
-                      Hide Form
+                      {t("common.close")}
                     </button>
                   )}
               </div>
@@ -747,7 +764,7 @@ const CheckoutPage = () => {
             {!isAddressLoaded && (
               <div className="bg-white p-8 rounded-lg shadow-md flex justify-center items-center">
                 <div className="loader-lg mr-3"></div>
-                <p className="text-gray-600">Loading your delivery information...</p>
+                <p className="text-gray-600">{t("common.loading")}</p>
               </div>
             )}
 
@@ -757,13 +774,13 @@ const CheckoutPage = () => {
                   <h2 className="font-bold text-lg text-gray-800">
                     {isAuthenticated
                       ? addressList.length === 0
-                        ? "Add Your First Address"
+                        ? t("checkout.addFirstAddress")
                         : editingAddressId
-                        ? "Edit Address"
-                        : "Add New Address"
+                        ? t("checkout.editAddress")
+                        : t("checkout.addNewAddress")
                       : guestAddress
-                      ? "Update Delivery Information"
-                      : "Enter Delivery Information"}
+                      ? t("checkout.updateDeliveryInfo")
+                      : t("checkout.enterDeliveryInfo")}
                   </h2>
                   {((isAuthenticated && addressList.length > 0) ||
                     (!isAuthenticated && guestAddress)) && (
@@ -777,24 +794,26 @@ const CheckoutPage = () => {
                 </div>
                 <form className="grid gap-4" onSubmit={handleSubmit(onSubmitAddress)}>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {renderFormField("name", "Full Name")}
-                    {renderFormField("email", "Email Address", "email")}
+                    {renderFormField("name", t("checkout.fullName"))}
+                    {renderFormField("email", t("auth.emailAddress"), "email")}
                   </div>
-                  {renderFormField("addressline", "Address Line/Quarter")}
+                  {renderFormField("addressline", t("checkout.addressLine"))}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {renderFormField("city", "City")}
-                    {renderFormField("state", "State/Region")}
+                    {renderFormField("city", t("checkout.city"))}
+                    {renderFormField("state", t("checkout.stateRegion"))}
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {renderFormField("pincode", "Postal Code")}
-                    {renderFormField("country", "Country")}
+                    {renderFormField("pincode", t("checkout.postalCode"))}
+                    {renderFormField("country", t("checkout.country"))}
                   </div>
-                  {renderFormField("mobile", "Mobile Number")}
+                  {renderFormField("mobile", t("checkout.mobileNumber"))}
                   <button
                     type="submit"
                     className="bg-pink-500 w-full py-3 rounded-md font-bold text-white mt-2 hover:bg-pink-600 transition-colors shadow-md focus:outline-none focus:ring-2 focus:ring-pink-300"
                   >
-                    SAVE {isAuthenticated ? "ADDRESS" : "INFORMATION"}
+                    {isAuthenticated
+                      ? t("checkout.saveAddressBtn")
+                      : t("checkout.saveInformationBtn")}
                   </button>
                 </form>
               </div>
@@ -819,17 +838,14 @@ const CheckoutPage = () => {
                     />
                   </svg>
                   <div>
-                    <p>
-                      No delivery {isAuthenticated ? "addresses" : "information"} found.
-                    </p>
+                    <p>{t("checkout.noActiveAddresses")}</p>
                     <button
                       onClick={openAddAddress}
                       className="text-blue-600 underline text-sm mt-1 font-normal"
                     >
-                      Click here to{" "}
                       {isAuthenticated
-                        ? "add your first address"
-                        : "enter your information"}
+                        ? t("checkout.addFirstAddress")
+                        : t("checkout.enterDeliveryInfo")}
                     </button>
                   </div>
                 </div>
@@ -839,18 +855,18 @@ const CheckoutPage = () => {
               <div className="bg-white p-5 rounded-lg shadow-md">
                 <h4 className="font-medium text-sm text-gray-500 mb-3">
                   {addressList.filter((addr) => addr.status).length > 0
-                    ? "Select a delivery address"
-                    : "No active addresses found"}
+                    ? t("checkout.selectDeliveryAddress")
+                    : t("checkout.noActiveAddresses")}
                 </h4>
                 <div className="grid gap-3">
                   {addressList.filter((addr) => addr.status).length === 0 && (
                     <div className="p-3 bg-blue-50 text-blue-700 rounded-md">
-                      <p>All your addresses are currently inactive.</p>
+                      <p>{t("checkout.noActiveAddresses")}</p>
                       <button
                         onClick={openAddAddress}
                         className="text-blue-600 underline text-sm mt-1"
                       >
-                        Add a new address
+                        {t("checkout.addNewAddress")}
                       </button>
                     </div>
                   )}
@@ -919,7 +935,7 @@ const CheckoutPage = () => {
               !showAddressForm && (
                 <div className="bg-white p-5 rounded-lg shadow-md">
                   <h4 className="font-medium text-sm text-gray-500 mb-3">
-                    Your delivery information
+                    {t("checkout.deliveryInformation")}
                   </h4>
                   <div className="border rounded-lg p-4 bg-blue-50">
                     <p className="font-bold text-gray-800">{guestAddress.name}</p>
@@ -942,7 +958,7 @@ const CheckoutPage = () => {
                       onClick={() => openEditAddress(guestAddress)}
                       className="mt-3 text-blue-600 text-sm hover:underline"
                     >
-                      Edit information
+                      {t("checkout.updateInformation")}
                     </button>
                   </div>
                 </div>
@@ -953,13 +969,16 @@ const CheckoutPage = () => {
         <div className="w-full lg:w-2/5">
           <div className="bg-white rounded-lg shadow-md p-5 sticky top-4">
             <h3 className="text-xl font-semibold mb-4 text-gray-800">
-              Order Summary
+              {t("checkout.orderSummary")}
             </h3>
             <div className="border-t border-gray-200 pt-4">
-              <h3 className="font-semibold mb-3 text-gray-700">Bill Details</h3>
+              <h3 className="font-semibold mb-3 text-gray-700">
+                {t("cartDrawer.billDetails")}
+              </h3>
               <div className="flex gap-4 justify-between py-2 border-b border-gray-100">
                 <p className="text-gray-600">
-                  Items total ({totalQty} item{totalQty !== 1 ? "s" : ""})
+                  {t("cartDrawer.itemsTotal")} (
+                  {t("cartDrawer.item", { count: totalQty })})
                 </p>
                 <p className="flex items-center gap-2">
                   {notDiscountTotalPrice !== totalPrice && (
@@ -973,13 +992,13 @@ const CheckoutPage = () => {
                 </p>
               </div>
               <div className="flex gap-4 justify-between py-2 border-b border-gray-100">
-                <p className="text-gray-600">Delivery Charge</p>
+                <p className="text-gray-600">{t("cartDrawer.deliveryCharge")}</p>
                 <p className="flex items-center gap-2 text-green-600 font-medium">
-                  Free
+                  {t("cartDrawer.free")}
                 </p>
               </div>
               <div className="font-semibold flex items-center justify-between gap-4 mt-3 pt-3">
-                <p className="text-lg text-gray-800">Grand Total</p>
+                <p className="text-lg text-gray-800">{t("cartDrawer.grandTotal")}</p>
                 <p className="text-lg text-pink-600">
                   {DisplayPriceInRupees(totalPrice)}
                 </p>
@@ -1005,13 +1024,11 @@ const CheckoutPage = () => {
                     />
                   </svg>
                   <span>
-                    You need to{" "}
                     {isAuthenticated
                       ? addressList.length
-                        ? "select"
-                        : "add"
-                      : "provide"}{" "}
-                    your delivery information before you can proceed with payment.
+                        ? t("checkout.selectAddressBeforeOrder")
+                        : t("checkout.addAddressBeforeOrder")
+                      : t("checkout.addDeliveryInfo")}
                   </span>
                 </p>
               </div>

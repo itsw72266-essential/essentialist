@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Star } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 import Modal from '@/components/Modal'
 import Axios from '@/lib/apiClient'
@@ -55,6 +56,7 @@ export default function LeaveReviewModal({
   productName,
   onSubmitted,
 }) {
+  const { t } = useTranslation()
   const queryClient = useQueryClient()
   const [rating, setRating] = useState(0)
   const [title, setTitle] = useState('')
@@ -97,7 +99,9 @@ export default function LeaveReviewModal({
     },
     onError: (err) => {
       const msg =
-        err?.response?.data?.message || err?.message || 'Failed to submit review'
+        err?.response?.data?.message ||
+        err?.message ||
+        t('product.reviews.submitFailed')
       setError(msg)
       AxiosToastError(err)
     },
@@ -112,7 +116,7 @@ export default function LeaveReviewModal({
           e.preventDefault()
           setError('')
           if (!rating || rating < 1 || rating > 5) {
-            setError('Please select a star rating.')
+            setError(t('product.reviews.modal.ratingRequired'))
             return
           }
           upsertMutation.mutate()
@@ -121,17 +125,12 @@ export default function LeaveReviewModal({
       >
         <header className="text-center mb-6">
           <h2 className="text-2xl font-bold text-slate-900 tracking-tight">
-            How would you rate this product?
+            {t('product.reviews.modal.title')}
           </h2>
           <p className="mt-2 text-sm text-slate-600 leading-relaxed">
-            {productName ? (
-              <>
-                Your feedback on <span className="font-medium">{productName}</span> helps
-                other shoppers choose with confidence.
-              </>
-            ) : (
-              'Your feedback helps other shoppers choose with confidence.'
-            )}
+            {productName
+              ? t('product.reviews.modal.introWithProduct', { productName })
+              : t('product.reviews.modal.introGeneric')}
           </p>
         </header>
 
@@ -143,7 +142,7 @@ export default function LeaveReviewModal({
               htmlFor="review-title"
               className="block text-sm font-semibold text-slate-800 mb-1.5"
             >
-              Headline <span className="font-normal text-slate-500">(optional)</span>
+              {t('product.reviews.modal.headlineOptional')}
             </label>
             <input
               id="review-title"
@@ -151,7 +150,7 @@ export default function LeaveReviewModal({
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               maxLength={140}
-              placeholder="Summarize your experience"
+              placeholder={t('product.reviews.modal.headlinePlaceholder')}
               className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-pink-400"
             />
           </div>
@@ -161,8 +160,7 @@ export default function LeaveReviewModal({
               htmlFor="review-comment"
               className="block text-sm font-semibold text-slate-800 mb-1.5"
             >
-              Tell us more about your experience{' '}
-              <span className="font-normal text-slate-500">(optional)</span>
+              {t('product.reviews.modal.experienceOptional')}
             </label>
             <textarea
               id="review-comment"
@@ -170,7 +168,7 @@ export default function LeaveReviewModal({
               onChange={(e) => setComment(e.target.value)}
               rows={4}
               maxLength={5000}
-              placeholder="What did you like? What could be improved?"
+              placeholder={t('product.reviews.modal.experiencePlaceholder')}
               className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-slate-900 text-sm resize-y min-h-[100px] focus:outline-none focus:ring-2 focus:ring-pink-400"
             />
           </div>
@@ -189,14 +187,16 @@ export default function LeaveReviewModal({
             disabled={upsertMutation.isPending}
             className="w-full sm:w-auto px-5 py-2.5 rounded-lg border border-slate-300 bg-white text-sm font-semibold text-slate-800 hover:bg-slate-50 disabled:opacity-60 transition-colors"
           >
-            Maybe later
+            {t('product.reviews.modal.maybeLater')}
           </button>
           <button
             type="submit"
             disabled={!canSubmit}
             className="w-full sm:w-auto px-5 py-2.5 rounded-lg bg-slate-800 text-sm font-semibold text-white hover:bg-slate-900 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
           >
-            {upsertMutation.isPending ? 'Submitting…' : 'Submit review'}
+            {upsertMutation.isPending
+              ? t('product.reviews.modal.submitting')
+              : t('product.reviews.modal.submit')}
           </button>
         </div>
       </form>

@@ -5,6 +5,7 @@
 // import { cacheLife } from 'next/cache'
 
 // import ProductRecommendations from '../components/ProductRecommendations'
+import HomeHero from '../components/home/HomeHero.client'
 // import TikTokGallery from '../components/TikTokGallery'
 // import CategorySectionsInfinite from '../components/CategorySectionsInfinite'
 // import { valideURLConvert } from '../utils/valideURLConvert'
@@ -655,54 +656,7 @@ export default async function Home() {
         <StructuredData categoryProducts={categoryProducts} />
 
         <section className="bg-white">
-          {/* FIX 1: HERO MOVED TO THE TOP (STRUCTURAL PRIORITY) */}
-          <div className="container mx-auto px-4 pt-4">
-            <div className="w-full h-full min-h-48 rounded overflow-hidden">
-              <div className="hidden lg:block">
-                <Image
-                  src="/assets/fbb4343f-2d39-4c25-ac2f-1ab5037f50da.avif"
-                  width={1200}
-                  height={500}
-                  alt="Professional makeup artist applying foundation - Essentialist Makeup Store Douala Cameroon"
-                  priority={true}
-                  fetchPriority="high"
-                  loading="eager"
-                  unoptimized={true}
-                  className="w-full h-auto"
-                  sizes="100vw"
-                />
-              </div>
-              <div className="lg:hidden">
-                <Image
-                  src="/assets/cosmetics-beauty-products-for-make-up-sale-banner-vector-25170220.avif"
-                  width={400}
-                  height={250}
-                  alt="Cosmetics beauty products sale banner - Shop makeup in Cameroon"
-                  priority={true}
-                  fetchPriority="high"
-                  loading="eager"
-                  unoptimized={true}
-                  className="w-full h-auto"
-                  sizes="100vw"
-                />
-              </div>
-
-              <div className="max-w-4xl mx-auto mt-6 mb-8 px-4 flex flex-col items-center text-center">
-                <h1 className="font-bold text-2xl md:text-3xl lg:text-4xl mb-3 text-gray-900 leading-tight">
-                  <span className="text-pink-600">Best Makeup Store in Cameroon</span>{" "}
-                  — Essentialist Makeup Store Douala
-                </h1>
-                <p className="text-gray-600 text-base md:text-lg leading-relaxed">
-                  Where to buy authentic <strong>makeup &amp; cosmetics in Cameroon</strong>.
-                  Shop <strong>NYX</strong>, <strong>Smashbox</strong>, <strong>Bobbi Brown</strong>,{" "}
-                  <strong>e.l.f.</strong>, <strong>Laura Geller</strong>, <strong>MAC</strong> &amp; more.
-                  Fast delivery to <strong>Douala</strong> and nationwide.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* FIX 2: PRODUCT RECOMMENDATIONS MOVED BELOW HERO */}
+          <HomeHero />\n\n          {/* FIX 2: PRODUCT RECOMMENDATIONS MOVED BELOW HERO */}
           <ProductRecommendations />
 
           {/* Category Grid — full cell width circles (larger); original column counts + gap */}

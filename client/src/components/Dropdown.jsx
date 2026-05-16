@@ -162,6 +162,9 @@ import { useQuery } from "@tanstack/react-query";
 
 import { valideURLConvert } from "@/utils/valideURLConvert";
 import SummaryApi, { callSummaryApi } from "@/backend/contracts/summaryApi";
+import { useTranslation } from "react-i18next";
+import "@/lib/i18n";
+import { getLocalizedContent } from "@/helpers/localizeContent";
 
 const normalizeCollection = (payload) => {
   if (!payload) return [];
@@ -174,6 +177,7 @@ const normalizeCollection = (payload) => {
 };
 
 const Dropdown = () => {
+  const { t, i18n } = useTranslation();
   const [isHovered, setIsHovered] = useState(false);
   const dropdownRef = useRef(null);
   const timeoutRef = useRef(null);
@@ -274,7 +278,7 @@ const Dropdown = () => {
         aria-expanded={isHovered}
       >
         <span className="flex items-center text-semibold text-lg">
-          Shop All Makeup
+          {t("header.shopAllMakeup")}
           <svg
             className={`w-auto h-4 ml-1.5 transition-transform duration-300 transform ${
               isHovered ? "rotate-180" : ""
@@ -331,13 +335,18 @@ const Dropdown = () => {
                 const subcategories = getSubcategoriesForCategory(
                   category._id
                 );
+                const categoryLabel = getLocalizedContent(
+                  category,
+                  "name",
+                  i18n.language
+                );
                 return (
                   <div
                     key={category._id}
                     className="break-inside-avoid"
                   >
                     <div className="font-bold text-black pb-2 mb-3 text-base tracking-wide border-b border-pink-100 uppercase">
-                      {category.name}
+                      {categoryLabel}
                     </div>
                     <div className="space-y-0.5">
                       {subcategories.map((subCat) => {
@@ -345,6 +354,11 @@ const Dropdown = () => {
                           category._id,
                           category.name,
                           subCat
+                        );
+                        const subLabel = getLocalizedContent(
+                          subCat,
+                          "name",
+                          i18n.language
                         );
                         return (
                           <Link
@@ -354,7 +368,7 @@ const Dropdown = () => {
                             className="block text-sm text-black font-semibold md:font-normal rounded-md hover:bg-pink-50 hover:text-pink-400 cursor-pointer p-1.5"
                             onClick={() => setIsHovered(false)}
                           >
-                            {subCat.name}
+                            {subLabel}
                           </Link>
                         );
                       })}

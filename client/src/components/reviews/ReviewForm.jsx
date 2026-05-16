@@ -345,6 +345,8 @@ import toast from "react-hot-toast";
 import RatingStars from "./RatingStars";
 import RichTextEditor from "./RichTextEditor";
 import { useUpsertReview } from "@/hooks/queries/reviews";
+import { useTranslation } from "react-i18next";
+import "@/lib/i18n";
 import Axios from "@/lib/apiClient";
 import SummaryApi from "@/backend/contracts/summaryApi";
 
@@ -360,6 +362,7 @@ const SUBJECT_OPTIONS = [
 const MAX_TAGS = 5;
 
 export default function ReviewForm({ defaultSubject = "product" }) {
+  const { t } = useTranslation();
   const router = useRouter();
   const [rating, setRating] = useState(4.5);
   const [subjectType, setSubjectType] = useState(defaultSubject);
@@ -503,11 +506,10 @@ export default function ReviewForm({ defaultSubject = "product" }) {
           Members only
         </p>
         <h2 className="mt-2 text-2xl font-semibold text-slate-900">
-          Sign in to share your review
+          {t("reviewsPage.signInTitle")}
         </h2>
         <p className="mt-3 text-sm text-slate-600">
-          Reviews and comments are limited to registered customers. Please log
-          in to continue.
+          {t("reviewsPage.signInIntro")}
         </p>
         <button
           type="button"
@@ -537,10 +539,10 @@ export default function ReviewForm({ defaultSubject = "product" }) {
           Share your experience
         </p>
         <h2 className="text-2xl font-semibold text-slate-800">
-          Publish a trusted review
+          {t("reviewsPage.publishTitle")}
         </h2>
         <p className="text-sm text-slate-500">
-          Your insights help other shoppers. Reviews go live after moderation.
+          {t("reviewsPage.publishIntro")}
         </p>
       </header>
 
@@ -684,7 +686,7 @@ export default function ReviewForm({ defaultSubject = "product" }) {
         disabled={isSaving}
         className="mt-6 inline-flex w-full items-center justify-center rounded-full bg-secondary-200 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-secondary-100 disabled:cursor-not-allowed disabled:opacity-60"
       >
-        {isSaving ? "Publishing…" : "Publish review"}
+        {isSaving ? t("reviewsPage.publishing") : t("reviewsPage.publish")}
       </button>
     </form>
   );

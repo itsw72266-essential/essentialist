@@ -202,8 +202,10 @@
 
 'use client';
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import { useTranslation } from "react-i18next";
+import "@/lib/i18n";
 import Axios from "@/lib/apiClient";
 import SummaryApi from "@/backend/contracts/summaryApi";
 import CardProduct from "./CardProduct";
@@ -251,9 +253,12 @@ const CompactHistoryCard = ({ product, onClick }) => {
 };
 
 const ProductRecommendations = ({ currentProductId, currentProductData }) => {
+  const { t } = useTranslation();
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [historyProducts, setHistoryProducts] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [visible, setVisible] = useState(false);
+  const sectionRef = useRef(null);
 
   const pathname = usePathname();
   const router = useRouter();
@@ -270,11 +275,37 @@ const ProductRecommendations = ({ currentProductId, currentProductData }) => {
   }, [currentProductId, currentProductData]);
 
   useEffect(() => {
+    if (isHomePage) {
+      setVisible(true);
+      return;
+    }
+    const el = sectionRef.current;
+    if (!el || typeof IntersectionObserver === "undefined") {
+      setVisible(true);
+      return;
+    }
+    const obs = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisible(true);
+          obs.disconnect();
+        }
+      },
+      { rootMargin: "200px 0px", threshold: 0.01 },
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [isHomePage]);
+
+  useEffect(() => {
     const storedHistory = getHistory();
     setHistoryProducts(storedHistory);
 
-    if (!isHomePage && currentProductData?.category?.[0]?._id) {
-      const fetchRelatedProducts = async () => {
+    if (!visible || isHomePage || !currentProductData?.category?.[0]?._id) {
+      return;
+    }
+
+    const fetchRelatedProducts = async () => {
         setLoading(true);
         try {
           const response = await Axios({
@@ -294,9 +325,8 @@ const ProductRecommendations = ({ currentProductId, currentProductData }) => {
           setLoading(false);
         }
       };
-      fetchRelatedProducts();
-    }
-  }, [isHomePage, currentProductData, currentProductId]);
+    fetchRelatedProducts();
+  }, [visible, isHomePage, currentProductData, currentProductId]);
 
   const handleClickProduct = (product) => {
     if (!product?._id || !product?.name) return;
@@ -315,9 +345,9 @@ const ProductRecommendations = ({ currentProductId, currentProductData }) => {
   if (isHomePage) {
     if (displayHistory.length === 0) return null;
     return (
-      <section className="container mx-auto px-4 py-8">
+      <section className="container mx-auto px-4 py-6">
         <h2 className="text-2xl font-semibold text-black mb-4">
-          Recently Viewed
+          {t("recommendations.recentlyViewed")}
         </h2>
         <div className="flex space-x-4 overflow-x-auto pb-4 scrollbar-none">
           {displayHistory.map((product) => (
@@ -333,12 +363,15 @@ const ProductRecommendations = ({ currentProductId, currentProductData }) => {
   }
 
   return (
-    <section className="products-showcase bg-white py-8 rounded-lg shadow-sm">
-      <div className="container mx-auto px-4 space-y-12">
+    <section
+      ref={sectionRef}
+      className="products-showcase bg-white pt-2 pb-6 rounded-lg shadow-sm -mt-1"
+    >
+      <div className="container mx-auto px-4 space-y-6">
         {relatedProducts.length > 0 && (
-          <div className="border-t pt-8">
-            <h2 className="text-2xl font-semibold text-black mb-6">
-              Related Products
+          <div className="border-t border-slate-200 pt-4">
+            <h2 className="text-2xl font-semibold text-black mb-4">
+              {t("recommendations.relatedProducts")}
             </h2>
             <div className="grid grid-cols-2 sm:grid-cols-2 md:flex
                           gap-4 sm:gap-6 md:gap-20
@@ -354,9 +387,9 @@ const ProductRecommendations = ({ currentProductId, currentProductData }) => {
         )}
 
         {displayHistory.length > 0 && (
-          <div className="border-t pt-8">
-            <h2 className="text-2xl font-semibold text-black mb-6">
-              Your Browsing History
+          <div className="border-t border-slate-200 pt-4">
+            <h2 className="text-2xl font-semibold text-black mb-4">
+              {t("recommendations.browsingHistory")}
             </h2>
             <div className="grid grid-cols-2 sm:grid-cols-2 md:flex
                           gap-4 sm:gap-6 md:gap-10

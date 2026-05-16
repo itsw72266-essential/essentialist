@@ -6,6 +6,9 @@
  */
 
 import Link from "next/link"
+import { cookies } from "next/headers"
+import BlogListingHeader from "./BlogListingHeader.client"
+import BlogListingEmpty from "./BlogListingEmpty.client"
 
 // --- Configuration ---
 const BUSINESS_CONFIG = {
@@ -94,6 +97,10 @@ export const metadata = {
  */
 async function fetchBlogs(page = 1) {
   try {
+    const cookieStore = await cookies()
+    const locale =
+      cookieStore.get("essentialist_lang")?.value?.split("-")[0] || "en"
+
     const url = new URL("/api/next/blog/list", API_BASE_URL)
     url.searchParams.set("status", "published")
     url.searchParams.set("limit", "12")
@@ -101,6 +108,10 @@ async function fetchBlogs(page = 1) {
     url.searchParams.set("sort", "newest")
 
     const response = await fetch(url.toString(), {
+      headers: {
+        "Accept-Language": locale,
+        "X-Locale": locale,
+      },
       next: { revalidate: 120 },
     })
 
@@ -305,41 +316,15 @@ const BlogPage = async ({ searchParams }) => {
       <StructuredData posts={posts} currentPage={currentPage} totalPages={totalPages} />
 
       <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        {/* Header Section */}
-        <header className="max-w-3xl mb-12">
-          <h1 className="text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">
-            Beauty Tips & Makeup Insights
-          </h1>
-          <p className="mt-4 text-lg text-slate-600">
-            Expert tutorials, skincare advice, beauty trends, and exclusive updates from{" "}
-            <span className="font-semibold text-pink-600">{BUSINESS_CONFIG.name}</span>. Your go-to
-            resource for authentic beauty inspiration in {BUSINESS_CONFIG.city}, {BUSINESS_CONFIG.country}.
-          </p>
-
-          {/* Trust Signal */}
-          <div className="mt-6 flex flex-wrap gap-6 text-sm">
-            <div className="flex items-center gap-2">
-              <span className="text-2xl">📚</span>
-              <span className="text-slate-600">Expert-Written Content</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-2xl">🇨🇲</span>
-              <span className="text-slate-600">Cameroon-Focused Advice</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-2xl">✨</span>
-              <span className="text-slate-600">Authentic Products</span>
-            </div>
-          </div>
-        </header>
+        <BlogListingHeader
+          storeName={BUSINESS_CONFIG.name}
+          city={BUSINESS_CONFIG.city}
+          country={BUSINESS_CONFIG.country}
+        />
 
         {/* Blog Posts Grid */}
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {posts.length === 0 && (
-            <div className="col-span-full rounded-lg border border-slate-200 bg-white p-8 text-center text-slate-500 shadow-sm">
-              <p className="text-sm">No articles published yet. Check back soon for fresh beauty inspiration.</p>
-            </div>
-          )}
+          {posts.length === 0 && <BlogListingEmpty />}
 
           {posts.map((post) => {
             const publishedDate = post.publishedAt || post.createdAt

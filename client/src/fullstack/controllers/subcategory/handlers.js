@@ -6,6 +6,10 @@ import {
   localizeDocuments,
   sanitizeTranslations,
 } from "../../lib/localization.js";
+import {
+  autoTranslateSubCategory,
+  scheduleAutoTranslate,
+} from "../../utils/auto-translate.js";
 
 const SUBCATEGORY_CACHE_NAMESPACES = ["subcategories:list"];
 const PRODUCT_CACHE_NAMESPACES = [
@@ -62,6 +66,10 @@ export const AddSubCategoryController = async (request, response) => {
       ...SUBCATEGORY_CACHE_NAMESPACES,
       ...PRODUCT_CACHE_NAMESPACES
     ]);
+
+    scheduleAutoTranslate(() =>
+      autoTranslateSubCategory(save._id, save.toObject?.() ?? save),
+    );
 
     return response.json({
       message: "Sub Category Created",
@@ -139,6 +147,8 @@ export const updateSubCategoryController = async (request, response) => {
       ...SUBCATEGORY_CACHE_NAMESPACES,
       ...PRODUCT_CACHE_NAMESPACES
     ]);
+
+    scheduleAutoTranslate(() => autoTranslateSubCategory(_id));
 
     return response.json({
       message: "Updated Successfully",

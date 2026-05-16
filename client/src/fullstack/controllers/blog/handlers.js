@@ -9,6 +9,11 @@ import {
   localizeBlog,
   sanitizeTranslations,
 } from "../../lib/localization.js";
+import {
+  BLOG_TRANSLATION_FIELDS,
+  autoTranslateBlog,
+  scheduleAutoTranslate,
+} from "../../utils/auto-translate.js";
 
 // Cache for a month 
 const DEFAULT_CACHE = { maxAge: 2592000, sMaxAge: 2592000 };
@@ -105,20 +110,18 @@ export const createBlogController = async (request, response) => {
       status: normalizedStatus,
       metaTitle,
       metaDescription,
-      translations: sanitizeTranslations(translations, [
-        "title",
-        "excerpt",
-        "content",
-        "tags",
-        "metaTitle",
-        "metaDescription"
-      ]),
+      translations: sanitizeTranslations(translations, BLOG_TRANSLATION_FIELDS),
       readingTime: calculateReadingTime(content),
       author: request.userId || null,
       publishedAt: normalizedStatus === "published" ? new Date() : null
     });
 
     await safeInvalidateBlogCache();
+
+    scheduleAutoTranslate(() =>
+      autoTranslateBlog(blog._id, blog.toObject?.() ?? blog),
+    );
+
     return response.status(201).json({ message: "Blog created", data: blog, success: true });
   } catch (error) {
     return response.status(500).json({ message: error.message, error: true, success: false });
@@ -238,18 +241,18 @@ export const updateBlogController = async (request, response) => {
     });
 
     if (updates.translations !== undefined) {
-      blog.translations = sanitizeTranslations(updates.translations, [
-        "title",
-        "excerpt",
-        "content",
-        "tags",
-        "metaTitle",
-        "metaDescription"
-      ]);
+      blog.translations = sanitizeTranslations(
+        updates.translations,
+        BLOG_TRANSLATION_FIELDS,
+      );
     }
 
     await blog.save();
     await safeInvalidateBlogCache();
+
+    scheduleAutoTranslate(() =>
+      autoTranslateBlog(blog._id, blog.toObject?.() ?? blog),
+    );
 
     return response.json({ message: "Blog updated", data: blog, success: true });
   } catch (error) {

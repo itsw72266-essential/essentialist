@@ -2,8 +2,11 @@
 import React, { useState } from 'react';
 import Head from 'next/head';
 import { FaTiktok } from 'react-icons/fa';
+import { Trans, useTranslation } from 'react-i18next';
+import '@/lib/i18n';
 
 const ContactUsPage = () => {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -31,7 +34,7 @@ const ContactUsPage = () => {
       setFormStatus({
         submitted: true,
         success: true,
-        message: 'Thank you for contacting us! We will get back to you shortly.'
+        message: t('contact.success')
       });
       setFormData({
         name: '',
@@ -109,10 +112,10 @@ const ContactUsPage = () => {
       {/* Page Header */}
       <div className="container mx-auto px-4 py-10 text-center">
         <h1 className="text-5xl md:text-6xl font-extrabold text-pink-700 tracking-tight mb-4">
-          Contact Us
+          {t('contact.title')}
         </h1>
         <p className="text-xl text-gray-700 max-w-3xl mx-auto mb-8">
-          Have questions about makeup products, need beauty advice, or want to place an order? Our team of beauty experts is here to help you!
+          {t('contact.heroSubtitle')}
         </p>
       </div>
 
@@ -126,7 +129,7 @@ const ContactUsPage = () => {
             {/* (see your original JSX above) */}
             {/* Social icons as in your code */}
             <div className="mt-10">
-              <h3 className="font-semibold text-pink-800 mb-4">Follow Us</h3>
+              <h3 className="font-semibold text-pink-800 mb-4">{t('contact.followUs')}</h3>
               <div className="flex space-x-4">
                 {/* ...other socials... */}
                 <a href="https://www.tiktok.com/@essentialistmakeupstore" className="bg-pink-400 p-3 rounded-full hover:bg-pink-300 transition-colors" aria-label="Tiktok">
@@ -139,7 +142,7 @@ const ContactUsPage = () => {
           {/* Contact Form */}
           <div className="w-full md:w-3/5 bg-white rounded-xl shadow-lg p-6 md:p-8">
             <h2 className="text-2xl font-bold text-pink-800 mb-6 border-b border-gray-200 pb-3">
-              Send Us a Message
+              {t('contact.sendMessage')}
             </h2>
             {formStatus.submitted && formStatus.success ? (
               <div className="bg-green-50 border border-green-200 text-green-700 p-4 rounded-lg mb-6">
@@ -155,7 +158,7 @@ const ContactUsPage = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                      Your Name <span className="text-pink-600">*</span>
+                      {t('contact.name')} <span className="text-pink-600">*</span>
                     </label>
                     <input
                       type="text"
@@ -164,13 +167,13 @@ const ContactUsPage = () => {
                       value={formData.name}
                       onChange={handleChange}
                       required
-                      placeholder="John Doe"
+                      placeholder={t('contact.namePlaceholder')}
                       className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
                     />
                   </div>
                   <div>
                     <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                      Email Address <span className="text-pink-600">*</span>
+                      {t('contact.email')} <span className="text-pink-600">*</span>
                     </label>
                     <input
                       type="email"
@@ -179,7 +182,7 @@ const ContactUsPage = () => {
                       value={formData.email}
                       onChange={handleChange}
                       required
-                      placeholder="your@email.com"
+                      placeholder={t('contact.emailPlaceholder')}
                       className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
                     />
                   </div>
@@ -187,7 +190,7 @@ const ContactUsPage = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
-                      Phone Number
+                      {t('contact.phone')}
                     </label>
                     <input
                       type="tel"
@@ -195,13 +198,13 @@ const ContactUsPage = () => {
                       name="phone"
                       value={formData.phone}
                       onChange={handleChange}
-                      placeholder="+237 6XX XXX XXX"
+                      placeholder={t('contact.phonePlaceholder')}
                       className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
                     />
                   </div>
                   <div>
                     <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-1">
-                      Subject <span className="text-pink-600">*</span>
+                      {t('contact.subject')} <span className="text-pink-600">*</span>
                     </label>
                     <select
                       id="subject"
@@ -211,19 +214,19 @@ const ContactUsPage = () => {
                       required
                       className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
                     >
-                      <option value="">Select a subject</option>
-                      <option value="Product Inquiry">Product Inquiry</option>
-                      <option value="Order Status">Order Status</option>
-                      <option value="Return or Exchange">Return or Exchange</option>
-                      <option value="Beauty Advice">Beauty Advice</option>
-                      <option value="Website Feedback">Website Feedback</option>
-                      <option value="Other">Other</option>
+                      <option value="">{t('contact.selectSubject')}</option>
+                      <option value="Product Inquiry">{t('contact.subjectProduct')}</option>
+                      <option value="Order Status">{t('contact.subjectOrder')}</option>
+                      <option value="Return or Exchange">{t('contact.subjectReturn')}</option>
+                      <option value="Beauty Advice">{t('contact.subjectAdvice')}</option>
+                      <option value="Website Feedback">{t('contact.subjectFeedback')}</option>
+                      <option value="Other">{t('contact.subjectOther')}</option>
                     </select>
                   </div>
                 </div>
                 <div>
                   <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">
-                    Your Message <span className="text-pink-600">*</span>
+                    {t('contact.message')} <span className="text-pink-600">*</span>
                   </label>
                   <textarea
                     id="message"
@@ -232,7 +235,7 @@ const ContactUsPage = () => {
                     onChange={handleChange}
                     required
                     rows={5}
-                    placeholder="Please provide details about your inquiry..."
+                    placeholder={t('contact.messagePlaceholder')}
                     className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
                   ></textarea>
                 </div>
@@ -245,7 +248,12 @@ const ContactUsPage = () => {
                     className="h-4 w-4 text-pink-600 focus:ring-pink-500 border-gray-300 rounded"
                   />
                   <label htmlFor="privacy" className="ml-2 block text-sm text-gray-700">
-                    I agree to the <a href="/privacy-policy" className="text-pink-600 hover:text-pink-500">Privacy Policy</a> and consent to being contacted regarding my inquiry.
+                    <Trans
+                      i18nKey="contact.privacyConsent"
+                      components={{
+                        1: <a href="/privacy-policy" className="text-pink-600 hover:text-pink-500" />,
+                      }}
+                    />
                   </label>
                 </div>
                 <div>
@@ -253,7 +261,7 @@ const ContactUsPage = () => {
                     type="submit"
                     className="w-full bg-pink-600 text-white py-3 px-6 rounded-md font-medium hover:bg-pink-700 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500"
                   >
-                    Send Message
+                    {t('contact.send')}
                   </button>
                 </div>
               </form>
@@ -266,7 +274,7 @@ const ContactUsPage = () => {
       <div className="container mx-auto mt-16 px-4 md:px-0 max-w-6xl">
         <div className="bg-white p-4 rounded-xl shadow-lg">
           <h2 className="text-2xl font-bold text-pink-800 mb-4 text-center">
-            Find Our Store
+            {t('contact.findStore')}
           </h2>
           <div className="aspect-w-16 aspect-h-9 rounded-lg overflow-hidden">
             <iframe 

@@ -144,6 +144,10 @@ import {
   localizeDocuments,
   sanitizeTranslations,
 } from "../../lib/localization.js";
+import {
+  autoTranslateCategory,
+  scheduleAutoTranslate,
+} from "../../utils/auto-translate.js";
 
 export const CATEGORY_CACHE_NAMESPACE = "category:list";
 
@@ -180,6 +184,10 @@ export const AddCategoryController = async (request, response) => {
     }
 
     await invalidateCategoryCache();
+
+    scheduleAutoTranslate(() =>
+      autoTranslateCategory(saveCategory._id, saveCategory.toObject?.() ?? saveCategory),
+    );
 
     return response.json({
       message: "Add Category",
@@ -235,6 +243,10 @@ export const updateCategoryController = async (request, response) => {
     );
 
     await invalidateCategoryCache();
+
+    if (_id) {
+      scheduleAutoTranslate(() => autoTranslateCategory(_id));
+    }
 
     return response.json({
       message: "Updated Category",

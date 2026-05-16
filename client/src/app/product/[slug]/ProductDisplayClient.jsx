@@ -178,7 +178,7 @@
 //     <div className="space-y-16">
 //       <section>
 //         <div className="mb-8 inline-block border-b-4 border-amber-500 pb-1">
-//           <h3 className="text-2xl font-bold">What Stands Out</h3>
+//           <h3 className="text-2xl font-bold">{t("product.whatStandsOut")}</h3>
 //         </div>
 //         <div className="grid gap-6 md:grid-cols-3">
 //           {["Deep Cleansing", "Heartleaf Extract", "Korean Formula"].map((title) => (
@@ -202,7 +202,7 @@
 
 //       <section className="space-y-6">
 //         <div className="mb-4 inline-block border-b-4 border-amber-500 pb-1">
-//           <h3 className="text-2xl font-bold text-slate-900">Product Details</h3>
+//           <h3 className="text-2xl font-bold text-slate-900">{t("product.productDetails")}</h3>
 //         </div>
 //         <div className="grid gap-4 text-sm text-slate-700">
 //           {[product.specifications, product.unit].filter(Boolean).map((detail, i) => (
@@ -269,7 +269,7 @@
 "use client";
 
 import { useMemo } from "react";
-import Image from "next/image";
+import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import dynamic from "next/dynamic";
 
@@ -290,8 +290,8 @@ function FCFA(amount) {
   return `${amount.toLocaleString('en-US')} FCFA`
 }
 
-function formatProductDescription(text) {
-  if (!text) return "No description available for this product.";
+function formatProductDescription(text, noDescriptionText) {
+  if (!text) return noDescriptionText;
   let formattedText = text.replace(/<\/?(b|strong)[^>]*>/gi, '');
   formattedText = formattedText.replace(/<\/p>/gi, '|||').replace(/<p[^>]*>/gi, '').replace(/<br\s*\/?>/gi, '|||').replace(/\n/g, '|||');
   formattedText = formattedText.replace(/([A-Z][A-Z\s\-&]{3,50})\s*-\s+/g, '|||$1 - ');
@@ -340,6 +340,7 @@ export default function ProductDisplayClient({
   initialReviewStats,
   initialDataUpdatedAt,
 }) {
+  const { t } = useTranslation();
   const { data: productData, isLoading: isProductLoading, isError: isProductError } = useQuery({
     ...productQueryOptions(productId),
     initialData: initialProduct,
@@ -352,7 +353,7 @@ export default function ProductDisplayClient({
   });
 
   if (isProductLoading && !productData) return <PageSkeleton />;
-  if (isProductError || !productData) return <section className="container mx-auto p-6 text-center"><p className="text-lg font-semibold text-rose-600">Unable to load product.</p></section>;
+  if (isProductError || !productData) return <section className="container mx-auto p-6 text-center"><p className="text-lg font-semibold text-rose-600">{t("product.loadError")}</p></section>;
 
   const images = useMemo(() => {
     if (Array.isArray(productData.image)) return productData.image.filter(Boolean);
@@ -360,7 +361,7 @@ export default function ProductDisplayClient({
   }, [productData.image]);
 
   return (
-    <main className="container mx-auto p-4 pb-20 text-slate-900 font-medium">
+    <main className="container mx-auto p-4 pb-4 text-slate-900 font-medium">
       <nav className="mb-4 flex flex-wrap items-center gap-2 text-[11px] text-slate-500 uppercase">
         <span className="hover:text-pink-600">{typeof productData.brand === 'object' ? productData.brand?.name : productData.brand}</span>
         <span>/</span>
@@ -370,7 +371,7 @@ export default function ProductDisplayClient({
       <div className="grid gap-6 lg:grid-cols-2 lg:gap-12">
         <div className="relative min-w-0">
           <div className="absolute left-2 top-2 z-10">
-            <span className="bg-pink-500 text-white text-[10px] font-bold px-2 py-1 rounded shadow-sm uppercase">Bestseller</span>
+            <span className="bg-pink-500 text-white text-[10px] font-bold px-2 py-1 rounded shadow-sm uppercase">{t("product.bestseller")}</span>
           </div>
           <ProductGallery images={images} productName={productData.name} />
         </div>
@@ -384,36 +385,38 @@ export default function ProductDisplayClient({
           />
           <Divider />
           <div className="flex flex-wrap items-end justify-between gap-4">
-            <PriceBlock label="Bulk Price" amount={pricewithDiscount(productData.bulkPrice ?? productData.price, productData.discount ?? 0)} baseAmount={productData.bulkPrice ?? productData.price} discount={productData.discount} />
-            <PriceBlock label="Selling Price" amount={pricewithDiscount(productData.price, productData.discount ?? 0)} baseAmount={productData.price} discount={productData.discount} />
+            <PriceBlock label={t("product.bulkPrice")} amount={pricewithDiscount(productData.bulkPrice ?? productData.price, productData.discount ?? 0)} baseAmount={productData.bulkPrice ?? productData.price} discount={productData.discount} />
+            <PriceBlock label={t("product.sellingPrice")} amount={pricewithDiscount(productData.price, productData.discount ?? 0)} baseAmount={productData.price} discount={productData.discount} />
             <div className="flex-none shadow-[0_0_12px_rgba(244,114,182,0.4)] rounded-lg"><AddToCartButton data={productData} /></div>
           </div>
-          <div className="flex items-center gap-2 bg-pink-50 border border-pink-100 p-2.5 rounded text-xs text-pink-800 font-semibold"><span>✓ 100% Authentic & Imported</span></div>
+          <div className="flex items-center gap-2 bg-pink-50 border border-pink-100 p-2.5 rounded text-xs text-pink-800 font-semibold"><span>✓ {t("product.authentic")}</span></div>
           <Divider />
           <WhyShopWithUs />
         </aside>
       </div>
 
       {/* GAP FIXED: Removed pb-32 mb-24 from here */}
-      <div className="mt-16 w-full border-t border-slate-200 pt-12">
+      <div className="mt-10 w-full border-t border-slate-200 pt-8">
         <DescriptionBlock product={productData} />
       </div>
 
-      <section id="reviews" className="mt-16 scroll-mt-24 border-t border-slate-200 pt-10">
-        <h2 className="text-xl font-bold text-slate-900 mb-2">Customer reviews</h2>
-        <p className="text-sm text-slate-600 mb-6">
-          Share your experience with {productData.name}. Reviews help other shoppers choose with confidence.
-        </p>
+      <section id="reviews" className="mt-8 scroll-mt-24 border-t border-slate-200 pt-6 pb-2">
         <ReviewsSection productId={productId} productName={productData.name} />
       </section>
-
-      <div className="h-40 w-full" />
     </main>
   );
 }
 
-function Badge() { return <span className="inline-flex rounded-full bg-pink-100 border border-pink-200 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-pink-700">Fast Cameroon Delivery</span>; }
+function Badge() {
+  const { t } = useTranslation();
+  return (
+    <span className="inline-flex rounded-full bg-pink-100 border border-pink-200 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-pink-700">
+      {t("product.fastDelivery")}
+    </span>
+  );
+}
 function RatingSummary({ reviewStats, productName }) {
+  const { t } = useTranslation();
   const count = Number(reviewStats?.count ?? 0) || 0;
   const average = Number(reviewStats?.average ?? 0);
 
@@ -421,7 +424,7 @@ function RatingSummary({ reviewStats, productName }) {
     return (
       <div className="space-y-2">
         <p className="text-sm text-slate-600">
-          No reviews yet for this product.
+          {t("product.reviews.noReviewsProduct")}
         </p>
         <button
           type="button"
@@ -431,7 +434,7 @@ function RatingSummary({ reviewStats, productName }) {
           }}
           className="inline-flex text-sm font-semibold text-pink-600 hover:text-pink-700 underline-offset-2 hover:underline"
         >
-          Write the first review
+          {t("product.reviews.writeFirst")}
         </button>
       </div>
     );
@@ -445,7 +448,7 @@ function RatingSummary({ reviewStats, productName }) {
           <span className="text-2xl font-bold text-slate-900">{average.toFixed(1)}</span>
           <span className="text-slate-500">/ 5</span>
           <span className="text-slate-600">
-            ({count} review{count === 1 ? "" : "s"})
+            ({t("product.reviews.count", { count })})
           </span>
         </div>
       </div>
@@ -457,7 +460,7 @@ function RatingSummary({ reviewStats, productName }) {
         }}
         className="inline-flex text-sm font-medium text-pink-600 hover:text-pink-700 underline-offset-2 hover:underline"
       >
-        See or add a review for {productName}
+        {t("product.reviews.seeOrAdd", { productName })}
       </button>
     </div>
   );
@@ -466,23 +469,27 @@ function PriceBlock({ label, amount, baseAmount, discount }) {
   return <div className="flex flex-col gap-1"><h2 className="text-[10px] font-extrabold uppercase text-slate-400 tracking-widest">{label}</h2><span className="text-xl font-bold text-slate-900 sm:text-2xl">{FCFA(amount)}</span>{discount > 0 && <div className="flex items-center gap-1 text-[10px]"><span className="text-slate-400 line-through">{FCFA(baseAmount)}</span><span className="text-pink-500 font-bold">-{discount}%</span></div>}</div>;
 }
 function DescriptionBlock({ product }) {
+  const { t } = useTranslation();
   const hasKeyFeatures = Array.isArray(product.keyFeatures) && product.keyFeatures.length > 0;
-  const formattedDescription = formatProductDescription(product.description);
+  const formattedDescription = formatProductDescription(
+    product.description,
+    t("product.noDescription"),
+  );
   return (
     <div className="space-y-12">
       {hasKeyFeatures && (
         <section>
-          <div className="mb-8 inline-block border-b-4 border-pink-500 pb-1"><h3 className="text-2xl font-bold">What Stands Out</h3></div>
+          <div className="mb-8 inline-block border-b-4 border-pink-500 pb-1"><h3 className="text-2xl font-bold">{t("product.whatStandsOut")}</h3></div>
           <div className="grid gap-6 md:grid-cols-3">{product.keyFeatures.map((f, i) => (<div key={i} className="p-6 rounded-xl border border-pink-100 bg-pink-50/30 shadow-sm"><h4 className="font-bold mb-2 text-pink-900">{f.title || f}</h4></div>))}</div>
         </section>
       )}
       <section>
-        <div className="mb-6 inline-block border-b-4 border-pink-500 pb-1"><h3 className="text-2xl font-bold text-gray-900">Product Description</h3></div>
+        <div className="mb-6 inline-block border-b-4 border-pink-500 pb-1"><h3 className="text-2xl font-bold text-gray-900">{t("product.productDescription")}</h3></div>
         <div className="text-base text-justify max-w-4xl" dangerouslySetInnerHTML={{ __html: formattedDescription }} />
       </section>
       {(product.specifications || product.unit) && (
         <section className="space-y-6">
-          <div className="mb-2 inline-block border-b-4 border-pink-500 pb-1"><h3 className="text-2xl font-bold text-slate-900">Product Details</h3></div>
+          <div className="mb-2 inline-block border-b-4 border-pink-500 pb-1"><h3 className="text-2xl font-bold text-slate-900">{t("product.productDetails")}</h3></div>
           <div className="grid gap-4 text-sm text-slate-700">{[product.specifications, product.unit].filter(Boolean).map((detail, i) => (<div key={i} className="flex items-start gap-3"><div className="mt-1 h-5 w-5 flex-shrink-0 rounded-full bg-pink-100 text-pink-600 flex items-center justify-center font-bold text-[10px]">✓</div><div className="pt-0.5">{typeof detail === 'object' ? JSON.stringify(detail) : detail}</div></div>))}</div>
         </section>
       )}
@@ -490,7 +497,29 @@ function DescriptionBlock({ product }) {
   );
 }
 function WhyShopWithUs() {
-  const perks = [{ title: "Fast Delivery", icon: "/assets/minute_delivery.jpeg" }, { title: "Best Prices", icon: "/assets/Best_Prices_Offers.png" }, { title: "Authentic Products", icon: "https://d2ati23fc66y9j.cloudfront.net/ubuycom-v1/images/ubuy-seal-authentic.png.webp" }];
-  return <div className="grid gap-3">{perks.map((p) => (<div key={p.title} className="flex items-center gap-3 p-2 rounded-lg border border-slate-100 bg-white"><img src={p.icon} alt={p.title} className="h-10 w-10 object-cover rounded" /><div><h3 className="font-bold text-slate-800 text-xs">{p.title}</h3></div></div>))}</div>;
+  const { t } = useTranslation();
+  const perks = [
+    { titleKey: "product.perks.fastDelivery", icon: "/assets/minute_delivery.jpeg" },
+    { titleKey: "product.perks.bestPrices", icon: "/assets/Best_Prices_Offers.png" },
+    {
+      titleKey: "product.perks.authenticProducts",
+      icon: "https://d2ati23fc66y9j.cloudfront.net/ubuycom-v1/images/ubuy-seal-authentic.png.webp",
+    },
+  ];
+  return (
+    <div className="grid gap-3">
+      {perks.map((p) => {
+        const title = t(p.titleKey);
+        return (
+          <div key={p.titleKey} className="flex items-center gap-3 p-2 rounded-lg border border-slate-100 bg-white">
+            <img src={p.icon} alt={title} className="h-10 w-10 object-cover rounded" />
+            <div>
+              <h3 className="font-bold text-slate-800 text-xs">{title}</h3>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
 }
 function PageSkeleton() { return <div className="container mx-auto p-10 animate-pulse bg-slate-50 h-screen rounded-xl" />; }

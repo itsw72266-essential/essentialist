@@ -6,9 +6,12 @@ import CardProduct from './CardProduct'
 import { FaAngleLeft, FaAngleRight, FaArrowRight } from 'react-icons/fa6'
 import { valideURLConvert } from '../utils/valideURLConvert'
 import Link from 'next/link'
+import { useTranslation } from 'react-i18next'
+import '@/lib/i18n'
 
 // No fetch/loading; render pre-fetched products directly for instant load
 const CategoryWiseProductDisplay = ({ id, name, products = [], subCategories = [] }) => {
+  const { t } = useTranslation()
   const [redirectURL, setRedirectURL] = useState(`/${valideURLConvert(name)}-${id}`)
   const containerRef = useRef()
 
@@ -52,7 +55,7 @@ const CategoryWiseProductDisplay = ({ id, name, products = [], subCategories = [
           className="text-pink-400 hover:text-green-400 font-bold md:text-[20px] text-[16px] transition-colors duration-300 p-4 flex items-center gap-2 hover:gap-3"
           aria-label={`View all ${name} products`}
         >
-          See All
+          {t('common.seeAll')}
           <FaArrowRight className="transition-all duration-300" />
         </Link>
       </div>

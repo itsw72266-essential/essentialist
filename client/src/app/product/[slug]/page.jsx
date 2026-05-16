@@ -892,11 +892,15 @@
  * FIXED: OpenGraph type validation error (use 'website' not 'og:product')
  */
 
-import { Suspense } from "react"
 import { notFound } from "next/navigation"
 import { unstable_cache } from "next/cache"
+import dynamic from "next/dynamic"
 import ProductDisplayClient from "./ProductDisplayClient"
-import ProductRecommendations from "../../../components/ProductRecommendations"
+
+const ProductRecommendations = dynamic(
+  () => import("../../../components/ProductRecommendations"),
+  { loading: () => null, ssr: false },
+)
 import { pricewithDiscount } from "../../../utils/PriceWithDiscount"
 import { fetchProduct, fetchReviewStats } from "./queries"
 
@@ -1307,7 +1311,7 @@ const tabularStyles = `
  */
 function RecommendationsSkeleton() {
   return (
-    <section className="container mx-auto px-4 pb-10 mt-12 border-t pt-10">
+    <section className="container mx-auto px-4 pb-4 mt-2 border-t border-slate-200 pt-4">
       <div className="h-8 w-64 bg-slate-100 rounded animate-pulse mb-8" />
       <div className="grid grid-cols-2 gap-6 md:grid-cols-4">
         {[...Array(4)].map((_, idx) => (
@@ -1551,12 +1555,10 @@ export default async function ProductDisplayPage({ params }) {
       />
 
       {/* Product Recommendations */}
-      <Suspense fallback={<RecommendationsSkeleton />}>
-        <ProductRecommendations
-          currentProductId={productId}
-          currentProductData={productData}
-        />
-      </Suspense>
+      <ProductRecommendations
+        currentProductId={productId}
+        currentProductData={productData}
+      />
     </>
   )
 }

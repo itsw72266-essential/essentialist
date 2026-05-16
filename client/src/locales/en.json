@@ -56,7 +56,7 @@
     "brands": "BRANDS",
     "newHot": "NEW & HOT",
     "blog": "BLOG",
-    "contactUs": "CONTACT US",
+    "contactUs": "CONTACT",
     "salesOffers": "SALES & OFFERS",
     "offers": "Offers",
     "clearance": "Clearance",
@@ -70,7 +70,8 @@
     "store": "Store",
     "language": "Language",
     "english": "English",
-    "french": "French"
+    "french": "French",
+    "shopAllMakeup": "Shop All Makeup"
   },
   "footer": {
     "backgroundTitle": "Footer Background Paths",
@@ -112,7 +113,8 @@
     "signUp": "Sign Up",
     "cantFind": "Is there a product you cannot find on our website? Do tell us",
     "here": "here!",
-    "rights": "All rights reserved."
+    "rights": "All rights reserved.",
+    "language": "Language"
   },
   "product": {
     "product": "Product",
@@ -122,10 +124,65 @@
     "addToCartFull": "Add to cart",
     "description": "Description",
     "specifications": "Specifications",
-    "reviews": "Reviews",
+    "reviewsTab": "Reviews",
     "relatedProducts": "Related products",
     "inStock": "In stock",
-    "outOfStock": "Out of stock"
+    "outOfStock": "Out of stock",
+    "loadError": "Unable to load product.",
+    "bestseller": "Bestseller",
+    "fastDelivery": "Fast Cameroon Delivery",
+    "bulkPrice": "Bulk Price",
+    "sellingPrice": "Selling Price",
+    "authentic": "100% Authentic & Imported",
+    "whatStandsOut": "What Stands Out",
+    "productDescription": "Product Description",
+    "productDetails": "Product Details",
+    "noDescription": "No description available for this product.",
+    "perks": {
+      "fastDelivery": "Fast Delivery",
+      "bestPrices": "Best Prices",
+      "authenticProducts": "Authentic Products"
+    },
+    "reviews": {
+      "sectionTitle": "Customer reviews",
+      "sectionIntro": "Share your experience with {{productName}}. Reviews help other shoppers choose with confidence.",
+      "leaveReview": "Leave a Review",
+      "noReviewsYet": "No published reviews yet.",
+      "count_one": "{{count}} review",
+      "count_other": "{{count}} reviews",
+      "submitFailed": "Failed to submit review",
+      "customer": "Customer",
+      "overall": "Overall from published reviews:",
+      "beFirst": "Be the first to share your experience. Click \"Leave a Review\" above.",
+      "loading": "Loading reviews…",
+      "verifiedPurchase": "Verified purchase",
+      "modal": {
+        "title": "How would you rate this product?",
+        "introWithProduct": "Your feedback on {{productName}} helps other shoppers choose with confidence.",
+        "introGeneric": "Your feedback helps other shoppers choose with confidence.",
+        "headlineOptional": "Headline (optional)",
+        "headlinePlaceholder": "Summarize your experience",
+        "experienceOptional": "Tell us more about your experience (optional)",
+        "experiencePlaceholder": "What did you like? What could be improved?",
+        "maybeLater": "Maybe later",
+        "submit": "Submit review",
+        "submitting": "Submitting…",
+        "ratingRequired": "Please select a star rating.",
+        "thankYou": "Thank you — your review was published."
+      },
+      "writeFirst": "Write the first review",
+      "seeOrAdd": "See or add a review for {{productName}}",
+      "noReviewsProduct": "No reviews yet for this product.",
+      "ratingAria": "Average rating {{average}} from {{count}} reviews",
+      "summaryAria": "Product review summary"
+    }
+  },
+  "success": {
+    "postPurchaseReview": {
+      "title": "Thank you for your purchase",
+      "body": "We would love your feedback. Choose a product below to leave a short review — it helps other shoppers.",
+      "close": "Close"
+    }
   },
   "cart": {
     "cart": "Cart",

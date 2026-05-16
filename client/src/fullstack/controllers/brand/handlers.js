@@ -10,6 +10,7 @@ import {
   localizeDocuments,
   sanitizeTranslations,
 } from "../../lib/localization.js";
+import { autoTranslateBrand, scheduleAutoTranslate } from "../../utils/auto-translate.js";
 
 const BRAND_CACHE_NAMESPACES = ["brands:list", "brands:details"];
 const PRODUCT_CACHE_NAMESPACES = [
@@ -95,6 +96,10 @@ export const createBrandController = async (request, response) => {
     });
 
     await safeInvalidateCacheNamespaces([...BRAND_CACHE_NAMESPACES, ...PRODUCT_CACHE_NAMESPACES]);
+
+    scheduleAutoTranslate(() =>
+      autoTranslateBrand(brand._id, brand.toObject?.() ?? brand),
+    );
 
     return response.json({
       message: "Brand created successfully",
@@ -274,6 +279,10 @@ export const updateBrandController = async (request, response) => {
     await brand.save();
 
     await safeInvalidateCacheNamespaces([...BRAND_CACHE_NAMESPACES, ...PRODUCT_CACHE_NAMESPACES]);
+
+    scheduleAutoTranslate(() =>
+      autoTranslateBrand(brand._id, brand.toObject?.() ?? brand),
+    );
 
     return response.json({
       message: "Brand updated successfully",

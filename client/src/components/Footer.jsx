@@ -529,6 +529,7 @@ import {
   FaYoutube
 } from 'react-icons/fa'
 import { useTranslation } from 'react-i18next'
+import LanguageSwitcher from './LanguageSwitcher'
 
 const Footer = () => {
   const { t } = useTranslation()
@@ -942,8 +943,11 @@ const Footer = () => {
           </div>
         </div>
 
-        <div className="mt-6 sm:mt-10 text-center text-xs sm:text-sm text-gray-700">
-          &copy; {new Date().getFullYear()} EssentialistMakeupStore. {t('footer.rights')}
+        <div className="mt-6 sm:mt-10 flex flex-col items-center gap-3">
+          <LanguageSwitcher compact />
+          <p className="text-center text-xs sm:text-sm text-gray-700">
+            &copy; {new Date().getFullYear()} EssentialistMakeupStore. {t('footer.rights')}
+          </p>
         </div>
       </div>
     </footer>
