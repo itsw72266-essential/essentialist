@@ -56,22 +56,35 @@ function getGenerativeModel(modelName, systemInstruction) {
   });
 }
 
+function getErrorMessage(error) {
+  return String(error?.message || "").toLowerCase();
+}
+
 function isRetryableError(error) {
   const status = error?.status ?? error?.statusCode;
   if (RETRYABLE.has(status)) return true;
-  const message = String(error?.message || "").toLowerCase();
-  return (
-    message.includes("429") ||
-    message.includes("503") ||
-    message.includes("resource exhausted")
-  );
+  const message = getErrorMessage(error);
+  return message.includes("503") || message.includes("resource exhausted");
+}
+
+function isQuotaError(error) {
+  const status = error?.status ?? error?.statusCode;
+  if (status === 429) return true;
+  return getErrorMessage(error).includes("quota");
 }
 
 function isModelNotFoundError(error) {
   const status = error?.status ?? error?.statusCode;
   if (status === 404) return true;
-  const message = String(error?.message || "").toLowerCase();
+  const message = getErrorMessage(error);
   return message.includes("not found") && message.includes("models/");
+}
+
+function getRetryDelayMs(error, attempt) {
+  const message = String(error?.message || "");
+  const match = message.match(/retry in (\d+(?:\.\d+)?)s/i);
+  if (match) return Math.ceil(Number(match[1]) * 1000) + 500;
+  return 1000 * (attempt + 1);
 }
 
 /**
@@ -93,12 +106,13 @@ export async function generateJsonWithFallback(prompt, systemInstruction) {
         return parsed && typeof parsed === "object" ? parsed : null;
       } catch (error) {
         lastError = error;
-        if (isModelNotFoundError(error)) {
-          console.warn(`[gemini] Model unavailable: ${modelName}, trying next…`);
+        if (isModelNotFoundError(error) || isQuotaError(error)) {
+          const reason = isQuotaError(error) ? "quota" : "not found";
+          console.warn(`[gemini] ${modelName} ${reason}, trying next model…`);
           break;
         }
         if (isRetryableError(error) && attempt < MAX_ATTEMPTS - 1) {
-          await sleep(1000 * (attempt + 1));
+          await sleep(getRetryDelayMs(error, attempt));
           continue;
         }
         throw error;
