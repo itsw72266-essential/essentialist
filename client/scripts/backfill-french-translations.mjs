@@ -2,8 +2,8 @@
  * Backfill translations.fr.* for the whole catalog (run locally against production DB).
  *
  * Usage (from client/):
- *   npm run backfill:fr
- *   npm run backfill:fr -- --entities=products,brands --batch=50
+ *   pnpm backfill:fr
+ *   pnpm backfill:fr -- --entities=products,brands --batch=50
  */
 
 import path from "node:path";

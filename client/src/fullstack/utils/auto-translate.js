@@ -256,7 +256,7 @@ export async function getFrenchTranslationStats() {
 
 /**
  * Persist French translations for existing DB rows (batch backfill).
- * Run via admin API (batched) or `npm run backfill:fr` locally for full catalog.
+ * Run via admin API (batched) or `pnpm backfill:fr` locally for full catalog.
  */
 export async function backfillFrenchTranslations({
   entities = Object.keys(BACKFILL_ENTITIES),
