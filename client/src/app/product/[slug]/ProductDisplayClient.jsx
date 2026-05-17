@@ -488,7 +488,10 @@ function DescriptionBlock({ product }) {
       )}
       <section>
         <div className="mb-6 inline-block border-b-4 border-pink-500 pb-1"><h3 className="text-2xl font-bold text-gray-900">{t("product.productDescription")}</h3></div>
-        <div className="text-base text-justify max-w-4xl" dangerouslySetInnerHTML={{ __html: formattedDescription }} />
+        <div
+          className="product-description-content w-full max-w-none text-base text-left"
+          dangerouslySetInnerHTML={{ __html: formattedDescription }}
+        />
       </section>
       {(product.specifications || product.unit) && (
         <section className="space-y-6">
