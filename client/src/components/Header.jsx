@@ -65,6 +65,7 @@ const Header = () => {
     const searchBarRef = useRef(null)
     const [isClient, setIsClient] = useState(false);
     const [deliveryDate, setDeliveryDate] = useState('');
+    const [deliveryDateShort, setDeliveryDateShort] = useState('');
     const [deliveryTime, setDeliveryTime] = useState('');
 
     const navLinks = useMemo(() => [
@@ -86,8 +87,13 @@ const Header = () => {
             tomorrow.setDate(tomorrow.getDate() + 2);
         }
         
-        const options = { weekday: 'long', month: 'short', day: 'numeric' };
-        setDeliveryDate(tomorrow.toLocaleDateString(locale === 'fr' ? 'fr-FR' : 'en-US', options));
+        const localeTag = locale === 'fr' ? 'fr-FR' : 'en-US';
+        setDeliveryDate(
+            tomorrow.toLocaleDateString(localeTag, { weekday: 'long', month: 'short', day: 'numeric' })
+        );
+        setDeliveryDateShort(
+            tomorrow.toLocaleDateString(localeTag, { weekday: 'short', month: 'short', day: 'numeric' })
+        );
         
         const endOfDay = new Date();
         endOfDay.setHours(23, 59, 59, 999);
@@ -178,30 +184,42 @@ const Header = () => {
 
     return (
         <header ref={headerRef} className="bg-white shadow" style={headerStyle}>
-            <div className="bg-pink-400 text-white px-2 py-1 sm:px-1 flex flex-col lg:flex-row items-center justify-between text-xs sm:text-sm">
-                <div className="flex items-center justify-center lg:justify-start w-full lg:w-auto gap-4">
-                    <div className="flex items-center">
-                        <HiPhone className="mr-1" />
-                        <span>+237 655 22 55 69</span>
-                    </div>
-                    <div className="flex items-center">
-                        <HiMail className="mr-1" />
-                        <span>esssmakeup@gmail.com</span>
-                    </div>
+            <div className="bg-pink-400 text-white px-1 py-0.5 sm:px-2 sm:py-1 flex flex-row flex-nowrap items-center justify-between gap-1 sm:gap-2 text-[10px] leading-tight sm:text-xs lg:text-sm min-h-[26px] sm:min-h-0">
+                <div className="flex items-center shrink-0 gap-1.5 sm:gap-3 lg:gap-4">
+                    <a
+                        href="tel:+237655225569"
+                        className="flex items-center gap-0.5 hover:text-purple-200 whitespace-nowrap"
+                        aria-label="+237 655 22 55 69"
+                    >
+                        <HiPhone className="size-3 sm:size-3.5 shrink-0" />
+                        <span className="hidden min-[400px]:inline lg:inline">+237 655 22 55 69</span>
+                    </a>
+                    <a
+                        href="mailto:esssmakeup@gmail.com"
+                        className="flex items-center gap-0.5 hover:text-purple-200"
+                        aria-label="esssmakeup@gmail.com"
+                    >
+                        <HiMail className="size-3 sm:size-3.5 shrink-0" />
+                        <span className="hidden md:inline">esssmakeup@gmail.com</span>
+                    </a>
                 </div>
-                <div className="font-medium text-center w-full lg:w-auto py-1 lg:py-0 flex items-center justify-center">
-                    <BiTimeFive className="mr-1 animate-pulse" />
-                    <span>
-                        {t('header.orderNow')} {deliveryDate} - {deliveryTime} 
-                        <span className="inline-flex items-center ml-1 font-bold">{t('header.left')}</span>
+                <div className="flex min-w-0 flex-1 items-center justify-center px-0.5 font-medium">
+                    <BiTimeFive className="mr-0.5 size-3 shrink-0 animate-pulse sm:mr-1 sm:size-3.5" />
+                    <span className="truncate text-center">
+                        <span className="hidden lg:inline">{t('header.orderNow')} </span>
+                        <span className="lg:hidden">{deliveryDateShort}</span>
+                        <span className="hidden lg:inline">{deliveryDate}</span>
+                        <span className="mx-0.5">·</span>
+                        <span className="font-bold">{deliveryTime}</span>
+                        <span className="hidden sm:inline lg:inline"> {t('header.left')}</span>
                     </span>
                 </div>
-                <div className="flex items-center justify-center lg:justify-end w-full lg:w-auto gap-2 sm:gap-4 mt-1 lg:mt-0">
+                <div className="flex shrink-0 items-center gap-1 sm:gap-2 lg:gap-4">
                     <LanguageSwitcher compact />
-                    <div className="flex items-center cursor-pointer hover:text-purple-200 text-xs sm:text-sm">
-                        <FaMapMarkerAlt className="mr-1" />
+                    <div className="flex items-center cursor-pointer hover:text-purple-200 whitespace-nowrap">
+                        <FaMapMarkerAlt className="mr-0.5 size-3 shrink-0 sm:mr-1 sm:size-3.5" />
                         <span className="hidden sm:inline">Bonamoussadi, Carrefour Maçon, Douala, Cameroon</span>
-                        <span className="inline sm:hidden">{t('header.store')}</span>
+                        <span className="sm:hidden">{t('header.store')}</span>
                     </div>
                 </div>
             </div>

@@ -16,15 +16,24 @@ body {
   @apply bg-background text-foreground;
 }
 
-/* Longer French copy: wrap safely and slightly tighten rhythm in compact UI */
+/* French UI strings are longer — scale rem-based typography down sitewide */
+html[lang="fr"] {
+  font-size: 93.75%;
+}
+
 html[lang="fr"] .locale-compact {
   overflow-wrap: anywhere;
   word-break: break-word;
   hyphens: auto;
 }
 
-html[lang="fr"] [data-locale-compact="true"] {
-  font-size: calc(1em * var(--locale-text-scale, 0.94));
+/* Product cards: keep EN-equivalent pixel sizes when root font is scaled */
+html[lang="fr"] .product-text-fixed {
+  font-size: calc(0.875rem / 0.9375);
+}
+
+html[lang="fr"] .product-text-fixed-xs {
+  font-size: calc(0.75rem / 0.9375);
 }
 
 /* Custom Scrollbar */

@@ -13,10 +13,8 @@ export function useLanguageSync() {
     const applyLanguage = (language) => {
       const locale = normalizeLocale(language);
       document.documentElement.lang = locale;
-      document.documentElement.style.setProperty(
-        "--locale-text-scale",
-        locale === "fr" ? "0.94" : "1",
-      );
+      document.documentElement.style.fontSize =
+        locale === "fr" ? "93.75%" : "";
     };
 
     applyLanguage(i18n.resolvedLanguage || i18n.language);

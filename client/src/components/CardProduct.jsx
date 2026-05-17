@@ -355,19 +355,19 @@ const CardProduct = React.memo(({ data, isLoading = false, priority = false }) =
           <CardProductRating productId={data._id} />
         </div>
 
-        <h3 className="font-bold text-gray-900 text-sm line-clamp-2 break-words mb-1 transition-colors duration-300 group-hover:text-pink-600">
+        <h3 className="product-text-fixed font-bold text-gray-900 text-sm line-clamp-2 break-words mb-1 transition-colors duration-300 group-hover:text-pink-600">
           {displayName}
         </h3>
 
         {displayUnit && (
-          <div className="text-gray-400 text-xs mb-3 font-medium line-clamp-1 break-words">
+          <div className="product-text-fixed-xs text-gray-400 text-xs mb-3 font-medium line-clamp-1 break-words">
             {displayUnit}
           </div>
         )}
 
         <div className="flex items-center justify-between mt-auto">
           <div className="flex flex-col">
-            <div className="font-black text-gray-900 text-sm">
+            <div className="product-text-fixed font-black text-gray-900 text-sm">
               {DisplayPriceInRupees(discountedPrice)}
             </div>
             {Boolean(data.discount) && (

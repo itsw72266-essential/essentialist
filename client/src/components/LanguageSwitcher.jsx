@@ -109,15 +109,25 @@ const LanguageSwitcher = ({ className = "", compact = false }) => {
       <button
         type="button"
         onClick={() => setOpen((value) => !value)}
-        className="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm font-bold text-gray-900 shadow-sm transition-colors hover:border-gray-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-1"
+        className={`inline-flex items-center rounded-md border border-gray-300 bg-white font-bold text-gray-900 shadow-sm transition-colors hover:border-gray-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-1 ${
+          compact
+            ? "gap-0.5 px-1 py-0.5 text-[10px] leading-none"
+            : "gap-2 px-3 py-1.5 text-sm"
+        }`}
         aria-label={t("header.language")}
         aria-haspopup="listbox"
         aria-expanded={open}
       >
-        <FlagIcon locale={active.code} clipId={gbClipId} />
+        <FlagIcon
+          locale={active.code}
+          clipId={gbClipId}
+          className={compact ? "scale-75 origin-center" : ""}
+        />
         <span>{active.label}</span>
         <ChevronDown
-          className={`h-4 w-4 shrink-0 text-gray-500 transition-transform ${open ? "rotate-180" : ""}`}
+          className={`shrink-0 text-gray-500 transition-transform ${open ? "rotate-180" : ""} ${
+            compact ? "h-3 w-3" : "h-4 w-4"
+          }`}
           strokeWidth={2}
         />
       </button>
