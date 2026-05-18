@@ -2,18 +2,9 @@ import { getServerSideApiBaseUrl } from "@/lib/serverApiOrigin";
 import { buildLanguageAlternates } from "@/lib/seo/localePaths";
 
 /**
- * @typedef {Object} SitemapEntry
- * @property {string} url
- * @property {string} [lastModified]
- * @property {string} [changeFrequency]
- * @property {number} [priority]
- * @property {{ languages: Record<string, string> }} [alternates]
- */
-
-/**
- * @param {SitemapEntry[]} items
+ * @param {import("next").MetadataRoute.Sitemap} items
  * @param {string} path
- * @param {Omit<SitemapEntry, 'url' | 'alternates'>} options
+ * @param {Omit<import("next").MetadataRoute.Sitemap[number], "url" | "alternates">} options
  */
 function pushLocalized(items, path, options) {
   const base = path.startsWith("/") ? path : `/${path}`;
@@ -59,10 +50,9 @@ async function fetchJSON(path) {
   }
 }
 
-/** @returns {Promise<SitemapEntry[]>} */
-export async function getSitemapEntries() {
+export default async function sitemap() {
   const now = new Date().toISOString();
-  /** @type {SitemapEntry[]} */
+  /** @type {import("next").MetadataRoute.Sitemap} */
   const items = [];
 
   const staticPages = [
