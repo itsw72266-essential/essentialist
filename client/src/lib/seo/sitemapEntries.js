@@ -1,17 +1,32 @@
-//D:\essentialist_next_ecommerce\client\src\app\sitemap.js
 import { getServerSideApiBaseUrl } from "@/lib/serverApiOrigin";
-import { SITE_ORIGIN, localizePath } from "@/lib/seo/localePaths";
+import { buildLanguageAlternates } from "@/lib/seo/localePaths";
 
+/**
+ * @typedef {Object} SitemapEntry
+ * @property {string} url
+ * @property {string} [lastModified]
+ * @property {string} [changeFrequency]
+ * @property {number} [priority]
+ * @property {{ languages: Record<string, string> }} [alternates]
+ */
+
+/**
+ * @param {SitemapEntry[]} items
+ * @param {string} path
+ * @param {Omit<SitemapEntry, 'url' | 'alternates'>} options
+ */
 function pushLocalized(items, path, options) {
   const base = path.startsWith("/") ? path : `/${path}`;
-  items.push({
-    url: `${SITE_ORIGIN}${base}`,
-    ...options,
-  });
-  items.push({
-    url: `${SITE_ORIGIN}${localizePath(base, "fr")}`,
-    ...options,
-  });
+  const languages = buildLanguageAlternates(base);
+  const alternates = { languages };
+
+  for (const url of [languages.en, languages.fr]) {
+    items.push({
+      url,
+      ...options,
+      alternates,
+    });
+  }
 }
 
 const API_URL = (
@@ -24,29 +39,30 @@ const API_URL = (
 ).replace(/\/+$/, "");
 
 function valideURLConvert(str) {
-  return (str || '')
+  return (str || "")
     .toString()
-    .normalize('NFKD')
-    .replace(/[\u0300-\u036F]/g, '')
-    .replace(/[^a-zA-Z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036F]/g, "")
+    .replace(/[^a-zA-Z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
     .toLowerCase();
 }
 
 async function fetchJSON(path) {
-  const url = `${API_URL}${path}`;
-  
-  // Notice we kept the 24 hour cache!
-  const res = await fetch(url, {
-    next: { revalidate: 86400 } 
-  });
-  
-  if (!res.ok) throw new Error(`Failed to fetch: ${url}`);
-  return res.json();
+  try {
+    const url = `${API_URL}${path}`;
+    const res = await fetch(url, { next: { revalidate: 86400 } });
+    if (!res.ok) return null;
+    return res.json();
+  } catch {
+    return null;
+  }
 }
 
-export default async function sitemap() {
+/** @returns {Promise<SitemapEntry[]>} */
+export async function getSitemapEntries() {
   const now = new Date().toISOString();
+  /** @type {SitemapEntry[]} */
   const items = [];
 
   const staticPages = [
@@ -74,32 +90,29 @@ export default async function sitemap() {
   let brands = [];
 
   const fallbackCategories = [
-    { _id: '1', name: 'SETTING POWDER', updatedAt: new Date().toISOString() },
-    { _id: '2', name: 'Makeup Sets', updatedAt: new Date().toISOString() },
-    { _id: '3', name: 'Foundation Makeup', updatedAt: new Date().toISOString() },
-    { _id: '4', name: 'Blush Makeup', updatedAt: new Date().toISOString() },
-    { _id: '5', name: 'Lip Makeup', updatedAt: new Date().toISOString() },
-    { _id: '6', name: 'Eye Makeup', updatedAt: new Date().toISOString() },
-    { _id: '7', name: 'Face Makeup', updatedAt: new Date().toISOString() },
+    { _id: "1", name: "SETTING POWDER", updatedAt: now },
+    { _id: "2", name: "Makeup Sets", updatedAt: now },
+    { _id: "3", name: "Foundation Makeup", updatedAt: now },
+    { _id: "4", name: "Blush Makeup", updatedAt: now },
+    { _id: "5", name: "Lip Makeup", updatedAt: now },
+    { _id: "6", name: "Eye Makeup", updatedAt: now },
+    { _id: "7", name: "Face Makeup", updatedAt: now },
   ];
 
   const fallbackProducts = [
-    { _id: 'nyx-1', name: 'Total control drop foundation', updatedAt: new Date().toISOString(), subCategory: '3' },
-    { _id: 'nyx-2', name: 'Dou chromatic lip gloss', updatedAt: new Date().toISOString(), subCategory: '5' },
-    { _id: 'la-girl-1', name: 'Lip/eye liner pencil 3 in 1', updatedAt: new Date().toISOString(), subCategory: '6' },
+    { _id: "nyx-1", name: "Total control drop foundation", updatedAt: now },
+    { _id: "nyx-2", name: "Dou chromatic lip gloss", updatedAt: now },
+    { _id: "la-girl-1", name: "Lip/eye liner pencil 3 in 1", updatedAt: now },
   ];
 
-  try {
-    // 🔥 THE FIX: Fetching from our new, fast endpoint!
-    const data = await fetchJSON('/api/next/sitemap-data');
-    
+  const data = await fetchJSON("/api/next/sitemap-data");
+  if (data) {
     categories = data.categories || fallbackCategories;
     subcategories = data.subcategories || [];
     products = data.products || fallbackProducts;
     blogs = data.blogs || [];
     brands = data.brands || [];
-  } catch (err) {
-    console.error('Failed to fetch sitemap data:', err);
+  } else {
     categories = fallbackCategories;
     products = fallbackProducts;
   }
@@ -136,9 +149,7 @@ export default async function sitemap() {
 
   for (const brand of brands) {
     const slug =
-      brand.slug ||
-      valideURLConvert(brand.name) ||
-      String(brand._id || "");
+      brand.slug || valideURLConvert(brand.name) || String(brand._id || "");
     if (!slug) continue;
     pushLocalized(items, `/brands/${slug}`, {
       lastModified: brand.updatedAt || now,
