@@ -103,17 +103,20 @@ export async function apiFetch(
     credentials = 'include',
     signal,
     timeout = 0,
+    locale = null,
   } = {},
 ) {
   const controller = signal ? null : new AbortController()
   const requestSignal = signal ?? controller?.signal
+  const resolvedLocale =
+    locale || (typeof headers['X-Locale'] === 'string' ? headers['X-Locale'] : null) || getBrowserLocale()
 
   const init = {
     method,
     headers: {
       'Content-Type': 'application/json',
-      ...(getBrowserLocale() ? { 'X-Locale': getBrowserLocale() } : {}),
-      ...(getBrowserLocale() ? { 'Accept-Language': getBrowserLocale() } : {}),
+      ...(resolvedLocale ? { 'X-Locale': resolvedLocale } : {}),
+      ...(resolvedLocale ? { 'Accept-Language': resolvedLocale } : {}),
       ...headers,
     },
     cache,

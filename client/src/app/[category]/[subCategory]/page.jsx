@@ -247,6 +247,8 @@
 // client/src/app/[category]/[subCategory]/page.jsx
 import { notFound } from "next/navigation";
 import SubCategoryClientBlock from "./SubCategoryClientBlock";
+import { getServerLocale } from "@/lib/seo/serverLocale";
+import { buildSubCategoryMetadata } from "@/lib/seo/catalogMetadata";
 const OBJECT_ID_REGEX = /^[0-9a-f]{24}$/i;
 
 const subCategoryBestTitles = {
@@ -332,6 +334,7 @@ function bestSeoTitleForSubcategory(subCategoryName = "") {
 export async function generateMetadata({ params, searchParams }) {
   const awaitedParams = await params;
   const awaitedSearch = await searchParams;
+  const locale = await getServerLocale();
 
   const categorySlug = awaitedParams?.category;
   const subCategorySlug = awaitedParams?.subCategory;
@@ -342,45 +345,26 @@ export async function generateMetadata({ params, searchParams }) {
   const subCategoryName = parseNameFromSlug(subCategorySlug);
 
   if (!categoryId || !subCategoryId) {
-    return { title: "Beauty Products | Essentialist Makeup Store" };
+    return buildSubCategoryMetadata({
+      subCategoryName: "Beauty Products",
+      categorySlug: categorySlug || "category",
+      subCategorySlug: subCategorySlug || "products",
+      locale,
+      commercialTitle: "Beauty Products",
+      page,
+    });
   }
 
-  // Avoid awaiting a full product fetch here: it doubled server work (metadata + client
-  // React Query) and blocked navigation. SEO copy uses slug-derived names; OG uses logo.
   const commercialTitle = bestSeoTitleForSubcategory(subCategoryName);
 
-  // High-conversion meta title
-  const title = `${commercialTitle} | Buy in Cameroon`;
-
-  const desc = `Shop authentic ${subCategoryName} in Cameroon at Essentialist Makeup Store. Transparent FCFA pricing. Fast delivery to Douala, Yaoundé, and nationwide. Order your ${subCategoryName} essentials today!`;
-
-  const canonical = `https://www.esmakeupstore.com/${categorySlug}/${subCategorySlug}${page > 1 ? `?page=${page}` : ""}`;
-
-  const ogImage = "https://www.esmakeupstore.com/assets/logo.jpg";
-
-  return {
-    metadataBase: new URL("https://www.esmakeupstore.com"),
-    title,
-    description: desc.slice(0, 160),
-    alternates: { canonical },
-    keywords: [commercialTitle, subCategoryName, "makeup Cameroon", "cosmetics Douala", "Essentialist Makeup Store", "FCFA prices"],
-    robots: { index: true, follow: true },
-    openGraph: {
-      type: "website",
-      siteName: "Essentialist Makeup Store",
-      url: canonical,
-      title,
-      description: desc.substring(0, 160),
-      images: [{ url: ogImage, width: 1200, height: 630, alt: subCategoryName }],
-      locale: "en_US",
-    },
-    twitter: {
-      card: "summary_large_image",
-      title,
-      description: desc.substring(0, 160),
-      images: [ogImage],
-    },
-  };
+  return buildSubCategoryMetadata({
+    subCategoryName,
+    categorySlug,
+    subCategorySlug,
+    locale,
+    commercialTitle,
+    page,
+  });
 }
 
 export default async function SubCategoryPage({ params, searchParams }) {

@@ -209,6 +209,8 @@
 // src/app/new-arrival/page.jsx
 import SummaryApi, { apiFetch } from "@/backend/contracts/summaryApi";
 import NewArrivalContent from "../../components/NewArrivalContent";
+import { getStaticPageMetadata } from "@/lib/seo/staticPages";
+import { getServerLocale } from "@/lib/seo/serverLocale";
 
 const STORE_NAME = "Essentialist Makeup Store";
 const PAGE_PATH = "https://www.esmakeupstore.com/new-arrival";
@@ -221,40 +223,10 @@ const USE_CATEGORY_BLOCKS = true;
 const NEW_CATEGORY_ID = "68055442764e6d332bd162c8";
 const NEW_HOT_CATEGORY_ID = "6806b355bca41016c4406edb";
 
-export const metadata = {
-  title: "Newest Makeup Arrivals Cameroon 2026 | Essentialist Store",
-  description:
-    "Shop the latest 2026 makeup launches in Cameroon. Authentic NYX, L.A. Girl, and global beauty brands. Fast delivery in Douala, Yaoundé, and nationwide.",
-  alternates: {
-    canonical: PAGE_PATH,
-  },
-  openGraph: {
-    title: "New & Trending Makeup 2026 | Essentialist Makeup Store Cameroon",
-    description:
-      "Explore new arrivals from top brands. Buy authentic cosmetics online with fast delivery in Douala and across Cameroon.",
-    url: PAGE_PATH,
-    siteName: STORE_NAME,
-    type: "website",
-    images: [
-      {
-        url: "https://www.esmakeupstore.com/assets/logo.jpg",
-        width: 1200,
-        height: 630,
-        alt: "New Arrivals at Essentialist Makeup Store",
-      },
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Newest Makeup Arrivals 2026 | Cameroon's Best Beauty Store",
-    description: "Shop the newest makeup arrivals from global brands in Cameroon. Authentic products, best FCFA prices.",
-    images: ["https://www.esmakeupstore.com/assets/logo.jpg"],
-  },
-  robots: {
-    index: true,
-    follow: true,
-  },
-};
+export async function generateMetadata() {
+  const locale = await getServerLocale();
+  return getStaticPageMetadata("new-arrival", locale);
+}
 
 async function loadProducts() {
   const basePayload = {

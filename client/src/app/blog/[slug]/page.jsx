@@ -174,6 +174,9 @@ import Link from "next/link"
 import { notFound } from "next/navigation"
 import sanitizeHtml from "sanitize-html"
 import { getServerSideApiBaseUrl } from "@/lib/serverApiOrigin"
+import { getServerLocale } from "@/lib/seo/serverLocale"
+import { buildBlogArticleMetadata } from "@/lib/seo/catalogMetadata"
+import { localeRequestHeaders } from "@/lib/seo/serverFetch"
 
 // --- Configuration ---
 const BUSINESS_CONFIG = {
@@ -205,9 +208,10 @@ function isPrerenderFetchAbort(error) {
 /**
  * Fetch blog post
  */
-async function fetchBlog(slug) {
+async function fetchBlog(slug, locale = "en") {
   try {
     const response = await fetch(`${API_BASE_URL}/api/next/blog/${slug}`, {
+      headers: localeRequestHeaders(locale),
       next: { revalidate: 120 },
     })
 
@@ -232,8 +236,9 @@ async function fetchBlog(slug) {
  */
 export async function generateMetadata({ params }) {
   const { slug } = await params
+  const locale = await getServerLocale()
 
-  const payload = await fetchBlog(slug)
+  const payload = await fetchBlog(slug, locale)
   if (!payload?.data) {
     return {
       title: "Article not found | EssentialistMakeupStore",
@@ -241,78 +246,11 @@ export async function generateMetadata({ params }) {
     }
   }
 
-  const blog = payload.data
-  const publishedDate = blog.publishedAt || blog.createdAt
-  const title = blog.metaTitle || blog.title
-  const description = blog.metaDescription || blog.excerpt || ""
-  const canonical = `https://www.esmakeupstore.com/blog/${slug}`
-
-  return {
-    metadataBase: new URL("https://www.esmakeupstore.com"),
-    title: `${title} | ${BUSINESS_CONFIG.name}`,
-    description: description.substring(0, 160),
-    keywords: [
-      ...(blog.tags || []),
-      "makeup",
-      "beauty",
-      "cameroon",
-      "tutorial",
-    ].filter(Boolean),
-
-    // Robots
-    robots: {
-      index: true,
-      follow: true,
-      "max-snippet": -1,
-      "max-image-preview": "large",
-      "max-video-preview": -1,
-    },
-
-    // Canonical
-    alternates: {
-      canonical: canonical,
-    },
-
-    // OpenGraph
-    openGraph: {
-      type: "article",
-      url: canonical,
-      title: title,
-      description: description,
-      images: blog.coverImage
-        ? [
-            {
-              url: blog.coverImage,
-              width: 1200,
-              height: 630,
-              alt: title,
-            },
-          ]
-        : [],
-      publishedTime: publishedDate,
-      authors: [BUSINESS_CONFIG.name],
-      tags: blog.tags || [],
-      locale: "en_US",
-    },
-
-    // Twitter
-    twitter: {
-      card: "summary_large_image",
-      title: title,
-      description: description,
-      images: blog.coverImage ? [blog.coverImage] : [],
-      creator: "@essentialistmakeup",
-    },
-
-    // Additional
-    other: {
-      "article:published_time": publishedDate,
-      "article:author": BUSINESS_CONFIG.name,
-      "article:section": "Beauty",
-      "geo:placename": BUSINESS_CONFIG.city,
-      "geo:region": `${BUSINESS_CONFIG.countryCode}-${BUSINESS_CONFIG.region}`,
-    },
-  }
+  return buildBlogArticleMetadata({
+    blog: payload.data,
+    slug,
+    locale,
+  })
 }
 
 /**
@@ -458,8 +396,9 @@ function StructuredData({ blog, slug }) {
  */
 const BlogDetailsPage = async ({ params }) => {
   const { slug } = await params
+  const locale = await getServerLocale()
 
-  const payload = await fetchBlog(slug)
+  const payload = await fetchBlog(slug, locale)
 
   if (!payload?.data) {
     notFound()

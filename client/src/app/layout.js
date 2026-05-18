@@ -431,9 +431,11 @@ export const metadata = {
   alternates: {
     canonical: '/',
     languages: {
-      'en-US': '/en',
-      'fr-CM': '/fr', // Future French support for Cameroon
-      'en': '/',
+      en: 'https://www.esmakeupstore.com/',
+      'en-US': 'https://www.esmakeupstore.com/',
+      fr: 'https://www.esmakeupstore.com/fr',
+      'fr-CM': 'https://www.esmakeupstore.com/fr',
+      'x-default': 'https://www.esmakeupstore.com/',
     },
   },
   

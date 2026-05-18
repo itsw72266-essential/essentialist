@@ -28,78 +28,24 @@ const API_BASE_URL =
   process.env.SITE_URL ||
   "http://localhost:3000"
 
-/**
- * Enhanced Metadata Export
- */
-export const metadata = {
-  metadataBase: new URL("https://www.esmakeupstore.com"),
-  title: "Beauty Tips, Makeup Tutorials & Store Updates | EssentialistMakeupStore Blog",
-  description:
-    "Discover the latest beauty trends, makeup tutorials, skincare advice, and store updates from EssentialistMakeupStore in Cameroon. Expert beauty tips tailored for Douala and nationwide.",
-  keywords: [
-    "beauty blog cameroon",
-    "makeup tutorials",
-    "beauty tips douala",
-    "skincare advice",
-    "makeup trends",
-    "beauty guides",
-    "cosmetics blog",
-  ],
+import { getStaticPageMetadata } from "@/lib/seo/staticPages";
+import { getServerLocale } from "@/lib/seo/serverLocale";
 
-  robots: {
-    index: true,
-    follow: true,
-    "max-snippet": -1,
-    "max-image-preview": "large",
-    "max-video-preview": -1,
-  },
-
-  alternates: {
-    canonical: "https://www.esmakeupstore.com/blog",
-  },
-
-  openGraph: {
-    type: "website",
-    url: "https://www.esmakeupstore.com/blog",
-    siteName: BUSINESS_CONFIG.name,
-    title: "Beauty Tips, Makeup Tutorials & Store Updates",
-    description:
-      "Expert beauty advice, makeup tutorials, and skincare tips for Cameroon.",
-    images: [
-      {
-        url: "https://www.esmakeupstore.com/assets/blog-cover.jpg",
-        width: 1200,
-        height: 630,
-        alt: "EssentialistMakeupStore Blog",
-      },
-    ],
-    locale: "en_US",
-  },
-
-  twitter: {
-    card: "summary_large_image",
-    title: "Beauty Blog | EssentialistMakeupStore",
-    description: "Makeup tutorials, beauty tips, and skincare advice.",
-    images: ["https://www.esmakeupstore.com/assets/blog-cover.jpg"],
-    creator: "@essentialistmakeup",
-  },
-
-  other: {
-    "geo:placename": BUSINESS_CONFIG.city,
-    "geo:region": `${BUSINESS_CONFIG.countryCode}-${BUSINESS_CONFIG.region}`,
-    "og:type": "website",
-    "og:site_name": BUSINESS_CONFIG.name,
-  },
+export async function generateMetadata() {
+  const locale = await getServerLocale();
+  return getStaticPageMetadata("blog", locale);
 }
 
 /**
  * Fetch blogs with error handling
  */
-async function fetchBlogs(page = 1) {
+async function fetchBlogs(page = 1, locale = "en") {
   try {
     const cookieStore = await cookies()
-    const locale =
-      cookieStore.get("essentialist_lang")?.value?.split("-")[0] || "en"
+    const resolvedLocale =
+      locale ||
+      cookieStore.get("essentialist_lang")?.value?.split("-")[0] ||
+      "en"
 
     const url = new URL("/api/next/blog/list", API_BASE_URL)
     url.searchParams.set("status", "published")
@@ -109,8 +55,8 @@ async function fetchBlogs(page = 1) {
 
     const response = await fetch(url.toString(), {
       headers: {
-        "Accept-Language": locale,
-        "X-Locale": locale,
+        "Accept-Language": resolvedLocale,
+        "X-Locale": resolvedLocale,
       },
       next: { revalidate: 120 },
     })
@@ -306,8 +252,9 @@ function StructuredData({ posts, currentPage, totalPages }) {
 const BlogPage = async ({ searchParams }) => {
   const params = await searchParams
   const currentPage = parseInt(params.page) || 1
+  const locale = await getServerLocale()
 
-  const payload = await fetchBlogs(currentPage)
+  const payload = await fetchBlogs(currentPage, locale)
   const posts = payload?.data || []
   const totalPages = payload?.totalPages || 1
 

@@ -1,5 +1,18 @@
 //D:\essentialist_next_ecommerce\client\src\app\sitemap.js
 import { getServerSideApiBaseUrl } from "@/lib/serverApiOrigin";
+import { SITE_ORIGIN, localizePath } from "@/lib/seo/localePaths";
+
+function pushLocalized(items, path, options) {
+  const base = path.startsWith("/") ? path : `/${path}`;
+  items.push({
+    url: `${SITE_ORIGIN}${base}`,
+    ...options,
+  });
+  items.push({
+    url: `${SITE_ORIGIN}${localizePath(base, "fr")}`,
+    ...options,
+  });
+}
 
 const API_URL = (
   getServerSideApiBaseUrl() ||
@@ -33,42 +46,32 @@ async function fetchJSON(path) {
 }
 
 export default async function sitemap() {
-  const items = [
-    {
-      url: 'https://www.esmakeupstore.com/',
-      lastModified: new Date().toISOString(),
-      changeFrequency: 'daily',
-      priority: 1,
-    },
-    {
-      url: 'https://www.esmakeupstore.com/contact',
-      lastModified: new Date().toISOString(),
-      changeFrequency: 'monthly',
-      priority: 0.8,
-    },
-    {
-      url: 'https://www.esmakeupstore.com/new-arrival',
-      lastModified: new Date().toISOString(),
-      changeFrequency: 'weekly',
-      priority: 0.8,
-    },
-    {
-      url: 'https://www.esmakeupstore.com/brands',
-      lastModified: new Date().toISOString(),
-      changeFrequency: 'monthly',
-      priority: 0.8,
-    },
-    {
-      url: 'https://www.esmakeupstore.com/blog',
-      lastModified: new Date().toISOString(),
-      changeFrequency: 'monthly',
-      priority: 0.8,
-    },
+  const now = new Date().toISOString();
+  const items = [];
+
+  const staticPages = [
+    { path: "/", changeFrequency: "daily", priority: 1 },
+    { path: "/contact", changeFrequency: "monthly", priority: 0.8 },
+    { path: "/new-arrival", changeFrequency: "weekly", priority: 0.8 },
+    { path: "/brands", changeFrequency: "monthly", priority: 0.8 },
+    { path: "/blog", changeFrequency: "monthly", priority: 0.8 },
+    { path: "/reviews", changeFrequency: "weekly", priority: 0.7 },
+    { path: "/search", changeFrequency: "weekly", priority: 0.5 },
   ];
 
+  for (const page of staticPages) {
+    pushLocalized(items, page.path, {
+      lastModified: now,
+      changeFrequency: page.changeFrequency,
+      priority: page.priority,
+    });
+  }
+
   let categories = [];
+  let subcategories = [];
   let products = [];
   let blogs = [];
+  let brands = [];
 
   const fallbackCategories = [
     { _id: '1', name: 'SETTING POWDER', updatedAt: new Date().toISOString() },
@@ -91,8 +94,10 @@ export default async function sitemap() {
     const data = await fetchJSON('/api/next/sitemap-data');
     
     categories = data.categories || fallbackCategories;
+    subcategories = data.subcategories || [];
     products = data.products || fallbackProducts;
     blogs = data.blogs || [];
+    brands = data.brands || [];
   } catch (err) {
     console.error('Failed to fetch sitemap data:', err);
     categories = fallbackCategories;
@@ -100,31 +105,52 @@ export default async function sitemap() {
   }
 
   for (const cat of categories) {
-    const catUrl = `https://www.esmakeupstore.com/${valideURLConvert(cat.name)}-${cat._id}`;
-    items.push({
-      url: catUrl,
-      lastModified: cat.updatedAt || new Date().toISOString(),
-      changeFrequency: 'weekly',
+    const catPath = `/${valideURLConvert(cat.name)}-${cat._id}`;
+    pushLocalized(items, catPath, {
+      lastModified: cat.updatedAt || now,
+      changeFrequency: "weekly",
       priority: 0.7,
     });
   }
 
   for (const prod of products) {
-    const prodUrl = `https://www.esmakeupstore.com/product/${valideURLConvert(prod.name)}-${prod._id}`;
-    items.push({
-      url: prodUrl,
-      lastModified: prod.updatedAt || new Date().toISOString(),
-      changeFrequency: 'weekly',
+    const prodPath = `/product/${valideURLConvert(prod.name)}-${prod._id}`;
+    pushLocalized(items, prodPath, {
+      lastModified: prod.updatedAt || now,
+      changeFrequency: "weekly",
       priority: 0.5,
     });
   }
 
+  for (const sub of subcategories) {
+    const cat = Array.isArray(sub.category) ? sub.category[0] : sub.category;
+    if (!cat?._id || !sub?.name) continue;
+    const catSlug = `${valideURLConvert(cat.name)}-${cat._id}`;
+    const subSlug = `${valideURLConvert(sub.name)}-${sub._id}`;
+    pushLocalized(items, `/${catSlug}/${subSlug}`, {
+      lastModified: sub.updatedAt || now,
+      changeFrequency: "weekly",
+      priority: 0.65,
+    });
+  }
+
+  for (const brand of brands) {
+    const slug =
+      brand.slug ||
+      valideURLConvert(brand.name) ||
+      String(brand._id || "");
+    if (!slug) continue;
+    pushLocalized(items, `/brands/${slug}`, {
+      lastModified: brand.updatedAt || now,
+      changeFrequency: "weekly",
+      priority: 0.7,
+    });
+  }
+
   for (const blog of blogs) {
-    const blogUrl = `https://www.esmakeupstore.com/blog/${blog.slug}`;
-    items.push({
-      url: blogUrl,
-      lastModified: blog.updatedAt || new Date().toISOString(),
-      changeFrequency: 'weekly',
+    pushLocalized(items, `/blog/${blog.slug}`, {
+      lastModified: blog.updatedAt || now,
+      changeFrequency: "weekly",
       priority: 0.6,
     });
   }

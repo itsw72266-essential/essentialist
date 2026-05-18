@@ -518,6 +518,9 @@
 import BrandsDirectoryClient from './BrandsDirectoryClient'
 import { valideURLConvert } from '../../utils/valideURLConvert'
 import { getServerSideApiBaseUrl } from '@/lib/serverApiOrigin'
+import { getServerLocale } from '@/lib/seo/serverLocale'
+import { buildBrandDirectoryMetadata } from '@/lib/seo/catalogMetadata'
+import { getStaticPageMetadata } from '@/lib/seo/staticPages'
 
 const SITE_URL = 'https://www.esmakeupstore.com/brands'
 const ROOT_URL = 'https://www.esmakeupstore.com'
@@ -863,36 +866,10 @@ function aggregateBrandStats(brands = [], productRows = []) {
 // ---------- Metadata ----------
 
 export async function generateMetadata() {
+  const locale = await getServerLocale()
+
   if (!CAN_USE_REMOTE_API) {
-    return {
-      metadataBase: new URL(ROOT_URL),
-      title: DEFAULT_TITLE,
-      description: DEFAULT_DESC,
-      robots: { index: false, follow: false },
-      alternates: { canonical: SITE_URL },
-      openGraph: {
-        type: 'website',
-        siteName: SITE_NAME,
-        url: SITE_URL,
-        title: DEFAULT_TITLE,
-        description: DEFAULT_DESC,
-        images: [
-          {
-            url: OG_IMAGE,
-            width: 1200,
-            height: 630,
-            alt: 'Makeup brands collection at Essentialist Makeup Store'
-          }
-        ],
-        locale: 'en_US'
-      },
-      twitter: {
-        card: 'summary_large_image',
-        title: DEFAULT_TITLE,
-        description: DEFAULT_DESC,
-        images: [OG_IMAGE]
-      }
-    }
+    return getStaticPageMetadata('brands', locale)
   }
 
   try {
@@ -909,85 +886,38 @@ export async function generateMetadata() {
     const brandNames = brandStats.map((brand) => brand.name).filter(Boolean)
     
     // SEO Fix: Limit to top 3 brands for a clean, un-truncated title
-    const dynTitle = brandNames.length
-      ? `Shop ${brandNames.slice(0, 3).join(', ')} & Top Makeup Brands`
-      : DEFAULT_TITLE
+    const dynTitle =
+      locale === 'fr'
+        ? brandNames.length
+          ? `Marques ${brandNames.slice(0, 3).join(', ')} et plus | Essentialist`
+          : 'Marques de maquillage au Cameroun | Essentialist'
+        : brandNames.length
+          ? `Shop ${brandNames.slice(0, 3).join(', ')} & Top Makeup Brands`
+          : DEFAULT_TITLE
 
-    // SEO Fix: Limit description to top 5 brands to avoid keyword stuffing penalties
-    const dynDesc = `Discover authentic cosmetic products from top brands like ${
-      brandNames.length ? brandNames.slice(0, 5).join(', ') : DEFAULT_BRANDS
-    }. Compare prices, shop skin essentials, and get fast delivery.`
+    const dynDesc =
+      locale === 'fr'
+        ? `Découvrez des marques authentiques : ${
+            brandNames.length ? brandNames.slice(0, 5).join(', ') : DEFAULT_BRANDS
+          }. Comparez, achetez et profitez de la livraison rapide.`
+        : `Discover authentic cosmetic products from top brands like ${
+            brandNames.length ? brandNames.slice(0, 5).join(', ') : DEFAULT_BRANDS
+          }. Compare prices, shop skin essentials, and get fast delivery.`
 
-    return {
-      metadataBase: new URL(ROOT_URL),
+    return buildBrandDirectoryMetadata({
+      locale,
       title: dynTitle,
       description: dynDesc,
-      // SEO Fix: Hardcoded the highly-searched terms and limited dynamic brands
       keywords: [
-        'Essentialist makeup store',
-        'makeup brands',
+        locale === 'fr' ? 'marques maquillage' : 'makeup brands',
         'cosmetic products',
-        'professional makeup',
-        'skin essentials',
-        'brand comparison',
-        ...brandNames.slice(0, 5) // Only include top 5 dynamic brands
+        'Essentialist',
+        ...brandNames.slice(0, 5),
       ],
-      robots: { index: true, follow: true },
-      alternates: { canonical: SITE_URL },
-      openGraph: {
-        type: 'website',
-        siteName: SITE_NAME,
-        url: SITE_URL,
-        title: dynTitle,
-        description: dynDesc,
-        images: [
-          {
-            url: OG_IMAGE,
-            width: 1200,
-            height: 630,
-            alt: 'Makeup brands collection at Essentialist Makeup Store'
-          }
-        ],
-        locale: 'en_US'
-      },
-      twitter: {
-        card: 'summary_large_image',
-        title: dynTitle,
-        description: dynDesc,
-        images: [OG_IMAGE]
-      }
-    }
+    })
   } catch (error) {
     console.error('Metadata generation (brands page) failed:', error)
-    return {
-      metadataBase: new URL(ROOT_URL),
-      title: DEFAULT_TITLE,
-      description: DEFAULT_DESC,
-      alternates: { canonical: SITE_URL },
-      robots: { index: true, follow: true },
-      openGraph: {
-        type: 'website',
-        siteName: SITE_NAME,
-        url: SITE_URL,
-        title: DEFAULT_TITLE,
-        description: DEFAULT_DESC,
-        images: [
-          {
-            url: OG_IMAGE,
-            width: 1200,
-            height: 630,
-            alt: 'Makeup brands collection at Essentialist Makeup Store'
-          }
-        ],
-        locale: 'en_US'
-      },
-      twitter: {
-        card: 'summary_large_image',
-        title: DEFAULT_TITLE,
-        description: DEFAULT_DESC,
-        images: [OG_IMAGE]
-      }
-    }
+    return getStaticPageMetadata('brands', locale)
   }
 }
 

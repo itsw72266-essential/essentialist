@@ -13,21 +13,13 @@ const jsonLd = {
   },
 };
 
-export const metadata = {
-  title: "Authentic Customer Reviews | Essentialist Makeup Store ",
-  description:
-    "Read and share verified experiences about Essentialist products, shipping, support, and more.",
-  alternates: {
-    canonical: "/review",
-  },
-  openGraph: {
-    title: "Essentialist Reviews Hub",
-    description:
-      "Browse real customer stories, filter by subject, and publish your own Essentialist review.",
-    url: "/review",
-    type: "website",
-  },
-};
+import { getStaticPageMetadata } from "@/lib/seo/staticPages";
+import { getServerLocale } from "@/lib/seo/serverLocale";
+
+export async function generateMetadata() {
+  const locale = await getServerLocale();
+  return getStaticPageMetadata("reviews", locale);
+}
 
 export default function ReviewPage() {
   return (

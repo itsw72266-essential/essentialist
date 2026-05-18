@@ -48,33 +48,8 @@ const ContactUsPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white via-pink-50 to-white pb-16">
-      {/* SEO Meta */}
       <Head>
-        <title>
-          Contact Essentialist Makeup Store | Customer Service in Cameroon | Beauty Expert Help
-        </title>
-        <meta
-          name="description"
-          content="Contact Essentialist Makeup Store for beauty advice, product inquiries, and order support in Cameroon. Reach our makeup experts by phone, email or visit our store in Douala for personalized assistance with cosmetics and beauty products."
-        />
-        <meta
-          name="keywords"
-          content="makeup store contact, beauty customer service Cameroon, cosmetics help Douala, Essentialist Makeup Store contact, beauty product questions, makeup order support, cosmetics advice Cameroon, NYX product inquiries, LA Girl customer service, beauty store location Douala"
-        />
-        <meta name="robots" content="index, follow" />
-        <link rel="canonical" href="https://www.esmakeupstore.com/contact" />
-        <meta property="og:title" content="Contact Essentialist Makeup Store | Customer Service in Cameroon" />
-        <meta property="og:description" content="Get in touch with Essentialist Makeup Store for all your beauty needs in Cameroon. Our makeup experts are ready to help with product advice, orders, and support." />
-        <meta property="og:type" content="website" />
-        <meta property="og:site_name" content="Essentialist Makeup Store" />
-        <meta property="og:url" content="https://www.esmakeupstore.com/contact" />
-        <meta property="og:image" content="https://www.esmakeupstore.com/assets/store-front.jpg" />
-        <meta property="og:image:alt" content="Essentialist Makeup Store Contact" />
-        <meta name="twitter:title" content="Contact Essentialist Makeup Store | Customer Service in Cameroon" />
-        <meta name="twitter:description" content="Reach out to Essentialist Makeup Store for beauty advice, product inquiries, and order support in Cameroon." />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:image" content="https://www.esmakeupstore.com/assets/store-front.jpg" />
-        {/* Structured Data */}
+        {/* Structured Data — page title/description via contact/layout.js */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{

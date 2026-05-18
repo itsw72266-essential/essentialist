@@ -898,6 +898,13 @@ import ProductDisplayClient from "./ProductDisplayClient"
 import ProductRecommendationsLazy from "./ProductRecommendationsLazy.client"
 import { pricewithDiscount } from "../../../utils/PriceWithDiscount"
 import { fetchProduct, fetchReviewStats } from "./queries"
+import { getServerLocale } from "@/lib/seo/serverLocale"
+import {
+  buildProductAlternates,
+  buildProductSeoCopy,
+  getLocalizedProductFields,
+} from "@/lib/seo/productMetadata"
+import { buildCanonicalUrl } from "@/lib/seo/localePaths"
 
 // --- Configuration ---
 const DEFAULT_PRICE_VALIDITY_DAYS = 90
@@ -1037,8 +1044,8 @@ function buildReviewEntries(product, url) {
  * Generate FAQ Schema for common product questions
  * Critical for AEO (Answer Engine Optimization)
  */
-function buildProductFAQSchema(product) {
-  const productName = product?.name ?? "Product"
+function buildProductFAQSchema(product, locale = "en") {
+  const productName = getLocalizedProductFields(product, locale).name
   const brandName =
     typeof product?.brand === "object" ? product.brand?.name : product.brand
   const price = resolveOfferPrice(product)
@@ -1107,7 +1114,7 @@ function buildProductFAQSchema(product) {
  * Redis on the API still speeds first hits / cache misses.
  */
 const getCachedProduct = unstable_cache(
-  async (productId) => fetchProduct(productId),
+  async (productId, locale) => fetchProduct(productId, locale),
   ["product-detail"],
   { revalidate: 60 },
 )
@@ -1125,6 +1132,7 @@ export async function generateMetadata({ params }) {
   const resolvedParams = await params
   const slug = resolvedParams?.slug
   const productId = extractProductId(slug)
+  const locale = await getServerLocale()
 
   if (!productId)
     return {
@@ -1134,7 +1142,7 @@ export async function generateMetadata({ params }) {
 
   let product = null
   try {
-    product = await getCachedProduct(productId)
+    product = await getCachedProduct(productId, locale)
   } catch {
     product = null
   }
@@ -1145,50 +1153,37 @@ export async function generateMetadata({ params }) {
       robots: { index: false },
     }
 
-  // --- Metadata Extraction ---
-  const name = product?.name ?? "Product"
   const brandName =
     typeof product?.brand === "object" ? product.brand?.name : product.brand
   const price = resolveOfferPrice(product)
-  const description = stripHtml(product?.description ?? "").substring(0, 160)
   const hasStock = Number(product?.stock ?? 0) > 0
-
-  // --- SEO-Optimized Title (< 60 chars) ---
-  const title =
-    price && brandName
-      ? `${brandName} ${name} | ${price.toLocaleString("en-US")} XAF | Buy in Cameroon`
-      : `${name} | Authentic Makeup in Cameroon`
-
-  // --- SEO-Optimized Description ---
-  const metaDescription = `Buy authentic ${brandName || "makeup"} ${name} ${
-    price ? `at ${price.toLocaleString("en-US")} XAF` : ""
-  } at ${BUSINESS_CONFIG.name}. ${
-    hasStock ? "In stock. " : "Check availability. "
-  }Fast delivery in ${BUSINESS_CONFIG.city} & nationwide. Money-back guarantee.`
+  const seo = buildProductSeoCopy({
+    product,
+    locale,
+    brandName,
+    price,
+    hasStock,
+    businessName: BUSINESS_CONFIG.name,
+    city: BUSINESS_CONFIG.city,
+  })
+  const { name } = seo
+  const metaDescription = seo.description.substring(0, 160)
+  const localizedFields = getLocalizedProductFields(product, locale)
+  const descriptionSnippet = stripHtml(localizedFields.description).substring(
+    0,
+    160,
+  )
 
   const heroImage = Array.isArray(product?.image)
     ? product.image[0]
     : product?.image
-  const canonical = `https://www.esmakeupstore.com/product/${slug}`
+  const alternates = buildProductAlternates(slug, locale)
 
   return {
     metadataBase: new URL("https://www.esmakeupstore.com"),
-    title: title,
-    description: metaDescription.substring(0, 160),
-    keywords: [
-      name,
-      brandName,
-      "makeup",
-      "cosmetics",
-      `${name} price`,
-      `${name} cameroon`,
-      `buy ${name} cameroon`,
-      `${name} douala`,
-      "authentic makeup",
-      "makeup store cameroon",
-    ]
-      .filter(Boolean)
-      .slice(0, 10),
+    title: seo.title,
+    description: descriptionSnippet || metaDescription,
+    keywords: seo.keywords.filter(Boolean).slice(0, 10),
 
     // --- Robots & Crawling ---
     robots: {
@@ -1205,16 +1200,14 @@ export async function generateMetadata({ params }) {
     },
 
     // --- Canonical & Alternates ---
-    alternates: {
-      canonical: canonical,
-    },
+    alternates,
 
     // --- OpenGraph (Social + AEO) ---
     // NOTE: Using 'website' type (valid Next.js type)
     // Product-specific metadata goes in 'other' field below
     openGraph: {
       type: "website",
-      url: canonical,
+      url: alternates.canonical,
       siteName: BUSINESS_CONFIG.name,
       title: name,
       description: metaDescription,
@@ -1229,7 +1222,8 @@ export async function generateMetadata({ params }) {
             },
           ]
         : [],
-      locale: "en_US",
+      locale: seo.openGraphLocale,
+      alternateLocale: locale === "fr" ? ["en_US"] : ["fr_CM"],
     },
 
     // --- Twitter Card ---
@@ -1325,10 +1319,12 @@ function RecommendationsSkeleton() {
  * Comprehensive Structured Data for Product
  * Includes: Product, Breadcrumb, FAQ, Aggregate Rating, Reviews
  */
-function StructuredData({ product, slug, reviewStats }) {
+function StructuredData({ product, slug, reviewStats, locale = "en" }) {
   if (!product) return null
 
-  const url = `https://www.esmakeupstore.com/product/${slug}`
+  const url = buildCanonicalUrl(`/product/${slug}`, locale)
+  const localizedProduct = getLocalizedProductFields(product, locale)
+  const productName = localizedProduct.name
   const images = Array.isArray(product.image)
     ? product.image.filter(Boolean)
     : [product.image].filter(Boolean)
@@ -1357,8 +1353,9 @@ function StructuredData({ product, slug, reviewStats }) {
     "@context": "https://schema.org",
     "@type": "Product",
     "@id": url,
-    name: product.name,
-    description: stripHtml(product.description).substring(0, 500),
+    name: productName,
+    description: stripHtml(localizedProduct.description).substring(0, 500),
+    inLanguage: locale === "fr" ? "fr-CM" : "en",
     image: images,
     sku: product._id ?? product.sku,
     brand: {
@@ -1440,7 +1437,6 @@ function StructuredData({ product, slug, reviewStats }) {
       : undefined,
     material: product.material || undefined,
     category: product.category?.name || "Makeup",
-    inLanguage: "en-US",
     potentialAction: {
       "@type": "BuyAction",
       target: url,
@@ -1448,6 +1444,7 @@ function StructuredData({ product, slug, reviewStats }) {
   }
 
   // --- 2. Breadcrumb Schema (Navigation + SEO) ---
+  const homeUrl = buildCanonicalUrl("/", locale)
   const breadcrumbJsonLd = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
@@ -1455,32 +1452,32 @@ function StructuredData({ product, slug, reviewStats }) {
       {
         "@type": "ListItem",
         position: 1,
-        name: "Home",
-        item: BUSINESS_CONFIG.url,
+        name: locale === "fr" ? "Accueil" : "Home",
+        item: homeUrl,
       },
       {
         "@type": "ListItem",
         position: 2,
-        name: "Products",
-        item: `${BUSINESS_CONFIG.url}/product`,
+        name: locale === "fr" ? "Produits" : "Products",
+        item: buildCanonicalUrl("/new-arrival", locale),
       },
       {
         "@type": "ListItem",
         position: 3,
-        name: product.category?.name || "Category",
+        name: product.category?.name || (locale === "fr" ? "Catégorie" : "Category"),
         item: `${BUSINESS_CONFIG.url}/${product.category?.slug || ""}`,
       },
       {
         "@type": "ListItem",
         position: 4,
-        name: product.name,
+        name: productName,
         item: url,
       },
     ],
   }
 
   // --- 3. FAQ Schema (AEO - Answer Engine Optimization) ---
-  const faqJsonLd = buildProductFAQSchema(product)
+  const faqJsonLd = buildProductFAQSchema(product, locale)
 
   return (
     <>
@@ -1509,13 +1506,14 @@ export default async function ProductDisplayPage({ params }) {
   const resolvedParams = await params
   const slug = resolvedParams?.slug
   const productId = extractProductId(slug)
+  const locale = await getServerLocale()
 
   if (!productId) return notFound()
 
   let productData
   let reviewStatsSnapshot = { average: 0, count: 0 }
   try {
-    productData = await getCachedProduct(productId)
+    productData = await getCachedProduct(productId, locale)
   } catch (error) {
     const status = error?.status
     if (status === 404 || status === 400) return notFound()
@@ -1539,11 +1537,13 @@ export default async function ProductDisplayPage({ params }) {
         product={productData}
         slug={slug}
         reviewStats={reviewStatsSnapshot}
+        locale={locale}
       />
 
       {/* Main Product Display */}
       <ProductDisplayClient
         productId={productId}
+        initialLocale={locale}
         initialProduct={productData}
         initialReviewStats={reviewStatsSnapshot}
         initialDataUpdatedAt={dataUpdatedAt}

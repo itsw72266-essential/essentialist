@@ -340,10 +340,12 @@ export default function ProductDisplayClient({
   initialProduct,
   initialReviewStats,
   initialDataUpdatedAt,
+  initialLocale = "en",
 }) {
   const { t, i18n } = useTranslation();
+  const locale = i18n.resolvedLanguage || i18n.language || initialLocale;
   const { data: productData, isLoading: isProductLoading, isError: isProductError } = useQuery({
-    ...productQueryOptions(productId),
+    ...productQueryOptions(productId, locale),
     initialData: initialProduct,
     initialDataUpdatedAt,
   });

@@ -2,7 +2,14 @@
 
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
+
+import {
+  getLocaleFromPathname,
+  localizePath,
+  stripLocalePrefix,
+} from "@/lib/seo/localePaths";
 
 import "@/lib/i18n";
 
@@ -67,20 +74,28 @@ function FlagIcon({ locale, className = "", clipId }) {
 
 const LanguageSwitcher = ({ className = "", compact = false }) => {
   const { i18n, t } = useTranslation();
+  const router = useRouter();
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const rootRef = useRef(null);
   const gbClipId = useId();
 
-  const language = i18n.resolvedLanguage || i18n.language || "en";
+  const pathLocale = getLocaleFromPathname(pathname);
+  const language = i18n.resolvedLanguage || i18n.language || pathLocale;
   const isFrench = language.startsWith("fr");
   const active = LOCALES.find((l) => l.code === (isFrench ? "fr" : "en")) || LOCALES[0];
 
   const setLocale = useCallback(
     (code) => {
       void i18n.changeLanguage(code);
+      const neutralPath = stripLocalePrefix(pathname);
+      const nextPath = localizePath(neutralPath, code);
+      if (nextPath !== pathname) {
+        router.push(nextPath);
+      }
       setOpen(false);
     },
-    [i18n]
+    [i18n, pathname, router]
   );
 
   useEffect(() => {

@@ -398,6 +398,12 @@ import {
   getSubCategories,
   getTopCategoryBundles,
 } from "../server/catalog";
+import { getServerLocale } from "@/lib/seo/serverLocale";
+import { getHomeMetadata } from "@/lib/seo/homeMetadata";
+import {
+  buildCanonicalUrl,
+  buildLanguageAlternates,
+} from "@/lib/seo/localePaths";
 
 // --- SEO Constants ---
 const BUSINESS_CONFIG = {
@@ -454,6 +460,9 @@ export async function generateMetadata() {
   "use cache";
   cacheLife("minutes", 5);
 
+  const locale = await getServerLocale();
+  const homeMeta = getHomeMetadata(locale);
+
   const categories = await getCategories();
   const categoryNames = Array.isArray(categories)
     ? categories
@@ -463,13 +472,23 @@ export async function generateMetadata() {
     : [];
 
   const topCategories = categoryNames.join(", ");
-  const dynTitle = topCategories
-    ? `Best Makeup Store in Cameroon | Shop ${topCategories} & More. Essentialist Douala`
-    : DEFAULT_TITLE;
+  const dynTitle =
+    locale === "fr"
+      ? topCategories
+        ? `Boutique maquillage Cameroun | ${topCategories} et plus | Essentialist Douala`
+        : homeMeta.title
+      : topCategories
+        ? `Best Makeup Store in Cameroon | Shop ${topCategories} & More. Essentialist Douala`
+        : DEFAULT_TITLE;
 
-  const dynDesc = topCategories
-    ? `Discover premium ${topCategories.toLowerCase()} and more at ${BUSINESS_CONFIG.name}. ${DEFAULT_DESC}`
-    : DEFAULT_DESC;
+  const dynDesc =
+    locale === "fr"
+      ? topCategories
+        ? `Découvrez ${topCategories.toLowerCase()} et plus chez ${BUSINESS_CONFIG.name}. ${homeMeta.description}`
+        : homeMeta.description
+      : topCategories
+        ? `Discover premium ${topCategories.toLowerCase()} and more at ${BUSINESS_CONFIG.name}. ${DEFAULT_DESC}`
+        : DEFAULT_DESC;
 
   const allKeywords = [
     ...CONTENT_KEYWORDS.primary,
@@ -489,19 +508,20 @@ export async function generateMetadata() {
       "max-video-preview": -1,
     },
     alternates: {
-      canonical: "/",
-      languages: { en: "/", fr: "/fr" },
+      canonical: buildCanonicalUrl("/", locale),
+      languages: buildLanguageAlternates("/"),
     },
     openGraph: {
       type: "website",
       siteName: BUSINESS_CONFIG.name,
-      url: BUSINESS_CONFIG.url,
+      url: buildCanonicalUrl("/", locale),
       title: dynTitle,
       description: dynDesc,
       images: [
         { url: OG_IMAGE, width: 1200, height: 630, alt: BUSINESS_CONFIG.name },
       ],
-      locale: "en_US",
+      locale: homeMeta.openGraphLocale,
+      alternateLocale: locale === "fr" ? ["en_US"] : ["fr_CM"],
     },
     twitter: {
       card: "summary_large_image",

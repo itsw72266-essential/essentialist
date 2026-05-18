@@ -556,6 +556,9 @@
 import { notFound } from 'next/navigation'
 import BrandPageClient from './BrandPageClient'
 import { getServerSideApiBaseUrl } from '@/lib/serverApiOrigin'
+import { getServerLocale } from '@/lib/seo/serverLocale'
+import { buildBrandPageMetadata } from '@/lib/seo/catalogMetadata'
+import { localeRequestHeaders } from '@/lib/seo/serverFetch'
 
 const SITE_URL = 'https://www.esmakeupstore.com'
 const SITE_NAME = 'Essentialist Makeup Store'
@@ -660,12 +663,12 @@ async function fetchBrandCollection() {
   return Array.isArray(items) ? items : []
 }
 
-async function fetchBrandBySlug(slug) {
+async function fetchBrandBySlug(slug, locale = 'en') {
   if (!CAN_USE_REMOTE_API || !slug) return null
 
   const direct = await fetchJson(
     `${API_BASE}/api/next/brand/${encodeURIComponent(slug)}?includeProducts=true`,
-    { cache: 'no-store' },
+    { cache: 'no-store', headers: localeRequestHeaders(locale) },
   )
   const directNormalized = direct?.data || direct?.brand || direct
   if (directNormalized) return directNormalized
@@ -917,6 +920,7 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }) {
   const resolvedParams = await params
   const brandParam = createBrandSlug(resolvedParams?.brand)
+  const locale = await getServerLocale()
 
   if (
     !brandParam ||
@@ -942,12 +946,13 @@ export async function generateMetadata({ params }) {
   }
 
   try {
-    const brand = await fetchBrandBySlug(brandParam)
+    const brand = await fetchBrandBySlug(brandParam, locale)
     if (!brand) {
       return {
-        metadataBase: new URL(SITE_URL),
-        title: 'Brand not found | Essentialist Makeup Store',
-        description: 'This brand is not available in our store.',
+        title:
+          locale === 'fr'
+            ? 'Marque introuvable | Essentialist'
+            : 'Brand not found | Essentialist Makeup Store',
         robots: { index: false, follow: false },
       }
     }
@@ -958,71 +963,12 @@ export async function generateMetadata({ params }) {
       : []
     const metrics = computeBrandMetrics(productRows)
 
-    // SEO Fix: Action-oriented title for higher CTR
-    const title = `Shop ${brand.name} Makeup | Essentialist Makeup Store`
-    
-    // SEO Fix: Limit description length to ensure keywords stay visible on Google
-    const plainBrandDescription = stripMarkdown(
-      brand.description || brand.shortDescription || '',
-    )
-    const shortDesc = plainBrandDescription.length > 60 
-      ? `${plainBrandDescription.substring(0, 60)}...` 
-      : plainBrandDescription
-
-    const description = shortDesc
-      ? `${shortDesc} Shop authentic ${brand.name} cosmetics at Essentialist Makeup Store. Explore ${metrics.totalProducts} products. Fast delivery in Cameroon.`
-      : `Shop authentic ${brand.name} makeup at Essentialist Makeup Store. Browse ${metrics.totalProducts} products including ${
-          metrics.subCategories.length
-            ? metrics.subCategories.slice(0, 3).join(', ')
-            : 'top-rated essentials'
-        }. Fast delivery in Douala & nationwide.`
-
-    const canonical = `${SITE_URL}/brands/${brandParam}`
-    const dynamicOgImage =
-      brand.ogImage ||
-      brand.banner ||
-      brand.coverImage ||
-      `${SITE_URL}/api/og/brand?slug=${encodeURIComponent(brandParam)}`
-
-    return {
-      metadataBase: new URL(SITE_URL),
-      title,
-      description,
-      // SEO Fix: Limited dynamic keywords to avoid spam penalties
-      keywords: [
-        `${brand.name}`,
-        `${brand.name} makeup Cameroon`,
-        `buy ${brand.name} Douala`,
-        'authentic cosmetics',
-        ...metrics.subCategories
-          .slice(0, 4)
-          .map((cat) => `${brand.name} ${cat}`),
-      ],
-      robots: { index: true, follow: true },
-      alternates: { canonical },
-      openGraph: {
-        type: 'website',
-        siteName: SITE_NAME,
-        url: canonical,
-        title,
-        description,
-        images: [
-          {
-            url: dynamicOgImage,
-            width: 1200,
-            height: 630,
-            alt: `${brand.name} cosmetic products`,
-          },
-        ],
-        locale: 'en_US',
-      },
-      twitter: {
-        card: 'summary_large_image',
-        title,
-        description,
-        images: [dynamicOgImage],
-      },
-    }
+    return buildBrandPageMetadata({
+      brand,
+      brandSlug: brandParam,
+      locale,
+      metrics,
+    })
   } catch (error) {
     console.error(`Metadata generation failed for brand ${brandParam}:`, error)
     return {

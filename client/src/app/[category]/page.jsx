@@ -675,6 +675,12 @@ import { notFound } from 'next/navigation';
 import CardProduct from '../../components/CardProduct';
 import { valideURLConvert } from '../../utils/valideURLConvert';
 import SummaryApi, { baseURL } from '@/backend/contracts/summaryApi';
+import { getServerLocale } from '@/lib/seo/serverLocale';
+import {
+  buildCategoryMetadata,
+  getLocalizedField,
+} from '@/lib/seo/catalogMetadata';
+import { localeRequestHeaders } from '@/lib/seo/serverFetch';
 
 const SEO_KEYWORDS = {
   'face makeup': 'beginner face makeup kit with brushes',
@@ -734,11 +740,11 @@ function capitalize(s = '') {
 }
 
 /* ----------------------- Data Fetch ----------------------- */
-async function fetchCategories() {
+async function fetchCategories(locale = 'en') {
   try {
     const res = await fetch(`${baseURL}${SummaryApi.getCategory.url}`, {
       method: SummaryApi.getCategory.method.toUpperCase(),
-      headers: { 'Content-Type': 'application/json' },
+      headers: localeRequestHeaders(locale),
       next: { revalidate: 300 },
     });
     if (!res.ok) return [];
@@ -805,31 +811,30 @@ async function fetchProductsAcrossSubcategories({ categoryId, subcats, page }) {
 }
 
 /* ----------------------- Metadata ----------------------- */
-export async function generateMetadata({ params, searchParams }) {
+export async function generateMetadata({ params }) {
   const resolvedParams = await params;
-  const resolvedSearchParams = await searchParams;
   const categorySlug = resolvedParams?.category;
-  const name = parseNameFromSlug(categorySlug) || 'Makeup';
-  const key = toKey(name);
-  const primarySeo = SEO_KEYWORDS[key] || `${name} Essentials`;
+  const locale = await getServerLocale();
+  const categoryId = parseIdFromSlug(categorySlug);
 
-  const metaTitle = `${capitalize(primarySeo)} | Essentialist Makeup Store Cameroon`;
-  const description = `Shop authentic ${name} products in Cameroon. Best FCFA prices, secure payment, and fast delivery to Douala, Yaoundé, and nationwide. Explore our ${name} collection today!`;
+  let categoryName = parseNameFromSlug(categorySlug) || 'Makeup';
+  if (categoryId) {
+    const categories = await fetchCategories(locale);
+    const category = categories.find((c) => String(c?._id) === String(categoryId));
+    if (category) {
+      categoryName = getLocalizedField(category, 'name', locale) || categoryName;
+    }
+  }
 
-  return {
-    title: metaTitle,
-    description,
-    keywords: [name, primarySeo, ...SITEWIDE_QUICK_WINS],
-    alternates: { canonical: `https://www.esmakeupstore.com/${categorySlug}` },
-    openGraph: {
-      title: metaTitle,
-      description,
-      url: `https://www.esmakeupstore.com/${categorySlug}`,
-      siteName: 'Essentialist Makeup Store',
-      images: [{ url: 'https://www.esmakeupstore.com/assets/logo.jpg' }],
-      type: 'website',
-    },
-  };
+  const key = toKey(categoryName);
+  const primarySeo = SEO_KEYWORDS[key] || `${categoryName} Essentials`;
+
+  return buildCategoryMetadata({
+    categoryName,
+    categorySlug,
+    locale,
+    primarySeo: capitalize(primarySeo),
+  });
 }
 
 /* ----------------------- JSON-LD ----------------------- */
