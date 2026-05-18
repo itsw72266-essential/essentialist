@@ -16,8 +16,15 @@ function shouldSkipLocale(pathname) {
   return SKIP_LOCALE_PREFIX.some((prefix) => pathname.startsWith(prefix));
 }
 
+function normalizePathname(pathname) {
+  if (pathname.length > 1 && pathname.endsWith("/")) {
+    return pathname.replace(/\/+$/, "") || "/";
+  }
+  return pathname;
+}
+
 export function middleware(request) {
-  const { pathname } = request.nextUrl;
+  const pathname = normalizePathname(request.nextUrl.pathname);
 
   if (shouldSkipLocale(pathname)) {
     return NextResponse.next();

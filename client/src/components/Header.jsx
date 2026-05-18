@@ -26,6 +26,7 @@ import {
   DASHBOARD_USER_PATHS,
   AUTH_AND_ACCOUNT_PATHS,
 } from '@/config/navigationPrefetch'
+import { getLocaleFromPathname, localizePath } from '@/lib/seo/localePaths'
 
 const Dropdown = dynamic(() => import('./Dropdown'), {
   loading: () => (
@@ -48,7 +49,8 @@ const Header = () => {
     const locale = (i18n.resolvedLanguage || i18n.language || 'en').startsWith('fr') ? 'fr' : 'en'
     const [isMobile] = useMobile()
     const pathname = usePathname()
-    const isSearchPage = pathname === "/search"
+    const pathLocale = getLocaleFromPathname(pathname)
+    const isSearchPage = pathname === "/search" || pathname === "/fr/search"
     const router = useRouter()
     const user = useSelector((state) => state?.user)
     const [openUserMenu, setOpenUserMenu] = useState(false)
@@ -227,7 +229,7 @@ const Header = () => {
             <nav className="bg-black text-white px-2 sm:px-4">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center flex-shrink-0">
-                        <Link prefetch={linkPrefetch} href="/" className="flex items-center h-full">
+                        <Link prefetch={linkPrefetch} href={localizePath("/", pathLocale)} className="flex items-center h-full">
                             {/* DESKTOP LOGO OPTIMIZED */}
                             <Image
                                 src="/assets/logo.jpg"
@@ -321,7 +323,7 @@ const Header = () => {
                     <ul className="flex justify-center space-x-20">
                         {navLinks.map(link => (
                             <li key={link.path} className="flex items-center justify-between hover:text-purple-400 cursor-pointer">
-                                <Link prefetch={linkPrefetch} href={link.path}>{link.title}</Link>
+                                <Link prefetch={linkPrefetch} href={localizePath(link.path, pathLocale)}>{link.title}</Link>
                             </li>
                         ))}
                         <li className="flex items-center min-h-[2.5rem]"><Dropdown /></li>
@@ -332,8 +334,8 @@ const Header = () => {
                             </button>
                             {offersDropdownOpen && (
                                 <div className="absolute top-full right-0 mt-2 w-40 bg-white text-black rounded shadow-lg z-50">
-                                    <Link prefetch={linkPrefetch} href="/offers" className="block px-4 py-2 hover:bg-pink-50 hover:text-pink-700 transition-colors" onClick={() => setOffersDropdownOpen(false)}>{t('header.offers')}</Link>
-                                    <Link prefetch={linkPrefetch} href="/clearance" className="block px-4 py-2 hover:bg-pink-50 hover:text-pink-700 transition-colors" onClick={() => setOffersDropdownOpen(false)}>{t('header.clearance')}</Link>
+                                    <Link prefetch={linkPrefetch} href={localizePath("/offers", pathLocale)} className="block px-4 py-2 hover:bg-pink-50 hover:text-pink-700 transition-colors" onClick={() => setOffersDropdownOpen(false)}>{t('header.offers')}</Link>
+                                    <Link prefetch={linkPrefetch} href={localizePath("/clearance", pathLocale)} className="block px-4 py-2 hover:bg-pink-50 hover:text-pink-700 transition-colors" onClick={() => setOffersDropdownOpen(false)}>{t('header.clearance')}</Link>
                                 </div>
                             )}
                         </li>
@@ -344,7 +346,7 @@ const Header = () => {
             <div className={`lg:hidden fixed top-0 left-0 w-full h-screen z-50 bg-opacity-80 transition-transform duration-300 ${mobileMenuOpen ? "translate-x-0" : "-translate-x-full"} flex overflow-y-auto bg-black`} style={{ backdropFilter: 'blur(5px)' }}>     
                 <div className="bg-black text-black h-full flex flex-col overflow-y-auto" style={{ width: '80%' }}>
                     <div className="flex justify-between items-center px-4 py-3 border-b border-gray-100 sticky top-0 bg-white z-10">
-                        <Link prefetch={linkPrefetch} href="/" onClick={() => setMobileMenuOpen(false)}>
+                        <Link prefetch={linkPrefetch} href={localizePath("/", pathLocale)} onClick={() => setMobileMenuOpen(false)}>
                             <Image src="/assets/logo.jpg" width={120} height={60} alt="logo" style={{ maxWidth: "100%", objectFit: "contain", height: "auto" }} priority={true} unoptimized={true} />
                         </Link>
                         <button className="text-black" onClick={() => setMobileMenuOpen(false)}><RiCloseLine size={30} /></button>
@@ -353,7 +355,7 @@ const Header = () => {
                         <ul className="flex flex-col">
                             {navLinks.map(link => (
                                 <li key={link.path} className="border-b border-gray-700">
-                                    <Link prefetch={linkPrefetch} href={link.path} className="block text-black px-4 py-4 hover:text-purple-400 transition-colors" onClick={() => setMobileMenuOpen(false)}>{link.title}</Link>
+                                    <Link prefetch={linkPrefetch} href={localizePath(link.path, pathLocale)} className="block text-black px-4 py-4 hover:text-purple-400 transition-colors" onClick={() => setMobileMenuOpen(false)}>{link.title}</Link>
                                 </li>
                             ))}
                             <li ref={offersDropdownMobileRef} className="relative border-b border-gray-700">
@@ -363,8 +365,8 @@ const Header = () => {
                                 </button>
                                 {offersDropdownMobileOpen && (
                                     <div className="bg-white rounded shadow-lg text-black mt-1 absolute left-4 w-40 z-50">
-                                        <Link prefetch={linkPrefetch} href="/offers" className="block px-4 py-2 hover:bg-pink-50 hover:text-pink-700 transition-colors" onClick={() => { setOffersDropdownMobileOpen(false); setMobileMenuOpen(false); }}>{t('header.offers')}</Link>
-                                        <Link prefetch={linkPrefetch} href="/clearance" className="block px-4 py-2 hover:bg-pink-50 hover:text-pink-700 transition-colors" onClick={() => { setOffersDropdownMobileOpen(false); setMobileMenuOpen(false); }}>{t('header.clearance')}</Link>
+                                        <Link prefetch={linkPrefetch} href={localizePath("/offers", pathLocale)} className="block px-4 py-2 hover:bg-pink-50 hover:text-pink-700 transition-colors" onClick={() => { setOffersDropdownMobileOpen(false); setMobileMenuOpen(false); }}>{t('header.offers')}</Link>
+                                        <Link prefetch={linkPrefetch} href={localizePath("/clearance", pathLocale)} className="block px-4 py-2 hover:bg-pink-50 hover:text-pink-700 transition-colors" onClick={() => { setOffersDropdownMobileOpen(false); setMobileMenuOpen(false); }}>{t('header.clearance')}</Link>
                                     </div>
                                 )}
                             </li>

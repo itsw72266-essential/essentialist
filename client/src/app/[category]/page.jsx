@@ -681,6 +681,7 @@ import {
   getLocalizedField,
 } from '@/lib/seo/catalogMetadata';
 import { localeRequestHeaders } from '@/lib/seo/serverFetch';
+import { isLocalePathPrefix } from '@/lib/seo/localePaths';
 
 const SEO_KEYWORDS = {
   'face makeup': 'beginner face makeup kit with brushes',
@@ -814,6 +815,7 @@ async function fetchProductsAcrossSubcategories({ categoryId, subcats, page }) {
 export async function generateMetadata({ params }) {
   const resolvedParams = await params;
   const categorySlug = resolvedParams?.category;
+  if (isLocalePathPrefix(categorySlug)) return {};
   const locale = await getServerLocale();
   const categoryId = parseIdFromSlug(categorySlug);
 
@@ -877,6 +879,7 @@ export default async function CategoryPage({ params, searchParams }) {
   const resolvedSearchParams = await searchParams;
   const categorySlug = resolvedParams?.category;
   const page = Number(resolvedSearchParams?.page || 1);
+  if (isLocalePathPrefix(categorySlug)) return notFound();
   const categoryId = parseIdFromSlug(categorySlug);
 
   if (!categoryId) return notFound();

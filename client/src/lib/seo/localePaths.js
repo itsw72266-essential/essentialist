@@ -10,6 +10,14 @@ export const SITE_ORIGIN =
     "",
   );
 
+/** URL segments reserved for locale routing — not category slugs. */
+export const LOCALE_PATH_PREFIXES = ["fr", "en"];
+
+/** @param {string} [segment] */
+export function isLocalePathPrefix(segment) {
+  return LOCALE_PATH_PREFIXES.includes(String(segment || "").toLowerCase());
+}
+
 /** @param {string} [pathname] */
 export function stripLocalePrefix(pathname = "/") {
   const path = pathname.startsWith("/") ? pathname : `/${pathname}`;
