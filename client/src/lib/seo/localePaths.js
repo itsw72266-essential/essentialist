@@ -63,9 +63,7 @@ export function buildLanguageAlternates(path) {
 
   return {
     en: `${SITE_ORIGIN}${enPath}`,
-    "en-US": `${SITE_ORIGIN}${enPath}`,
     fr: `${SITE_ORIGIN}${frPath}`,
-    "fr-CM": `${SITE_ORIGIN}${frPath}`,
     "x-default": `${SITE_ORIGIN}${enPath}`,
   };
 }

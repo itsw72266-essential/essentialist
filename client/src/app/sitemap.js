@@ -9,15 +9,12 @@ import { buildLanguageAlternates } from "@/lib/seo/localePaths";
 function pushLocalized(items, path, options) {
   const base = path.startsWith("/") ? path : `/${path}`;
   const languages = buildLanguageAlternates(base);
-  const alternates = { languages };
 
-  for (const url of [languages.en, languages.fr]) {
-    items.push({
-      url,
-      ...options,
-      alternates,
-    });
-  }
+  items.push({
+    url: languages.en,
+    ...options,
+    alternates: { languages },
+  });
 }
 
 const API_URL = (

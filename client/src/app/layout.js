@@ -304,6 +304,7 @@ import { Suspense } from 'react'
 import './globals.css'
 
 import ClientLayoutShell from './partials/ClientLayoutShell'
+import { buildLanguageAlternates } from '@/lib/seo/localePaths'
 
 // --- Font Configuration (Performance + Design) ---
 const inter = Inter({
@@ -430,13 +431,7 @@ export const metadata = {
   // Canonical & Alternates
   alternates: {
     canonical: '/',
-    languages: {
-      en: 'https://www.esmakeupstore.com/',
-      'en-US': 'https://www.esmakeupstore.com/',
-      fr: 'https://www.esmakeupstore.com/fr',
-      'fr-CM': 'https://www.esmakeupstore.com/fr',
-      'x-default': 'https://www.esmakeupstore.com/',
-    },
+    languages: buildLanguageAlternates('/'),
   },
   
   // OpenGraph Configuration (Social + AEO)
