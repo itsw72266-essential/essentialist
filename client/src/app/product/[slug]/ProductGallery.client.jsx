@@ -262,15 +262,15 @@ export default function ProductGallery({ images = [], productName = "" }) {
 
   return (
     <div className="w-full">
-      <div className="zoomable relative overflow-hidden rounded-lg bg-white shadow-sm border border-slate-100">
+      <div className="zoomable relative aspect-square w-full max-h-[min(80vh,720px)] overflow-hidden rounded-lg bg-white shadow-sm border border-slate-100">
         <ImageZoomWrapper
           src={currentSrc}
           alt={mainImageAlt}
           width={1000}
           height={1000}
-          zoom={2.8}
+          zoom={2.4}
           hoverScale={1.09}
-          className="h-full w-full object-contain"
+          className="h-full w-full"
           priority={prioritize}
           fetchPriority={prioritize ? "high" : "auto"}
           loading={prioritize ? "eager" : "lazy"}

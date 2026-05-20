@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useEffect, useCallback } from "react";
+import { useRef, useState, useEffect, useCallback, useMemo } from "react";
 import Image from "next/image";
 
 export default function ImageZoom({
@@ -47,7 +47,7 @@ export default function ImageZoom({
       const clamp = (v) => Math.max(0, Math.min(100, v));
       setBgPos(`${clamp(x)}% ${clamp(y)}%`);
     },
-    [isActive]
+    [isActive],
   );
 
   const onEnter = () => setIsActive(true);
@@ -60,22 +60,19 @@ export default function ImageZoom({
     }
   };
 
-  const bgSize = `${(
-    (imgNatural.w / (width || 1)) *
-    zoom *
-    100
-  ).toFixed(2)}% auto`;
+  /** object-contain-style background size for square viewport */
+  const bgSize = useMemo(() => {
+    const aspect = imgNatural.w / (imgNatural.h || 1);
+    const pct = (zoom * 100).toFixed(2);
+    return aspect > 1 ? `${pct}% auto` : `auto ${pct}%`;
+  }, [imgNatural.w, imgNatural.h, zoom]);
 
   const resolvedLoading = loading ?? (priority ? "eager" : "lazy");
 
   return (
     <div
       ref={containerRef}
-      className={`relative group select-none rounded-lg border border-gray-100 bg-white ${className}`}
-      style={{
-        transition: "transform 160ms ease",
-        overflow: "hidden",
-      }}
+      className={`relative h-full w-full min-h-0 overflow-hidden rounded-lg bg-white ${className}`}
       onMouseEnter={onEnter}
       onMouseLeave={onLeave}
       onMouseMove={handleMove}
@@ -88,7 +85,7 @@ export default function ImageZoom({
       tabIndex={0}
     >
       <div
-        className="h-full w-full"
+        className="absolute inset-0 flex items-center justify-center overflow-hidden"
         style={{
           transform: isActive ? `scale(${hoverScale})` : "scale(1)",
           transition: "transform 160ms ease",
@@ -99,7 +96,7 @@ export default function ImageZoom({
           alt={alt}
           width={width}
           height={height}
-          className="h-full w-full object-contain"
+          className="max-h-full max-w-full h-auto w-auto object-contain"
           priority={priority}
           loading={resolvedLoading}
           fetchPriority={fetchPriority}
@@ -113,11 +110,8 @@ export default function ImageZoom({
 
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0"
-        style={{
-          zIndex: 1,
-          overflow: "visible",
-        }}
+        className="pointer-events-none absolute inset-0 overflow-hidden"
+        style={{ zIndex: 1 }}
       >
         <div
           className="absolute inset-0"
