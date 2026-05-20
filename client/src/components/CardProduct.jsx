@@ -236,7 +236,7 @@
 import { useMemo, useCallback } from 'react'
 import Link from 'next/link'
 import { DisplayPriceInRupees } from '../utils/DisplayPriceInRupees'
-import { valideURLConvert } from '../utils/valideURLConvert'
+import { buildProductPath } from '@/lib/catalogSlugs'
 import { pricewithDiscount } from '../utils/PriceWithDiscount'
 import AddToCartButton from './AddToCartButton'
 import Image from 'next/image'
@@ -284,7 +284,7 @@ const CardProduct = React.memo(({ data, isLoading = false, priority = false }) =
     return <CardSkeleton />
   }
 
-  const productUrl = useMemo(() => `/product/${valideURLConvert(data.name)}-${data._id}`, [data.name, data._id])
+  const productUrl = useMemo(() => buildProductPath(data), [data])
 
   const discountedPrice = useMemo(() => {
     const basePrice = typeof data.bulkPrice === 'number' && data.bulkPrice > 0 ? data.bulkPrice : data.price

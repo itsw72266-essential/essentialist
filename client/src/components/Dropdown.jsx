@@ -160,7 +160,7 @@ import React, {
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 
-import { valideURLConvert } from "@/utils/valideURLConvert";
+import { buildSubCategoryPath } from "@/lib/catalogSlugs";
 import SummaryApi, { callSummaryApi } from "@/backend/contracts/summaryApi";
 import { useTranslation } from "react-i18next";
 import "@/lib/i18n";
@@ -257,14 +257,12 @@ const Dropdown = () => {
     [subCategoryData]
   );
 
-  const generateProductUrl = useCallback(
-    (categoryId, categoryName, subCategory) => {
-      return `/${valideURLConvert(categoryName)}-${categoryId}/${valideURLConvert(
-        subCategory.name
-      )}-${subCategory._id}`;
-    },
-    []
-  );
+  const generateProductUrl = useCallback((categoryId, categoryName, subCategory) => {
+    return buildSubCategoryPath(
+      { _id: categoryId, name: categoryName },
+      subCategory,
+    );
+  }, []);
 
   return (
     <div

@@ -673,9 +673,17 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import CardProduct from '../../components/CardProduct';
-import { valideURLConvert } from '../../utils/valideURLConvert';
 import SummaryApi, { baseURL } from '@/backend/contracts/summaryApi';
 import { getServerLocale } from '@/lib/seo/serverLocale';
+import {
+  buildCategoryPath,
+  buildSubCategoryPath,
+  extractLegacyObjectId,
+  findCategoryByParam,
+  shouldRedirectCatalogParam,
+} from '@/lib/catalogSlugs';
+import { localizePath } from '@/lib/seo/localePaths';
+import { redirect } from 'next/navigation';
 import {
   buildCategoryMetadata,
   getLocalizedField,
@@ -720,9 +728,7 @@ const PAGE_SIZE = 12;
 
 /* ----------------------- Helpers ----------------------- */
 function parseIdFromSlug(slug) {
-  if (!slug) return null;
-  const parts = String(slug).split('-');
-  return parts.at(-1);
+  return extractLegacyObjectId(slug);
 }
 function parseNameFromSlug(slug) {
   if (!slug) return '';
@@ -817,15 +823,14 @@ export async function generateMetadata({ params }) {
   const categorySlug = resolvedParams?.category;
   if (isLocalePathPrefix(categorySlug)) return {};
   const locale = await getServerLocale();
-  const categoryId = parseIdFromSlug(categorySlug);
+  const categories = await fetchCategories(locale);
+  const category = findCategoryByParam(categories, categorySlug);
 
   let categoryName = parseNameFromSlug(categorySlug) || 'Makeup';
-  if (categoryId) {
-    const categories = await fetchCategories(locale);
-    const category = categories.find((c) => String(c?._id) === String(categoryId));
-    if (category) {
-      categoryName = getLocalizedField(category, 'name', locale) || categoryName;
-    }
+  let canonicalCategorySlug = categorySlug;
+  if (category) {
+    categoryName = getLocalizedField(category, 'name', locale) || categoryName;
+    canonicalCategorySlug = category.slug || categorySlug;
   }
 
   const key = toKey(categoryName);
@@ -833,7 +838,7 @@ export async function generateMetadata({ params }) {
 
   return buildCategoryMetadata({
     categoryName,
-    categorySlug,
+    categorySlug: canonicalCategorySlug,
     locale,
     primarySeo: capitalize(primarySeo),
   });
@@ -880,17 +885,20 @@ export default async function CategoryPage({ params, searchParams }) {
   const categorySlug = resolvedParams?.category;
   const page = Number(resolvedSearchParams?.page || 1);
   if (isLocalePathPrefix(categorySlug)) return notFound();
-  const categoryId = parseIdFromSlug(categorySlug);
 
-  if (!categoryId) return notFound();
-
-  const [categories, subcats] = await Promise.all([
-    fetchCategories(),
-    fetchSubCategoriesOfCategory(categoryId),
-  ]);
-
-  const category = categories.find((c) => String(c?._id) === String(categoryId));
+  const locale = await getServerLocale();
+  const categories = await fetchCategories(locale);
+  const category = findCategoryByParam(categories, categorySlug);
   if (!category) return notFound();
+
+  if (shouldRedirectCatalogParam(category, categorySlug)) {
+    redirect(localizePath(buildCategoryPath(category), locale));
+  }
+
+  const categoryId = category._id;
+  const canonicalCategorySlug = category.slug || categorySlug;
+
+  const subcats = await fetchSubCategoriesOfCategory(categoryId);
 
   const categoryName = category?.name || 'Category';
   const key = toKey(categoryName);
@@ -905,11 +913,11 @@ export default async function CategoryPage({ params, searchParams }) {
 
   const totalPages = Math.ceil(totalCount / PAGE_SIZE);
   const hasMore = page < totalPages;
-  const nextHref = `/${categorySlug}?page=${page + 1}`;
+  const nextHref = `/${canonicalCategorySlug}?page=${page + 1}`;
 
   return (
     <>
-      <StructuredData categorySlug={categorySlug} categoryName={categoryName} products={products} />
+      <StructuredData categorySlug={canonicalCategorySlug} categoryName={categoryName} products={products} />
       
       <style dangerouslySetInnerHTML={{ __html: `
         .e-hero { background: linear-gradient(135deg, #fff 0%, #fff1f2 100%); border: 1px solid #fecdd3; }
@@ -936,7 +944,7 @@ export default async function CategoryPage({ params, searchParams }) {
               {subcats.map((s) => (
                 <Link
                   key={s._id}
-                  href={`/${valideURLConvert(categoryName)}-${category._id}/${valideURLConvert(s.name)}-${s._id}`}
+                  href={buildSubCategoryPath(category, s)}
                   className="e-subcat-card bg-white p-4 rounded-xl flex flex-col items-center group"
                 >
                   <div className="w-24 h-24 mb-3">

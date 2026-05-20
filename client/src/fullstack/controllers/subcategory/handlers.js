@@ -10,6 +10,7 @@ import {
   autoTranslateSubCategory,
   scheduleAutoTranslate,
 } from "../../utils/auto-translate.js";
+import { generateUniqueCatalogSlug } from "../../lib/catalogSlugDb.js";
 
 const SUBCATEGORY_CACHE_NAMESPACES = ["subcategories:list"];
 const PRODUCT_CACHE_NAMESPACES = [
@@ -52,8 +53,11 @@ export const AddSubCategoryController = async (request, response) => {
       });
     }
 
+    const slug = await generateUniqueCatalogSlug(SubCategoryModel, name);
+
     const payload = {
       name,
+      slug,
       image,
       category,
       translations: sanitizeTranslations(translations, ["name"])
@@ -128,6 +132,20 @@ export const updateSubCategoryController = async (request, response) => {
     }
 
     const checkSub = await SubCategoryModel.findById(_id);
+
+    if (checkSub && name && name !== checkSub.name) {
+      updatePayload.slug = await generateUniqueCatalogSlug(
+        SubCategoryModel,
+        name,
+        _id,
+      );
+    } else if (checkSub && !checkSub.slug && name) {
+      updatePayload.slug = await generateUniqueCatalogSlug(
+        SubCategoryModel,
+        name,
+        _id,
+      );
+    }
 
     if (!checkSub) {
       return response.status(400).json({

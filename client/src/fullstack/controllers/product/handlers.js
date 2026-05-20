@@ -2,6 +2,8 @@
 import mongoose from 'mongoose';
 import CategoryModel from '../../models/category.model.js';
 import SubCategoryModel from '../../models/subCategory.model.js';
+import { extractLegacyObjectId, stripLegacyIdSuffix } from '@/lib/catalogSlugs.js';
+import { generateUniqueCatalogSlug } from '../../lib/catalogSlugDb.js';
 import ProductModel from '../../models/product.model.js';
 import BrandModel from '../../models/brand.model.js';
 import { invalidateCacheNamespaces } from '../../lib/cacheNoop.js';
@@ -297,8 +299,11 @@ export const createProductController = async (request, response) => {
       }
     }
 
+    const slug = await generateUniqueCatalogSlug(ProductModel, name);
+
     const product = new ProductModel({
       name,
+      slug,
       image,
       category,
       subCategory,
@@ -538,21 +543,36 @@ export const getProductByCategoryAndSubCategory = async (request, response) => {
 export const getProductDetails = async (request, response) => {
   try {
     const locale = getRequestLocale(request);
-    const { productId } = request.body;
+    const { productId, slug: slugParam } = request.body;
 
-    if (!productId || !mongoose.Types.ObjectId.isValid(productId)) {
-      return response.status(400).json({
-        message: "Valid productId is required",
-        error: true,
-        success: false
-      });
+    let product = null;
+    let resolvedId = null;
+
+    if (productId && mongoose.Types.ObjectId.isValid(productId)) {
+      resolvedId = String(productId);
+      product = await ProductModel.findOne({ _id: productId })
+        .populate("category subCategory brand")
+        .lean();
+    } else if (slugParam) {
+      const cleanSlug = stripLegacyIdSuffix(String(slugParam));
+      product = await ProductModel.findOne({ slug: cleanSlug })
+        .populate("category subCategory brand")
+        .lean();
+
+      if (!product) {
+        const legacyId = extractLegacyObjectId(String(slugParam));
+        if (legacyId && mongoose.Types.ObjectId.isValid(legacyId)) {
+          resolvedId = legacyId;
+          product = await ProductModel.findOne({ _id: legacyId })
+            .populate("category subCategory brand")
+            .lean();
+        }
+      } else {
+        resolvedId = String(product._id);
+      }
     }
 
-    const product = await ProductModel.findOne({ _id: productId })
-      .populate("category subCategory brand")
-      .lean();
-
-    if (!product) {
+    if (!product || !resolvedId) {
       return response.status(404).json({
         message: "Product not found",
         error: true,
@@ -563,9 +583,9 @@ export const getProductDetails = async (request, response) => {
     if (
       locale === "fr" &&
       needsFrenchSync(product, PRODUCT_TRANSLATION_FIELDS) &&
-      shouldRunLazyTranslate(`product:${productId}`)
+      shouldRunLazyTranslate(`product:${resolvedId}`)
     ) {
-      scheduleAutoTranslate(() => autoTranslateProduct(productId, product));
+      scheduleAutoTranslate(() => autoTranslateProduct(resolvedId, product));
     }
 
     setCacheHeaders(response, PRODUCT_DETAILS_CACHE);
@@ -663,6 +683,12 @@ export const updateProductDetails = async (request, response) => {
 
     if (rest.translations !== undefined) {
       rest.translations = sanitizeTranslations(rest.translations, PRODUCT_TRANSLATION_FIELDS);
+    }
+
+    if (rest.name && rest.name !== product.name) {
+      product.slug = await generateUniqueCatalogSlug(ProductModel, rest.name, _id);
+    } else if (!product.slug && product.name) {
+      product.slug = await generateUniqueCatalogSlug(ProductModel, product.name, _id);
     }
 
     Object.assign(product, rest);

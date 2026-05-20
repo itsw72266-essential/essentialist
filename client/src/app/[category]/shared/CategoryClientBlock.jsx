@@ -6,7 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import Head from "next/head";
 
-import { valideURLConvert } from "@/utils/valideURLConvert";
+import { buildProductPath } from "@/lib/catalogSlugs";
 import { useCategoryWithProductsQuery } from "@/hooks/queries/useCategoryWithProductsQuery";
 
 function SkeletonCard() {
@@ -285,9 +285,7 @@ export default function CategoryClientBlock({
                     ? product.brand
                     : product.brand?.name;
                 const inStock = product.stock > 0;
-                const productURL = `/product/${valideURLConvert(
-                  product.name
-                )}-${product._id}`;
+                const productURL = buildProductPath(product);
 
                 return (
                   <Link

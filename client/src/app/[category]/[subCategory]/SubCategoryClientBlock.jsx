@@ -475,7 +475,7 @@ import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import "@/lib/i18n";
 import CardProduct from "../../../components/CardProduct";
-import { valideURLConvert } from "../../../utils/valideURLConvert";
+import { getSubCategorySlug } from "@/lib/catalogSlugs";
 import SummaryApi, { callSummaryApi } from "@/backend/contracts/summaryApi";
 import { linkPrefetch } from "@/lib/devPerformance";
 
@@ -723,7 +723,7 @@ export default function SubCategoryClientBlock({
                 return (
                   <Link
                     key={sub?._id}
-                    href={`/${categorySlug}/${valideURLConvert(sub?.name)}-${sub?._id}`}
+                    href={`/${categorySlug}/${getSubCategorySlug(sub)}`}
                     scroll={false} 
                     prefetch={linkPrefetch} 
                     className={`group relative w-full p-2 flex flex-col items-center md:flex-row md:h-16 box-border md:gap-4 border-b transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white ${
@@ -818,7 +818,7 @@ export default function SubCategoryClientBlock({
                   return (
                     <Link
                       key={sub._id}
-                      href={`/${categorySlug}/${valideURLConvert(sub.name)}-${sub._id}`}
+                      href={`/${categorySlug}/${getSubCategorySlug(sub)}`}
                       scroll={false} 
                       prefetch={linkPrefetch} 
                       className={`flex items-center gap-3 p-3 rounded-xl transition-all duration-200 border ${

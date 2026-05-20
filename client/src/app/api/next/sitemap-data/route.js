@@ -12,13 +12,13 @@ export async function GET() {
     await connectMongo();
     const [categories, subcategories, products, blogs, brands] =
       await Promise.all([
-        CategoryModel.find().select("name updatedAt image").lean(),
+        CategoryModel.find().select("name slug updatedAt image").lean(),
         SubCategoryModel.find()
-          .select("name updatedAt category")
-          .populate("category", "name _id")
+          .select("name slug updatedAt category")
+          .populate("category", "name slug _id")
           .lean(),
         ProductModel.find({ publish: true })
-          .select("name updatedAt image")
+          .select("name slug updatedAt image")
           .lean(),
         BlogModel.find({ status: "published" })
           .select("slug updatedAt coverImage")

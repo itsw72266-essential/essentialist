@@ -1,5 +1,11 @@
 import { getServerSideApiBaseUrl } from "@/lib/serverApiOrigin";
 import { buildLanguageAlternates } from "@/lib/seo/localePaths";
+import {
+  buildCategoryPath,
+  buildProductPath,
+  buildSubCategoryPath,
+  slugifyName,
+} from "@/lib/catalogSlugs";
 
 /**
  * @param {import("next").MetadataRoute.Sitemap} items
@@ -25,16 +31,6 @@ const API_URL = (
   process.env.SITE_URL ||
   "http://localhost:3000"
 ).replace(/\/+$/, "");
-
-function valideURLConvert(str) {
-  return (str || "")
-    .toString()
-    .normalize("NFKD")
-    .replace(/[\u0300-\u036F]/g, "")
-    .replace(/[^a-zA-Z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .toLowerCase();
-}
 
 async function fetchJSON(path) {
   try {
@@ -105,7 +101,7 @@ export default async function sitemap() {
   }
 
   for (const cat of categories) {
-    const catPath = `/${valideURLConvert(cat.name)}-${cat._id}`;
+    const catPath = buildCategoryPath(cat);
     pushLocalized(items, catPath, {
       lastModified: cat.updatedAt || now,
       changeFrequency: "weekly",
@@ -114,7 +110,7 @@ export default async function sitemap() {
   }
 
   for (const prod of products) {
-    const prodPath = `/product/${valideURLConvert(prod.name)}-${prod._id}`;
+    const prodPath = buildProductPath(prod);
     pushLocalized(items, prodPath, {
       lastModified: prod.updatedAt || now,
       changeFrequency: "weekly",
@@ -125,9 +121,7 @@ export default async function sitemap() {
   for (const sub of subcategories) {
     const cat = Array.isArray(sub.category) ? sub.category[0] : sub.category;
     if (!cat?._id || !sub?.name) continue;
-    const catSlug = `${valideURLConvert(cat.name)}-${cat._id}`;
-    const subSlug = `${valideURLConvert(sub.name)}-${sub._id}`;
-    pushLocalized(items, `/${catSlug}/${subSlug}`, {
+    pushLocalized(items, buildSubCategoryPath(cat, sub), {
       lastModified: sub.updatedAt || now,
       changeFrequency: "weekly",
       priority: 0.65,
@@ -136,7 +130,7 @@ export default async function sitemap() {
 
   for (const brand of brands) {
     const slug =
-      brand.slug || valideURLConvert(brand.name) || String(brand._id || "");
+      brand.slug || slugifyName(brand.name) || String(brand._id || "");
     if (!slug) continue;
     pushLocalized(items, `/brands/${slug}`, {
       lastModified: brand.updatedAt || now,

@@ -1,25 +1,35 @@
-// client\src\app\product\[slug]\queries.js
 import { cache } from "react";
 import SummaryApi, { apiFetch } from "@/backend/contracts/summaryApi";
 import { getCurrentLocale } from "@/lib/i18n";
+import { OBJECT_ID_REGEX } from "@/lib/catalogSlugs";
 
-export const productQueryKey = (productId, locale) => [
+export const productQueryKey = (productKey, locale) => [
   "product-details",
-  productId,
+  productKey,
   locale || (typeof window !== "undefined" ? getCurrentLocale() : "en"),
 ];
 export const reviewStatsQueryKey = (productId) => ["product-review-stats", productId];
 
-async function fetchProductImpl(productId, locale = "en") {
-  if (!productId) {
-    const error = new Error("Missing productId");
+function buildProductDetailsBody(productKey) {
+  if (!productKey) return null;
+  const key = String(productKey);
+  if (OBJECT_ID_REGEX.test(key) && key.length === 24) {
+    return { productId: key };
+  }
+  return { slug: key };
+}
+
+async function fetchProductImpl(productKey, locale = "en") {
+  const body = buildProductDetailsBody(productKey);
+  if (!body) {
+    const error = new Error("Missing product identifier");
     error.status = 400;
     throw error;
   }
 
   const response = await apiFetch(SummaryApi.getProductDetails.url, {
     method: SummaryApi.getProductDetails.method.toUpperCase(),
-    body: { productId },
+    body,
     locale,
   });
 
@@ -52,17 +62,17 @@ async function fetchReviewStatsImpl(productId) {
 }
 
 /** Dedupe within one RSC request (generateMetadata + page both need the same rows). */
-export const fetchProduct = cache((productId, locale = "en") =>
-  fetchProductImpl(productId, locale),
+export const fetchProduct = cache((productKey, locale = "en") =>
+  fetchProductImpl(productKey, locale),
 );
 export const fetchReviewStats = cache(fetchReviewStatsImpl);
 
-export function productQueryOptions(productId, locale) {
+export function productQueryOptions(productKey, locale) {
   const resolvedLocale =
     locale || (typeof window !== "undefined" ? getCurrentLocale() : "en");
   return {
-    queryKey: productQueryKey(productId, resolvedLocale),
-    queryFn: () => fetchProduct(productId, resolvedLocale),
+    queryKey: productQueryKey(productKey, resolvedLocale),
+    queryFn: () => fetchProduct(productKey, resolvedLocale),
     staleTime: 60_000,
     retry: 1,
   };

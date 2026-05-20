@@ -901,7 +901,10 @@ import { useTranslation } from 'react-i18next'
 
 import '@/lib/i18n'
 import BrandSearch from '../../components/BrandSearch'
-import { valideURLConvert } from '../../utils/valideURLConvert'
+import {
+  buildSubCategoryPath,
+  getProductSlug,
+} from '@/lib/catalogSlugs'
 import {
   useBrandsQuery,
   useCategoriesQuery,
@@ -974,24 +977,7 @@ function createBrandSlug(name = '') {
 }
 
 function createProductSlug(product = {}) {
-  const fallbackName =
-    typeof product?.name === 'string' ? product.name.trim() : ''
-  const raw =
-    typeof product?.slug === 'string' && product.slug.trim()
-      ? product.slug.trim()
-      : typeof product?.handle === 'string' && product.handle.trim()
-        ? product.handle.trim()
-        : typeof product?.seoSlug === 'string' && product.seoSlug.trim()
-          ? product.seoSlug.trim()
-          : fallbackName
-            ? valideURLConvert(fallbackName)
-            : ''
-
-  if (!raw) return ''
-  if (product?._id && typeof product._id === 'string' && !raw.includes(product._id)) {
-    return `${raw}-${product._id}`
-  }
-  return raw
+  return getProductSlug(product)
 }
 
 function FCFA(amount) {
@@ -1267,9 +1253,7 @@ function getCategoryLinkMeta(allCategory, allSubCategory, row) {
 
 function buildSubCatUrl(mainCat, subCat) {
   if (!mainCat?._id || !subCat?._id) return '#'
-  return `/${valideURLConvert(mainCat.name)}-${mainCat._id}/${valideURLConvert(
-    subCat.name
-  )}-${subCat._id}`
+  return buildSubCategoryPath(mainCat, subCat)
 }
 
 // ---------- UI helpers ----------

@@ -210,7 +210,7 @@ import Axios from "@/lib/apiClient";
 import SummaryApi from "@/backend/contracts/summaryApi";
 import CardProduct from "./CardProduct";
 import { getLocalizedProductName } from "@/helpers/localizeContent";
-import { valideURLConvert } from "../utils/valideURLConvert";
+import { buildProductPath } from "@/lib/catalogSlugs";
 
 const HISTORY_KEY = "browsing_history_products";
 
@@ -338,8 +338,7 @@ const ProductRecommendations = ({ currentProductId, currentProductData }) => {
     // Fast client-side navigation to /product/[slug] without additional API calls
     // The product/[slug]/page.jsx can parse the slug (e.g., extract ID from name-id format)
     // and fetch full details server-side or client-side as needed.
-    const productSlug = `${valideURLConvert(product.name)}-${product._id}`;
-    router.push(`/product/${productSlug}`);
+    router.push(buildProductPath(product));
   };
   
   const displayHistory = isHomePage 

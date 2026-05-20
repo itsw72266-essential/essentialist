@@ -904,7 +904,8 @@ import {
   buildProductSeoCopy,
   getLocalizedProductFields,
 } from "@/lib/seo/productMetadata"
-import { buildCanonicalUrl } from "@/lib/seo/localePaths"
+import { buildCanonicalUrl, localizePath } from "@/lib/seo/localePaths"
+import { buildProductPath } from "@/lib/catalogSlugs"
 
 // --- Configuration ---
 const DEFAULT_PRICE_VALIDITY_DAYS = 90
@@ -919,10 +920,28 @@ const BUSINESS_CONFIG = {
 }
 
 // --- Utility Functions ---
-function extractProductId(slug) {
-  if (!slug) return null
-  const parts = slug.split("-")
-  return parts.at(-1)
+async function resolveProductRoute(urlParam, locale) {
+  if (!urlParam) return null
+
+  let product
+  try {
+    product = await getCachedProduct(urlParam, locale)
+  } catch {
+    return null
+  }
+
+  const productId = String(product._id)
+  const canonicalPath = buildProductPath(product)
+
+  if (canonicalPath !== `/product/${urlParam}`) {
+    redirect(localizePath(canonicalPath, locale))
+  }
+
+  return {
+    product,
+    productId,
+    canonicalSlug: product.slug || urlParam,
+  }
 }
 
 function stripHtml(html) {
@@ -1131,10 +1150,9 @@ const getCachedReviewStats = unstable_cache(
 export async function generateMetadata({ params }) {
   const resolvedParams = await params
   const slug = resolvedParams?.slug
-  const productId = extractProductId(slug)
   const locale = await getServerLocale()
 
-  if (!productId)
+  if (!slug)
     return {
       title: "Product Not Found",
       robots: { index: false },
@@ -1142,7 +1160,7 @@ export async function generateMetadata({ params }) {
 
   let product = null
   try {
-    product = await getCachedProduct(productId, locale)
+    product = await getCachedProduct(slug, locale)
   } catch {
     product = null
   }
@@ -1177,7 +1195,8 @@ export async function generateMetadata({ params }) {
   const heroImage = Array.isArray(product?.image)
     ? product.image[0]
     : product?.image
-  const alternates = buildProductAlternates(slug, locale)
+  const canonicalSlug = product.slug || slug
+  const alternates = buildProductAlternates(canonicalSlug, locale)
 
   return {
     metadataBase: new URL("https://www.esmakeupstore.com"),
@@ -1505,21 +1524,14 @@ function StructuredData({ product, slug, reviewStats, locale = "en" }) {
 export default async function ProductDisplayPage({ params }) {
   const resolvedParams = await params
   const slug = resolvedParams?.slug
-  const productId = extractProductId(slug)
   const locale = await getServerLocale()
 
-  if (!productId) return notFound()
+  const resolved = await resolveProductRoute(slug, locale)
+  if (!resolved) return notFound()
 
-  let productData
+  const { product: productData, productId, canonicalSlug } = resolved
+
   let reviewStatsSnapshot = { average: 0, count: 0 }
-  try {
-    productData = await getCachedProduct(productId, locale)
-  } catch (error) {
-    const status = error?.status
-    if (status === 404 || status === 400) return notFound()
-    throw error
-  }
-
   try {
     reviewStatsSnapshot = await getCachedReviewStats(productId)
   } catch {
@@ -1535,7 +1547,7 @@ export default async function ProductDisplayPage({ params }) {
       {/* Structured Data */}
       <StructuredData
         product={productData}
-        slug={slug}
+        slug={canonicalSlug}
         reviewStats={reviewStatsSnapshot}
         locale={locale}
       />

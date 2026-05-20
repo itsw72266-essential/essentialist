@@ -157,6 +157,7 @@ const productTranslationSchema = new mongoose.Schema(
 const productSchema = new mongoose.Schema(
   {
     name: { type: String },
+    slug: { type: String, unique: true, sparse: true, index: true },
     image: { type: Array, default: [] },
     category: [
       {

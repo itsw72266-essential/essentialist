@@ -32,7 +32,7 @@ import { useGlobalContext } from "@/providers/ReactQueryProvider";
 import Swal from "sweetalert2";
 import "sweetalert2/dist/sweetalert2.min.css";
 import { useTranslation } from "react-i18next";
-import { valideURLConvert } from "../utils/valideURLConvert";
+import { buildProductPath } from "@/lib/catalogSlugs";
 
 const RECEIPT_PUBLIC_KEY_RAW =
   process.env.NEXT_PUBLIC_RECEIPT_PUBLIC_KEY ?? "";
@@ -1068,8 +1068,7 @@ export default function SuccessPageClient({ searchParams: initialParams }) {
       const pid = item.productId;
       if (!pid || seen.has(pid)) continue;
       seen.add(pid);
-      const slug = `${valideURLConvert(item.name)}-${pid}`;
-      const href = `/product/${slug}?writeReview=1#reviews`;
+      const href = `${buildProductPath({ _id: pid, name: item.name })}?writeReview=1#reviews`;
       links.push({ href, label: item.name });
     }
     if (!links.length) return;

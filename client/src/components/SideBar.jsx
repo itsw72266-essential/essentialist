@@ -715,7 +715,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
 
-import { valideURLConvert } from "@/utils/valideURLConvert";
+import { buildSubCategoryPath } from "@/lib/catalogSlugs";
 import {
   useBrandsQuery,
   useCategoriesQuery,
@@ -1040,9 +1040,7 @@ const SideBar = ({
                   {subcategories.length > 0 ? (
                     <ul className={`space-y-1 py-2 ${isMobile ? "pl-4" : ""}`}>
                       {subcategories.map((subCat) => {
-                        const url = `/${valideURLConvert(category.name)}-${
-                          category._id
-                        }/${valideURLConvert(subCat.name)}-${subCat._id}`;
+                        const url = buildSubCategoryPath(category, subCat);
 
                         return (
                           <li key={subCat._id}>

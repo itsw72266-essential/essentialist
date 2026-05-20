@@ -249,7 +249,16 @@ import { notFound } from "next/navigation";
 import SubCategoryClientBlock from "./SubCategoryClientBlock";
 import { getServerLocale } from "@/lib/seo/serverLocale";
 import { buildSubCategoryMetadata } from "@/lib/seo/catalogMetadata";
-const OBJECT_ID_REGEX = /^[0-9a-f]{24}$/i;
+import {
+  buildCategoryPath,
+  buildSubCategoryPath,
+  extractLegacyObjectId,
+  findCategoryByParam,
+  findSubCategoryByParam,
+  shouldRedirectCatalogParam,
+} from "@/lib/catalogSlugs";
+import { isLocalePathPrefix, localizePath } from "@/lib/seo/localePaths";
+import { redirect } from "next/navigation";
 
 const subCategoryBestTitles = {
   Foundation: "Transfer Proof Foundation For Masks",
@@ -310,10 +319,7 @@ const subCategoryBestTitles = {
 };
 
 function parseIdFromSlug(slug) {
-  if (!slug) return null;
-  const parts = String(slug).split("-");
-  const candidate = parts[parts.length - 1];
-  return OBJECT_ID_REGEX.test(candidate) ? candidate : null;
+  return extractLegacyObjectId(slug);
 }
 
 function parseNameFromSlug(slug) {
@@ -340,27 +346,26 @@ export async function generateMetadata({ params, searchParams }) {
   const subCategorySlug = awaitedParams?.subCategory;
   const page = Number(awaitedSearch?.page || 1);
 
-  const categoryId = parseIdFromSlug(categorySlug);
-  const subCategoryId = parseIdFromSlug(subCategorySlug);
-  const subCategoryName = parseNameFromSlug(subCategorySlug);
+  const { fetchAllCategories, fetchSubCategoriesOfCategory } = await import(
+    "@/lib/catalogFetch.server.js"
+  );
+  const categories = await fetchAllCategories(locale);
+  const category = findCategoryByParam(categories, categorySlug);
+  const subcatsForCategory = category
+    ? await fetchSubCategoriesOfCategory(category._id)
+    : [];
+  const subCategory = findSubCategoryByParam(subcatsForCategory, subCategorySlug);
 
-  if (!categoryId || !subCategoryId) {
-    return buildSubCategoryMetadata({
-      subCategoryName: "Beauty Products",
-      categorySlug: categorySlug || "category",
-      subCategorySlug: subCategorySlug || "products",
-      locale,
-      commercialTitle: "Beauty Products",
-      page,
-    });
-  }
+  const subCategoryName = subCategory?.name || parseNameFromSlug(subCategorySlug) || "Beauty Products";
+  const canonicalCategorySlug = category?.slug || categorySlug || "category";
+  const canonicalSubSlug = subCategory?.slug || subCategorySlug || "products";
 
   const commercialTitle = bestSeoTitleForSubcategory(subCategoryName);
 
   return buildSubCategoryMetadata({
     subCategoryName,
-    categorySlug,
-    subCategorySlug,
+    categorySlug: canonicalCategorySlug,
+    subCategorySlug: canonicalSubSlug,
     locale,
     commercialTitle,
     page,
@@ -375,17 +380,39 @@ export default async function SubCategoryPage({ params, searchParams }) {
   const subCategorySlug = awaitedParams?.subCategory;
   const page = Number(awaitedSearch?.page || 1);
 
-  const categoryId = parseIdFromSlug(categorySlug);
-  const subCategoryId = parseIdFromSlug(subCategorySlug);
+  if (isLocalePathPrefix(categorySlug)) return notFound();
 
-  if (!categoryId || !subCategoryId) return notFound();
+  const locale = await getServerLocale();
+  const { fetchAllCategories, fetchSubCategoriesOfCategory } = await import(
+    "@/lib/catalogFetch.server.js"
+  );
+  const categories = await fetchAllCategories(locale);
+  const category = findCategoryByParam(categories, categorySlug);
+  if (!category) return notFound();
+
+  if (shouldRedirectCatalogParam(category, categorySlug)) {
+    redirect(localizePath(buildCategoryPath(category), locale));
+  }
+
+  const subcatsForCategory = await fetchSubCategoriesOfCategory(category._id);
+  const subCategory = findSubCategoryByParam(subcatsForCategory, subCategorySlug);
+  if (!subCategory) return notFound();
+
+  const canonicalCategorySlug = category.slug || categorySlug;
+  const canonicalSubSlug = subCategory.slug || subCategorySlug;
+
+  if (shouldRedirectCatalogParam(subCategory, subCategorySlug)) {
+    redirect(
+      localizePath(buildSubCategoryPath(category, subCategory), locale),
+    );
+  }
 
   return (
     <SubCategoryClientBlock
-      categorySlug={categorySlug}
-      subCategorySlug={subCategorySlug}
-      categoryId={categoryId}
-      subCategoryId={subCategoryId}
+      categorySlug={canonicalCategorySlug}
+      subCategorySlug={canonicalSubSlug}
+      categoryId={category._id}
+      subCategoryId={subCategory._id}
       page={page}
       categoryNameFromSlug={parseNameFromSlug(categorySlug)}
       subCategoryNameFromSlug={parseNameFromSlug(subCategorySlug)}

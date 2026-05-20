@@ -4,7 +4,7 @@
 import React, { useMemo, useEffect, useRef, useState } from 'react'
 import CardProduct from './CardProduct'
 import { FaAngleLeft, FaAngleRight, FaArrowRight } from 'react-icons/fa6'
-import { valideURLConvert } from '../utils/valideURLConvert'
+import { buildCategoryPath, buildSubCategoryPath } from '@/lib/catalogSlugs'
 import Link from 'next/link'
 import { useTranslation } from 'react-i18next'
 import '@/lib/i18n'
@@ -26,7 +26,7 @@ const CategoryWiseProductDisplay = ({
   const headingClasses = useAdaptiveTextClasses(displayName, 'sectionHeading')
   const seeAllClasses = useAdaptiveTextClasses(t('common.seeAll'), 'seeAllLink')
 
-  const [redirectURL, setRedirectURL] = useState(`/${valideURLConvert(name)}-${id}`)
+  const [redirectURL, setRedirectURL] = useState(buildCategoryPath({ _id: id, name }))
   const containerRef = useRef()
 
   // Build redirect URL (memoized for stability/fast re-renders)
@@ -35,9 +35,10 @@ const CategoryWiseProductDisplay = ({
       const filterData = sub.category?.some((c) => c._id === id)
       return filterData
     })
-    return subcategory 
-      ? `/${valideURLConvert(name)}-${id}/${valideURLConvert(subcategory.name)}-${subcategory._id}`
-      : `/${valideURLConvert(name)}-${id}`
+    const category = { _id: id, name }
+    return subcategory
+      ? buildSubCategoryPath(category, subcategory)
+      : buildCategoryPath(category)
   }, [subCategories, name, id])
 
   useEffect(() => {

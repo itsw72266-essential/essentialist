@@ -148,6 +148,7 @@ import {
   autoTranslateCategory,
   scheduleAutoTranslate,
 } from "../../utils/auto-translate.js";
+import { generateUniqueCatalogSlug } from "../../lib/catalogSlugDb.js";
 
 export const CATEGORY_CACHE_NAMESPACE = "category:list";
 
@@ -167,8 +168,11 @@ export const AddCategoryController = async (request, response) => {
       });
     }
 
+    const slug = await generateUniqueCatalogSlug(CategoryModel, name);
+
     const addCategory = new CategoryModel({
       name,
+      slug,
       image,
       translations: sanitizeTranslations(translations, ["name"]),
     });
@@ -233,6 +237,17 @@ export const updateCategoryController = async (request, response) => {
 
     if (translations !== undefined) {
       updatePayload.translations = sanitizeTranslations(translations, ["name"]);
+    }
+
+    if (name) {
+      const existing = await CategoryModel.findById(_id).select("name slug").lean();
+      if (existing && name !== existing.name) {
+        updatePayload.slug = await generateUniqueCatalogSlug(
+          CategoryModel,
+          name,
+          _id,
+        );
+      }
     }
 
     const update = await CategoryModel.updateOne(

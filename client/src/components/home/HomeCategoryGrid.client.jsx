@@ -12,11 +12,15 @@ import {
 } from "@/hooks/queries/useCatalogQueries";
 import { getLocalizedContent } from "@/helpers/localizeContent";
 import { getAdaptiveTextClasses } from "@/lib/localeTypography";
-import { valideURLConvert } from "@/utils/valideURLConvert";
+import {
+  buildCategoryPath,
+  buildSubCategoryPath,
+} from "@/lib/catalogSlugs";
 
-function buildCategoryUrl(catId, catName, subCategory) {
-  if (!catId || !catName || !subCategory) return "#";
-  return `/${valideURLConvert(catName)}-${catId}/${valideURLConvert(subCategory.name)}-${subCategory._id}`;
+function buildCategoryUrl(category, subCategory) {
+  if (!category?._id) return "#";
+  if (subCategory?._id) return buildSubCategoryPath(category, subCategory);
+  return buildCategoryPath(category);
 }
 
 export default function HomeCategoryGrid({
@@ -46,7 +50,7 @@ export default function HomeCategoryGrid({
         );
         return {
           id: cat._id,
-          href: buildCategoryUrl(cat._id, cat.name, subcategory),
+          href: buildCategoryUrl(cat, subcategory),
           image: cat.image,
           displayName,
         };
