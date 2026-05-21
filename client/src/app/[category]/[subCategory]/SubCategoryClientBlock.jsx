@@ -476,6 +476,8 @@ import { useTranslation } from "react-i18next";
 import "@/lib/i18n";
 import CardProduct from "../../../components/CardProduct";
 import PopularProductLinks from "@/components/seo/PopularProductLinks.client";
+import Breadcrumbs from "@/components/seo/Breadcrumbs.client";
+import BreadcrumbJsonLd from "@/components/seo/BreadcrumbJsonLd";
 import { getSubCategorySlug } from "@/lib/catalogSlugs";
 import { getSubCategoryCommercialTitle } from "@/lib/seo/gscCatalogTitles";
 import { pickPopularProductLinks } from "@/lib/seo/popularProductLinks";
@@ -502,18 +504,8 @@ async function fetchSubCategoriesForCategory(categoryId) {
   }
 }
 
-function StructuredData({ categorySlug, subCategorySlug, subCategoryName, products }) {
+function StructuredData({ categorySlug, subCategorySlug, subCategoryName, products, breadcrumbItems = [], locale = "en" }) {
   const url = `https://www.esmakeupstore.com/${categorySlug}/${subCategorySlug}`;
-
-  const breadcrumbJsonLd = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Home", item: "https://www.esmakeupstore.com/" },
-      { "@type": "ListItem", position: 2, name: "Products", item: "https://www.esmakeupstore.com/product" },
-      { "@type": "ListItem", position: 3, name: subCategoryName, item: url },
-    ],
-  };
 
   const collectionJsonLd = {
     "@context": "https://schema.org",
@@ -554,7 +546,7 @@ function StructuredData({ categorySlug, subCategorySlug, subCategoryName, produc
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
+      <BreadcrumbJsonLd items={breadcrumbItems} locale={locale} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionJsonLd) }} />
       {itemListJsonLd && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }} />}
     </>
@@ -569,6 +561,8 @@ export default function SubCategoryClientBlock({
   page = 1,
   categoryNameFromSlug,
   subCategoryNameFromSlug,
+  breadcrumbItems = [],
+  locale = "en",
 }) {
   const mobileContentRef = useRef(null);
   const { i18n } = useTranslation();
@@ -651,7 +645,14 @@ export default function SubCategoryClientBlock({
 
   return (
     <>
-      <StructuredData categorySlug={categorySlug} subCategorySlug={subCategorySlug} subCategoryName={resolvedSubCategoryName} products={allProducts} />
+      <StructuredData
+        categorySlug={categorySlug}
+        subCategorySlug={subCategorySlug}
+        subCategoryName={resolvedSubCategoryName}
+        products={allProducts}
+        breadcrumbItems={breadcrumbItems}
+        locale={locale}
+      />
 
       <style dangerouslySetInnerHTML={{ __html: `
         .scrollbarCustom { scrollbar-width: thin; scrollbar-color: #cbd5e1 transparent; }
@@ -701,6 +702,7 @@ export default function SubCategoryClientBlock({
 
           <section ref={mobileContentRef} className="min-h-[88vh] max-h-[88vh] overflow-y-auto scrollbarCustom bg-slate-50/30">
             <header className="bg-white shadow-sm p-4 sticky top-0 z-10 border-b border-slate-100">
+              <Breadcrumbs items={breadcrumbItems} className="mb-2" />
               <div className="flex items-center justify-between gap-2">
                 <h1 className="font-bold text-gray-900 text-sm sm:text-base leading-tight">{h1Commercial}</h1>
               </div>
@@ -791,6 +793,7 @@ export default function SubCategoryClientBlock({
         </aside>
 
         <section className="flex-grow">
+          <Breadcrumbs items={breadcrumbItems} className="mb-4" />
           <header className="mb-10 flex items-end justify-between gap-4 border-b border-slate-100 pb-8">
             <div className="space-y-1">
               <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">{h1Commercial}</h1>

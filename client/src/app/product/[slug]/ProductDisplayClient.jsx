@@ -10,7 +10,6 @@
 // import AddToCartButton from "../../../components/AddToCartButton";
 // import { DisplayPriceInRupees } from "../../../utils/DisplayPriceInRupees";
 // import { pricewithDiscount } from "../../../utils/PriceWithDiscount";
-// import { productQueryOptions, ratingQueryOptions } from "./queries";
 // import ProductGallery from "./ProductGallery.client";
 
 // const RatingBlock = dynamic(() => import("./RatingBlock.client"), {
@@ -276,6 +275,7 @@ import dynamic from "next/dynamic";
 import Divider from "../../../components/Divider";
 import AddToCartButton from "../../../components/AddToCartButton";
 import { pricewithDiscount } from "../../../utils/PriceWithDiscount";
+import Breadcrumbs from "@/components/seo/Breadcrumbs.client";
 import { productQueryOptions, reviewStatsQueryOptions } from "./queries";
 import ProductGallery from "./ProductGallery.client";
 import { getLocalizedProductName } from "@/helpers/localizeContent";
@@ -341,6 +341,7 @@ export default function ProductDisplayClient({
   initialReviewStats,
   initialDataUpdatedAt,
   initialLocale = "en",
+  breadcrumbItems = [],
 }) {
   const { t, i18n } = useTranslation();
   const locale = i18n.resolvedLanguage || i18n.language || initialLocale;
@@ -367,11 +368,7 @@ export default function ProductDisplayClient({
 
   return (
     <main className="container mx-auto p-4 pb-4 text-slate-900 font-medium">
-      <nav className="mb-4 flex flex-wrap items-center gap-2 text-[11px] text-slate-500 uppercase">
-        <span className="hover:text-pink-600">{typeof productData.brand === 'object' ? productData.brand?.name : productData.brand}</span>
-        <span>/</span>
-        <span className="font-bold text-slate-900 break-words line-clamp-1">{productName}</span>
-      </nav>
+      <Breadcrumbs items={breadcrumbItems} />
 
       <div className="grid gap-6 lg:grid-cols-2 lg:gap-12">
         <div className="relative min-w-0">

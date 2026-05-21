@@ -910,6 +910,8 @@ import {
   useCategoriesQuery,
   useSubCategoriesQuery
 } from '@/hooks/queries/useCatalogQueries'
+import Breadcrumbs from '@/components/seo/Breadcrumbs.client'
+import { homeBreadcrumbItem } from '@/lib/seo/breadcrumbs'
 import SummaryApi from '@/backend/contracts/summaryApi'
 import Axios from '@/lib/apiClient'
 
@@ -1499,6 +1501,9 @@ async function pingIndexNow() {
 // ---------- Main client component ----------
 
 export default function BrandsDirectoryClient({ canUseRemoteApi }) {
+  const { i18n } = useTranslation()
+  const locale = i18n.resolvedLanguage || i18n.language || 'en'
+
   // Pagination & Filtering States
   const [currentPage, setCurrentPage] = useState(1)
   const [selectedBrandFilter, setSelectedBrandFilter] = useState('')
@@ -1541,6 +1546,14 @@ export default function BrandsDirectoryClient({ canUseRemoteApi }) {
   const brandStats = useMemo(
     () => aggregateBrandStats(brands || [], productRows),
     [brands, productRows]
+  )
+
+  const breadcrumbItems = useMemo(
+    () => [
+      homeBreadcrumbItem(locale),
+      { label: locale === 'fr' ? 'Marques' : 'Brands' },
+    ],
+    [locale],
   )
 
   // Filter logic
@@ -1596,6 +1609,8 @@ export default function BrandsDirectoryClient({ canUseRemoteApi }) {
   return (
     <main className="bg-gradient-to-b from-pink-50 to-white min-h-screen py-10 px-2 md:px-10">
       <StructuredData products={productRows} brandStats={brandStats} />
+
+      <Breadcrumbs items={breadcrumbItems} className="mb-4 max-w-6xl mx-auto" />
 
       <div className="mb-2">
         <BrandSearch />

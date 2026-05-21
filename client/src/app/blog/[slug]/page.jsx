@@ -177,6 +177,9 @@ import { getServerSideApiBaseUrl } from "@/lib/serverApiOrigin"
 import { getServerLocale } from "@/lib/seo/serverLocale"
 import { buildBlogArticleMetadata } from "@/lib/seo/catalogMetadata"
 import { localeRequestHeaders } from "@/lib/seo/serverFetch"
+import Breadcrumbs from "@/components/seo/Breadcrumbs.client"
+import BreadcrumbJsonLd from "@/components/seo/BreadcrumbJsonLd"
+import { homeBreadcrumbItem } from "@/lib/seo/breadcrumbs"
 
 // --- Configuration ---
 const BUSINESS_CONFIG = {
@@ -256,7 +259,7 @@ export async function generateMetadata({ params }) {
 /**
  * Structured Data for Blog Article
  */
-function StructuredData({ blog, slug }) {
+function StructuredData({ blog, slug, breadcrumbItems = [], locale = "en" }) {
   const url = `https://www.esmakeupstore.com/blog/${slug}`
   const publishedDate = blog.publishedAt || blog.createdAt
 
@@ -322,32 +325,6 @@ function StructuredData({ blog, slug }) {
     ],
   }
 
-  // 3. Breadcrumb schema
-  const breadcrumbSchema = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: [
-      {
-        "@type": "ListItem",
-        position: 1,
-        name: "Home",
-        item: BUSINESS_CONFIG.url,
-      },
-      {
-        "@type": "ListItem",
-        position: 2,
-        name: "Blog",
-        item: `${BUSINESS_CONFIG.url}/blog`,
-      },
-      {
-        "@type": "ListItem",
-        position: 3,
-        name: blog.title,
-        item: url,
-      },
-    ],
-  }
-
   // 4. Organization schema
   const organizationSchema = {
     "@context": "https://schema.org",
@@ -379,10 +356,7 @@ function StructuredData({ blog, slug }) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
-      />
+      <BreadcrumbJsonLd items={breadcrumbItems} locale={locale} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
@@ -405,6 +379,12 @@ const BlogDetailsPage = async ({ params }) => {
   }
 
   const blog = payload.data
+
+  const breadcrumbItems = [
+    homeBreadcrumbItem(locale),
+    { label: "Blog", href: "/blog" },
+    { label: blog.title },
+  ]
 
   const publishedDate = blog.publishedAt || blog.createdAt
   const formattedDate = publishedDate
@@ -437,23 +417,22 @@ const BlogDetailsPage = async ({ params }) => {
 
   return (
     <>
-      <StructuredData blog={blog} slug={slug} />
+      <StructuredData
+        blog={blog}
+        slug={slug}
+        breadcrumbItems={breadcrumbItems}
+        locale={locale}
+      />
 
       <article
         className="mx-auto max-w-4xl px-4 py-12"
         itemScope
         itemType="https://schema.org/BlogPosting"
       >
-        {/* Back Link */}
-        <Link
-          href="/blog"
-          className="inline-flex items-center text-sm font-semibold uppercase tracking-wide text-pink-600 hover:text-pink-700 transition"
-        >
-          ← Back to Blog
-        </Link>
+        <Breadcrumbs items={breadcrumbItems} className="mb-8" />
 
         {/* Header */}
-        <header className="mt-8 space-y-6">
+        <header className="space-y-6">
           {/* Tags */}
           {Array.isArray(blog.tags) && blog.tags.length > 0 && (
             <div className="flex flex-wrap gap-2">

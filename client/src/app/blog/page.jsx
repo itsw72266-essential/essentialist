@@ -30,6 +30,9 @@ const API_BASE_URL =
 
 import { getStaticPageMetadata } from "@/lib/seo/staticPages";
 import { getServerLocale } from "@/lib/seo/serverLocale";
+import Breadcrumbs from "@/components/seo/Breadcrumbs.client";
+import BreadcrumbJsonLd from "@/components/seo/BreadcrumbJsonLd";
+import { homeBreadcrumbItem } from "@/lib/seo/breadcrumbs";
 
 export async function generateMetadata() {
   const locale = await getServerLocale();
@@ -76,7 +79,7 @@ async function fetchBlogs(page = 1, locale = "en") {
 /**
  * Structured Data for Blog Listing
  */
-function StructuredData({ posts, currentPage, totalPages }) {
+function StructuredData({ posts, currentPage, totalPages, breadcrumbItems = [], locale = "en" }) {
   const baseUrl = "https://www.esmakeupstore.com/blog"
 
   // 1. BlogPosting schema for each article
@@ -169,26 +172,6 @@ function StructuredData({ posts, currentPage, totalPages }) {
     ],
   }
 
-  // 4. Breadcrumb schema
-  const breadcrumbSchema = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: [
-      {
-        "@type": "ListItem",
-        position: 1,
-        name: "Home",
-        item: "https://www.esmakeupstore.com",
-      },
-      {
-        "@type": "ListItem",
-        position: 2,
-        name: "Blog",
-        item: baseUrl,
-      },
-    ],
-  }
-
   // 5. Organization schema (global authority)
   const organizationSchema = {
     "@context": "https://schema.org",
@@ -234,10 +217,7 @@ function StructuredData({ posts, currentPage, totalPages }) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
-      />
+      <BreadcrumbJsonLd items={breadcrumbItems} locale={locale} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
@@ -258,11 +238,23 @@ const BlogPage = async ({ searchParams }) => {
   const posts = payload?.data || []
   const totalPages = payload?.totalPages || 1
 
+  const breadcrumbItems = [
+    homeBreadcrumbItem(locale),
+    { label: "Blog" },
+  ]
+
   return (
     <>
-      <StructuredData posts={posts} currentPage={currentPage} totalPages={totalPages} />
+      <StructuredData
+        posts={posts}
+        currentPage={currentPage}
+        totalPages={totalPages}
+        breadcrumbItems={breadcrumbItems}
+        locale={locale}
+      />
 
       <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+        <Breadcrumbs items={breadcrumbItems} className="mb-6" />
         <BlogListingHeader
           storeName={BUSINESS_CONFIG.name}
           city={BUSINESS_CONFIG.city}

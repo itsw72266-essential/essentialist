@@ -689,6 +689,8 @@ import {
 import { localeRequestHeaders } from '@/lib/seo/serverFetch';
 import { isLocalePathPrefix } from '@/lib/seo/localePaths';
 import { getCategorySeoTitle } from '@/lib/seo/gscCatalogTitles';
+import { homeBreadcrumbItem } from '@/lib/seo/breadcrumbs';
+import BreadcrumbJsonLd from '@/components/seo/BreadcrumbJsonLd';
 
 const SITEWIDE_QUICK_WINS = [
   'lipstick set gift under 10000 FCFA',
@@ -818,23 +820,11 @@ export async function generateMetadata({ params }) {
 }
 
 /* ----------------------- JSON-LD ----------------------- */
-function StructuredData({ categorySlug, categoryName, products = [] }) {
+function StructuredData({ categorySlug, categoryName, products = [], locale = 'en', breadcrumbItems = [] }) {
   const url = `https://www.esmakeupstore.com/${categorySlug}`;
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            '@context': 'https://schema.org',
-            '@type': 'BreadcrumbList',
-            itemListElement: [
-              { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://www.esmakeupstore.com/' },
-              { '@type': 'ListItem', position: 2, name: categoryName, item: url },
-            ],
-          }),
-        }}
-      />
+      <BreadcrumbJsonLd items={breadcrumbItems} locale={locale} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -897,15 +887,30 @@ export default async function CategoryPage({ params, searchParams }) {
     slug: category.slug,
   };
 
+  const breadcrumbItems = [
+    homeBreadcrumbItem(locale),
+    {
+      label: categoryName,
+      href: buildCategoryPath(categoryPayload),
+    },
+  ];
+
   return (
     <>
-      <StructuredData categorySlug={canonicalCategorySlug} categoryName={categoryName} products={products} />
+      <StructuredData
+        categorySlug={canonicalCategorySlug}
+        categoryName={categoryName}
+        products={products}
+        locale={locale}
+        breadcrumbItems={breadcrumbItems}
+      />
       <CategoryPageContent
         category={categoryPayload}
         subcats={subcats}
         products={products}
         primarySeo={capitalize(primarySeo)}
         categoryName={categoryName}
+        breadcrumbItems={breadcrumbItems}
         totalCount={totalCount}
         hasMore={hasMore}
         nextHref={nextHref}

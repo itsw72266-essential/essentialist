@@ -881,7 +881,9 @@ import {
   useSubCategoriesQuery
 } from '@/hooks/queries/useCatalogQueries'
 import PopularProductLinks from '@/components/seo/PopularProductLinks.client'
+import Breadcrumbs from '@/components/seo/Breadcrumbs.client'
 import { pickPopularProductLinks } from '@/lib/seo/popularProductLinks'
+import { brandsIndexBreadcrumbItems } from '@/lib/seo/breadcrumbs'
 
 const SITE_URL = 'https://www.esmakeupstore.com'
 const SITE_NAME = 'Essentialist Makeup Store'
@@ -1438,6 +1440,8 @@ async function pingBrandIndexNow(brandSlug) {
 }
 
 export default function BrandPageClient({ brandSlug }) {
+  const { i18n } = useTranslation()
+  const locale = i18n.resolvedLanguage || i18n.language || 'en'
   const [currentPage, setCurrentPage] = useState(1);
 
   const {
@@ -1519,6 +1523,11 @@ export default function BrandPageClient({ brandSlug }) {
     [productRows],
   )
 
+  const breadcrumbItems = useMemo(() => {
+    if (!brandData?.name) return []
+    return brandsIndexBreadcrumbItems(brandData.name, locale)
+  }, [brandData?.name, locale])
+
   const brandForNavigation = useMemo(
     () =>
       Array.isArray(allBrands)
@@ -1565,6 +1574,10 @@ export default function BrandPageClient({ brandSlug }) {
   return (
     <main className="bg-gradient-to-b from-pink-50 to-white min-h-screen py-10 px-2 md:px-10">
       <BrandStructuredData brand={brandData} products={productRows} />
+
+      <div className="container mx-auto max-w-6xl mb-4">
+        <Breadcrumbs items={breadcrumbItems} />
+      </div>
 
       <header className="text-center mb-8">
         <h1 className="text-4xl md:text-6xl font-extrabold text-pink-400 mb-2 tracking-tight">

@@ -1,7 +1,11 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import Breadcrumbs from "@/components/seo/Breadcrumbs.client";
+import BreadcrumbJsonLd from "@/components/seo/BreadcrumbJsonLd";
 import { buildPageMetadata } from "@/lib/seo/buildMetadata";
+import { homeBreadcrumbItem } from "@/lib/seo/breadcrumbs";
+import { getServerLocale } from "@/lib/seo/serverLocale";
 import {
   getAllLocalSeoGuideSlugs,
   getLocalSeoGuide,
@@ -48,22 +52,20 @@ function FaqJsonLd({ faq }) {
 
 export default async function LocalSeoGuidePage({ params }) {
   const { slug } = await params;
+  const locale = await getServerLocale();
   const guide = getLocalSeoGuide(slug);
   if (!guide) notFound();
 
+  const breadcrumbItems = [
+    homeBreadcrumbItem(locale),
+    { label: "Guides", href: "/guides" },
+    { label: guide.title },
+  ];
+
   return (
     <main className="container mx-auto px-4 py-10 max-w-3xl">
-      <nav className="text-sm text-slate-500 mb-6">
-        <Link href="/" className="hover:text-pink-600">
-          Home
-        </Link>
-        <span className="mx-2">/</span>
-        <Link href="/guides" className="hover:text-pink-600">
-          Guides
-        </Link>
-        <span className="mx-2">/</span>
-        <span className="text-slate-800">{guide.title}</span>
-      </nav>
+      <BreadcrumbJsonLd items={breadcrumbItems} locale={locale} />
+      <Breadcrumbs items={breadcrumbItems} className="mb-6" />
 
       <article>
         <h1 className="text-3xl font-bold text-slate-900 mb-4">{guide.title}</h1>

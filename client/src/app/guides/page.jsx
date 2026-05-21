@@ -1,6 +1,10 @@
 import Link from "next/link";
 
+import Breadcrumbs from "@/components/seo/Breadcrumbs.client";
+import BreadcrumbJsonLd from "@/components/seo/BreadcrumbJsonLd";
 import { buildPageMetadata } from "@/lib/seo/buildMetadata";
+import { homeBreadcrumbItem } from "@/lib/seo/breadcrumbs";
+import { getServerLocale } from "@/lib/seo/serverLocale";
 import { LOCAL_SEO_GUIDES } from "@/lib/seo/localSeoGuides";
 
 export const metadata = buildPageMetadata({
@@ -17,9 +21,17 @@ export const metadata = buildPageMetadata({
   ],
 });
 
-export default function GuidesIndexPage() {
+export default async function GuidesIndexPage() {
+  const locale = await getServerLocale();
+  const breadcrumbItems = [
+    homeBreadcrumbItem(locale),
+    { label: "Guides" },
+  ];
+
   return (
     <main className="container mx-auto px-4 py-10 max-w-3xl">
+      <BreadcrumbJsonLd items={breadcrumbItems} locale={locale} />
+      <Breadcrumbs items={breadcrumbItems} className="mb-6" />
       <h1 className="text-3xl font-bold text-slate-900 mb-2">Shopping guides</h1>
       <p className="text-slate-600 mb-8">
         Local SEO guides for finding authentic makeup in Cameroon — with links to

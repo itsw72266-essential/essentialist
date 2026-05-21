@@ -260,6 +260,7 @@ import {
 import { isLocalePathPrefix, localizePath } from "@/lib/seo/localePaths";
 import { redirect } from "next/navigation";
 import { getSubCategoryCommercialTitle } from "@/lib/seo/gscCatalogTitles";
+import { homeBreadcrumbItem } from "@/lib/seo/breadcrumbs";
 
 function parseIdFromSlug(slug) {
   return extractLegacyObjectId(slug);
@@ -341,6 +342,18 @@ export default async function SubCategoryPage({ params, searchParams }) {
     );
   }
 
+  const categoryName = category.name || parseNameFromSlug(categorySlug);
+  const subCategoryName = subCategory.name || parseNameFromSlug(subCategorySlug);
+
+  const breadcrumbItems = [
+    homeBreadcrumbItem(locale),
+    {
+      label: categoryName,
+      href: buildCategoryPath(category),
+    },
+    { label: subCategoryName },
+  ];
+
   return (
     <SubCategoryClientBlock
       categorySlug={canonicalCategorySlug}
@@ -350,6 +363,8 @@ export default async function SubCategoryPage({ params, searchParams }) {
       page={page}
       categoryNameFromSlug={parseNameFromSlug(categorySlug)}
       subCategoryNameFromSlug={parseNameFromSlug(subCategorySlug)}
+      breadcrumbItems={breadcrumbItems}
+      locale={locale}
     />
   );
 }

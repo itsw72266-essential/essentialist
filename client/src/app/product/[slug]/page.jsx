@@ -906,6 +906,8 @@ import {
 } from "@/lib/seo/productMetadata"
 import { buildCanonicalUrl, localizePath } from "@/lib/seo/localePaths"
 import { buildProductPath } from "@/lib/catalogSlugs"
+import { buildProductBreadcrumbItems } from "@/lib/seo/breadcrumbs"
+import BreadcrumbJsonLd from "@/components/seo/BreadcrumbJsonLd"
 
 // --- Configuration ---
 const DEFAULT_PRICE_VALIDITY_DAYS = 90
@@ -1333,7 +1335,7 @@ function RecommendationsSkeleton() {
  * Comprehensive Structured Data for Product
  * Includes: Product, Breadcrumb, FAQ, Aggregate Rating, Reviews
  */
-function StructuredData({ product, slug, reviewStats, locale = "en" }) {
+function StructuredData({ product, slug, reviewStats, locale = "en", breadcrumbItems = [] }) {
   if (!product) return null
 
   const url = buildCanonicalUrl(`/product/${slug}`, locale)
@@ -1457,39 +1459,6 @@ function StructuredData({ product, slug, reviewStats, locale = "en" }) {
     },
   }
 
-  // --- 2. Breadcrumb Schema (Navigation + SEO) ---
-  const homeUrl = buildCanonicalUrl("/", locale)
-  const breadcrumbJsonLd = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: [
-      {
-        "@type": "ListItem",
-        position: 1,
-        name: locale === "fr" ? "Accueil" : "Home",
-        item: homeUrl,
-      },
-      {
-        "@type": "ListItem",
-        position: 2,
-        name: locale === "fr" ? "Produits" : "Products",
-        item: buildCanonicalUrl("/new-arrival", locale),
-      },
-      {
-        "@type": "ListItem",
-        position: 3,
-        name: product.category?.name || (locale === "fr" ? "Catégorie" : "Category"),
-        item: `${BUSINESS_CONFIG.url}/${product.category?.slug || ""}`,
-      },
-      {
-        "@type": "ListItem",
-        position: 4,
-        name: productName,
-        item: url,
-      },
-    ],
-  }
-
   // --- 3. FAQ Schema (AEO - Answer Engine Optimization) ---
   const faqJsonLd = buildProductFAQSchema(product, locale)
 
@@ -1499,12 +1468,7 @@ function StructuredData({ product, slug, reviewStats, locale = "en" }) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: safeJsonLdString(productJsonLd) }}
       />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: safeJsonLdString(breadcrumbJsonLd),
-        }}
-      />
+      <BreadcrumbJsonLd items={breadcrumbItems} locale={locale} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: safeJsonLdString(faqJsonLd) }}
@@ -1534,6 +1498,12 @@ export default async function ProductDisplayPage({ params }) {
   }
 
   const dataUpdatedAt = Date.now()
+  const { name: localizedProductName } = getLocalizedProductFields(productData, locale)
+  const breadcrumbItems = buildProductBreadcrumbItems(
+    productData,
+    localizedProductName,
+    locale,
+  )
 
   return (
     <>
@@ -1545,6 +1515,7 @@ export default async function ProductDisplayPage({ params }) {
         slug={canonicalSlug}
         reviewStats={reviewStatsSnapshot}
         locale={locale}
+        breadcrumbItems={breadcrumbItems}
       />
 
       {/* Main Product Display */}
@@ -1554,6 +1525,7 @@ export default async function ProductDisplayPage({ params }) {
         initialProduct={productData}
         initialReviewStats={reviewStatsSnapshot}
         initialDataUpdatedAt={dataUpdatedAt}
+        breadcrumbItems={breadcrumbItems}
       />
 
       {/* Product Recommendations */}

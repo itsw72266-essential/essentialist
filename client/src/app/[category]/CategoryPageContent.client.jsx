@@ -8,6 +8,7 @@ import { useTranslation } from "react-i18next";
 import "@/lib/i18n";
 import CategoryCircleGrid from "@/components/catalog/CategoryCircleGrid.client";
 import CategoryWiseProductDisplay from "@/components/CategoryWiseProductDisplay";
+import Breadcrumbs from "@/components/seo/Breadcrumbs.client";
 import { getLocalizedContent } from "@/helpers/localizeContent";
 import { useAdaptiveTextClasses } from "@/hooks/useAdaptiveTextClasses";
 import { buildSubCategoryPath } from "@/lib/catalogSlugs";
@@ -28,6 +29,7 @@ export default function CategoryPageContent({
   products = [],
   primarySeo = "",
   categoryName = "Category",
+  breadcrumbItems = [],
   totalCount = 0,
   hasMore = false,
   nextHref = "",
@@ -62,6 +64,7 @@ export default function CategoryPageContent({
   return (
     <section className="bg-white pb-20">
       <div className="container mx-auto px-4 pt-4">
+        <Breadcrumbs items={breadcrumbItems} className="pt-2" />
         <div className="w-full h-full min-h-48 rounded overflow-hidden">
           {bannerSrc ? (
             <Image
