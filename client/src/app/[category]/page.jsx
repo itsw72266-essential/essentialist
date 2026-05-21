@@ -670,14 +670,12 @@
 
 
 // src/app/[category]/page.jsx
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import CardProduct from '../../components/CardProduct';
 import SummaryApi, { baseURL } from '@/backend/contracts/summaryApi';
+import CategoryPageContent from './CategoryPageContent.client';
 import { getServerLocale } from '@/lib/seo/serverLocale';
 import {
   buildCategoryPath,
-  buildSubCategoryPath,
   extractLegacyObjectId,
   findCategoryByParam,
   shouldRedirectCatalogParam,
@@ -913,85 +911,31 @@ export default async function CategoryPage({ params, searchParams }) {
 
   const totalPages = Math.ceil(totalCount / PAGE_SIZE);
   const hasMore = page < totalPages;
-  const nextHref = `/${canonicalCategorySlug}?page=${page + 1}`;
+  const nextHref = localizePath(
+    `/${canonicalCategorySlug}?page=${page + 1}`,
+    locale,
+  );
+
+  const categoryPayload = {
+    _id: String(category._id),
+    name: category.name,
+    image: category.image,
+    slug: category.slug,
+  };
 
   return (
     <>
       <StructuredData categorySlug={canonicalCategorySlug} categoryName={categoryName} products={products} />
-      
-      <style dangerouslySetInnerHTML={{ __html: `
-        .e-hero { background: linear-gradient(135deg, #fff 0%, #fff1f2 100%); border: 1px solid #fecdd3; }
-        .e-gradient-text { background: linear-gradient(135deg, #e11d48 0%, #be123c 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .e-subcat-card { transition: all 0.3s ease; border: 1px solid #f1f5f9; }
-        .e-subcat-card:hover { transform: translateY(-4px); border-color: #fb7185; box-shadow: 0 10px 20px rgba(225, 29, 72, 0.1); }
-      `}} />
-
-      <main className="container mx-auto px-4 pb-20">
-        <section className="e-hero rounded-2xl mt-6 p-8 text-center md:text-left">
-          <h1 className="text-3xl md:text-4xl font-extrabold e-gradient-text">
-            {capitalize(primarySeo)}
-          </h1>
-          <p className="text-slate-600 mt-3 max-w-3xl text-lg">
-            Shop authentic <strong>{categoryName}</strong> in Cameroon. Secure FCFA payments and fast delivery to Douala and Yaoundé.
-          </p>
-        </section>
-
-        {/* Subcategories */}
-        {subcats.length > 0 && (
-          <section className="mt-12">
-            <h2 className="text-2xl font-bold text-slate-800 mb-6">Explore {categoryName} Collections</h2>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {subcats.map((s) => (
-                <Link
-                  key={s._id}
-                  href={buildSubCategoryPath(category, s)}
-                  className="e-subcat-card bg-white p-4 rounded-xl flex flex-col items-center group"
-                >
-                  <div className="w-24 h-24 mb-3">
-                    <img src={s?.image || '/placeholder.png'} alt={s.name} className="w-full h-full object-contain group-hover:scale-110 transition-transform" />
-                  </div>
-                  <h3 className="font-semibold text-slate-700 text-sm text-center">{s.name}</h3>
-                </Link>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* Products Grid */}
-        <section className="mt-16">
-          <div className="flex items-center justify-between mb-8 border-b border-slate-100 pb-4">
-            <h2 className="text-2xl font-bold text-slate-800">Available Products</h2>
-            <span className="text-sm font-medium text-slate-500 bg-slate-50 px-4 py-1 rounded-full border">
-              {totalCount} Items Found
-            </span>
-          </div>
-
-          {products.length === 0 ? (
-            <div className="py-20 text-center bg-slate-50 rounded-2xl border-2 border-dashed">
-              <p className="text-slate-500">More {categoryName} products arriving soon!</p>
-            </div>
-          ) : (
-            <>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                {products.map((p, i) => (
-                  <CardProduct key={p?._id || i} data={p} />
-                ))}
-              </div>
-
-              {hasMore && (
-                <div className="mt-16 text-center">
-                  <Link
-                    href={nextHref}
-                    className="inline-flex items-center px-10 py-4 rounded-full bg-pink-600 text-white font-bold hover:bg-pink-700 transition-all shadow-lg hover:shadow-pink-200"
-                  >
-                    Load More {categoryName}
-                  </Link>
-                </div>
-              )}
-            </>
-          )}
-        </section>
-      </main>
+      <CategoryPageContent
+        category={categoryPayload}
+        subcats={subcats}
+        products={products}
+        primarySeo={capitalize(primarySeo)}
+        categoryName={categoryName}
+        totalCount={totalCount}
+        hasMore={hasMore}
+        nextHref={nextHref}
+      />
     </>
   );
 }
