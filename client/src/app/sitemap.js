@@ -6,6 +6,7 @@ import {
   buildSubCategoryPath,
   slugifyName,
 } from "@/lib/catalogSlugs";
+import { getAllLocalSeoGuideSlugs } from "@/lib/seo/localSeoGuides";
 
 /**
  * @param {import("next").MetadataRoute.Sitemap} items
@@ -54,6 +55,7 @@ export default async function sitemap() {
     { path: "/new-arrival", changeFrequency: "weekly", priority: 0.8 },
     { path: "/brands", changeFrequency: "monthly", priority: 0.8 },
     { path: "/blog", changeFrequency: "monthly", priority: 0.8 },
+    { path: "/guides", changeFrequency: "monthly", priority: 0.75 },
     { path: "/reviews", changeFrequency: "weekly", priority: 0.7 },
     { path: "/search", changeFrequency: "weekly", priority: 0.5 },
   ];
@@ -63,6 +65,14 @@ export default async function sitemap() {
       lastModified: now,
       changeFrequency: page.changeFrequency,
       priority: page.priority,
+    });
+  }
+
+  for (const guideSlug of getAllLocalSeoGuideSlugs()) {
+    pushLocalized(items, `/guides/${guideSlug}`, {
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.7,
     });
   }
 

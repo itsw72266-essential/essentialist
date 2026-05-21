@@ -12,6 +12,9 @@ const PAGES = {
         "beauty customer service Cameroon",
         "cosmetics help Douala",
         "Essentialist contact",
+        "essentialist makeup store douala",
+        "cosmetic shops in cameroon",
+        "cosmetic shop douala",
       ],
     },
     fr: {
@@ -24,6 +27,8 @@ const PAGES = {
         "service client cosmétiques",
         "boutique maquillage Douala",
         "Essentialist contact",
+        "boutique maquillage douala",
+        "produits cosmétiques cameroun",
       ],
     },
   },

@@ -1185,12 +1185,7 @@ export async function generateMetadata({ params }) {
     city: BUSINESS_CONFIG.city,
   })
   const { name } = seo
-  const metaDescription = seo.description.substring(0, 160)
-  const localizedFields = getLocalizedProductFields(product, locale)
-  const descriptionSnippet = stripHtml(localizedFields.description).substring(
-    0,
-    160,
-  )
+  const metaDescription = seo.description
 
   const heroImage = Array.isArray(product?.image)
     ? product.image[0]
@@ -1201,7 +1196,7 @@ export async function generateMetadata({ params }) {
   return {
     metadataBase: new URL("https://www.esmakeupstore.com"),
     title: seo.title,
-    description: descriptionSnippet || metaDescription,
+    description: metaDescription,
     keywords: seo.keywords.filter(Boolean).slice(0, 10),
 
     // --- Robots & Crawling ---
@@ -1228,7 +1223,7 @@ export async function generateMetadata({ params }) {
       type: "website",
       url: alternates.canonical,
       siteName: BUSINESS_CONFIG.name,
-      title: name,
+      title: seo.title,
       description: metaDescription,
       images: heroImage
         ? [
@@ -1248,7 +1243,7 @@ export async function generateMetadata({ params }) {
     // --- Twitter Card ---
     twitter: {
       card: "summary_large_image",
-      title: name,
+      title: seo.title,
       description: metaDescription,
       images: heroImage ? [heroImage] : [],
       creator: "@essentialistmakeup",

@@ -15,6 +15,9 @@ const productSchema = new mongoose.Schema(
   {
     name: { type: String },
     slug: { type: String, unique: true, sparse: true, index: true },
+    metaTitle: { type: String, default: "" },
+    metaDescription: { type: String, default: "" },
+    seoKeywords: { type: [String], default: [] },
     image: { type: Array, default: [] },
     category: [
       {

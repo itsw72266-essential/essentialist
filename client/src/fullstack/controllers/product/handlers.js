@@ -304,6 +304,11 @@ export const createProductController = async (request, response) => {
     const product = new ProductModel({
       name,
       slug,
+      metaTitle: request.body.metaTitle || "",
+      metaDescription: request.body.metaDescription || "",
+      seoKeywords: Array.isArray(request.body.seoKeywords)
+        ? request.body.seoKeywords
+        : [],
       image,
       category,
       subCategory,

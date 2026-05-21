@@ -259,64 +259,7 @@ import {
 } from "@/lib/catalogSlugs";
 import { isLocalePathPrefix, localizePath } from "@/lib/seo/localePaths";
 import { redirect } from "next/navigation";
-
-const subCategoryBestTitles = {
-  Foundation: "Transfer Proof Foundation For Masks",
-  "Foundation Makeup": "Foundation Shade Finder Kit",
-  "Liquid Foundation": "Lightweight Liquid Foundation For Acne Prone Skin",
-  "Powder Foundation": "Buildable Powder Foundation For Mature Skin",
-  "Stick foundation": "Stick Foundation For Oily Skin",
-  "Total Control Drop Foundation": "Drop Foundation Full Coverage Adjustable",
-  "Foundation Primers": "Gripping Primer For Long Wear Makeup",
-  "Face Primer": "Pore Blurring Primer For Oily Skin",
-  "Tinted Moisturizer": "Tinted Moisturizer With SPF For Oily Skin",
-  "Setting Spray": "Alcohol Free Setting Spray For Dry Skin",
-  "SETTING POWDER": "No Flashback Setting Powder",
-  "All Setting Powder": "Translucent Setting Powder For Oily Skin",
-  Concealer: "Full Coverage Concealer For Dark Circles",
-  "Concealers & Neutralizers": "Peach Color Corrector For Dark Circles",
-  "Dark circle concealer": "Orange Concealer For Dark Circles",
-  "Blush Makeup": "Cream Blush For Mature Skin",
-  "All Blush": "Best Affordable Blush For Fair Skin",
-  "High Definition Blush": "HD Cream Blush For Camera Ready Look",
-  "Highlighters & Luminizers": "Subtle Highlighter For Mature Skin",
-  Illuminator: "Liquid Illuminator Under Foundation",
-  "Liquid highlighter": "Dewy Liquid Highlighter For Natural Glow",
-  Bronzy: "Subtle Bronzy Makeup Look Products",
-  "Bronzy Powder": "Warm Bronzer Powder For Olive Skin",
-  Bronzer: "Matte Bronzer For Fair Cool Undertone",
-  "Matte bronzer": "Matte Bronzer For Fair Cool Undertone",
-  "Eye Makeup": "Everyday Eye Makeup Kit For Beginners",
-  "Eye Shadow": "Neutral Eyeshadow For Blue Eyes",
-  "Eye Shadow Palette": "Mini Eyeshadow Palette For Travel",
-  Eyeliner: "Smudge Proof Eyeliner For Oily Lids",
-  Kajal: "Long Lasting Kajal For Watery Eyes",
-  Mascara: "Tubing Mascara For Short Lashes",
-  "Eye Cream & Treatment": "Eye Cream for Dark Circles",
-  "EYE CREAM": "Fragrance Free Eye Cream For Sensitive Skin",
-  "Eye Serum": "Retinol Eye Serum For Fine Lines",
-  "Eye brow cake powder": "Eyebrow Cake Powder For Sparse Brows",
-  "Eye Brow Enhancers": "Tinted Brow Gel For Thin Eyebrows",
-  "Lip Makeup": "Lip Makeup Set Gift For Her",
-  Lipstick: "Transfer Proof Lipstick For Weddings",
-  "Liquid Lipstick": "Comfortable Liquid Lipstick Non Drying",
-  "Matte Lip Sticks": "Matte Lipstick Set Nude",
-  "Lip Gloss": "Non Sticky Lip Gloss Set",
-  "Lip Lacquer": "High Shine Lip Lacquer Long Wear",
-  "Lip Liner": "Waterproof Lip Liner Nude Shades",
-  "Lip Plumper": "Cinnamon Lip Plumper Gloss",
-  "Lip Tint": "Long Lasting Lip Tint Waterproof",
-  "Lip Crayon": "Matte Lip Crayon Non Drying",
-  "Lip cream": "Long Lasting Lip Cream Matte Finish",
-  "Lip Cream Pallette": "Lip Cream Palette Professional",
-  "Lip/eye liner pencil 3 in 1": "3 In 1 Lip Eye Liner Pencil Set",
-  "Makeup Palettes": "All In One Makeup Palette With Mirror",
-  "Makeup Sets": "Beginner Makeup Set With Bag",
-  "Makeup Kits": "Travel Makeup Kit Essentials",
-  "Face Makeup": "Beginner Face Makeup Kit With Brushes",
-  Compact: "Compact Powder For Oily Skin Long Lasting",
-  "Loose Powder": "Talc Free Loose Setting Powder",
-};
+import { getSubCategoryCommercialTitle } from "@/lib/seo/gscCatalogTitles";
 
 function parseIdFromSlug(slug) {
   return extractLegacyObjectId(slug);
@@ -326,15 +269,6 @@ function parseNameFromSlug(slug) {
   if (!slug) return "";
   const parts = String(slug).split("-");
   return parts.slice(0, parts.length - 1).join(" ");
-}
-
-function bestSeoTitleForSubcategory(subCategoryName = "") {
-  if (subCategoryBestTitles[subCategoryName]) return subCategoryBestTitles[subCategoryName];
-  const key = Object.keys(subCategoryBestTitles).find(
-    (k) => k.toLowerCase() === String(subCategoryName).toLowerCase()
-  );
-  if (key) return subCategoryBestTitles[key];
-  return `${subCategoryName} Essentials`;
 }
 
 export async function generateMetadata({ params, searchParams }) {
@@ -360,7 +294,7 @@ export async function generateMetadata({ params, searchParams }) {
   const canonicalCategorySlug = category?.slug || categorySlug || "category";
   const canonicalSubSlug = subCategory?.slug || subCategorySlug || "products";
 
-  const commercialTitle = bestSeoTitleForSubcategory(subCategoryName);
+  const commercialTitle = getSubCategoryCommercialTitle(subCategoryName);
 
   return buildSubCategoryMetadata({
     subCategoryName,

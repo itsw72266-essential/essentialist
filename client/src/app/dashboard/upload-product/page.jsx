@@ -683,6 +683,9 @@ const initialState = {
   price: '',
   discount: '',
   description: '',
+  metaTitle: '',
+  metaDescription: '',
+  seoKeywords: '',
   plainTextDetails: '',
   more_details: {},
   brandId: ''
@@ -882,7 +885,11 @@ const UploadProduct = () => {
         ...SummaryApi.createProduct,
         data: {
           ...data,
-          brandId: data.brandId || null
+          brandId: data.brandId || null,
+          seoKeywords: String(data.seoKeywords || '')
+            .split(',')
+            .map((k) => k.trim())
+            .filter(Boolean),
         }
       });
 
@@ -969,6 +976,50 @@ const UploadProduct = () => {
                   )}
                 </p>
               )}
+            </div>
+
+            <div className="grid gap-2 border rounded-lg p-3 bg-slate-50">
+              <p className="font-medium text-sm">SEO (optional)</p>
+              <div className="grid gap-1">
+                <label htmlFor="metaTitle" className="text-sm font-medium">
+                  Meta title
+                </label>
+                <input
+                  id="metaTitle"
+                  name="metaTitle"
+                  type="text"
+                  value={data.metaTitle}
+                  onChange={handleChange}
+                  placeholder="e.g. NYX Worth The Hype Mascara Price in Cameroon"
+                  className="bg-blue-50 p-2 outline-none border focus-within:border-primary-200 rounded"
+                />
+              </div>
+              <div className="grid gap-1">
+                <label htmlFor="metaDescription" className="text-sm font-medium">
+                  Meta description
+                </label>
+                <textarea
+                  id="metaDescription"
+                  name="metaDescription"
+                  value={data.metaDescription}
+                  onChange={handleChange}
+                  rows={3}
+                  className="bg-blue-50 p-2 outline-none border focus-within:border-primary-200 rounded"
+                />
+              </div>
+              <div className="grid gap-1">
+                <label htmlFor="seoKeywords" className="text-sm font-medium">
+                  SEO keywords (comma-separated)
+                </label>
+                <input
+                  id="seoKeywords"
+                  name="seoKeywords"
+                  type="text"
+                  value={data.seoKeywords}
+                  onChange={handleChange}
+                  className="bg-blue-50 p-2 outline-none border focus-within:border-primary-200 rounded"
+                />
+              </div>
             </div>
 
             <div className="grid gap-1">

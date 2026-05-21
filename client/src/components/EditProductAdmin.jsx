@@ -693,6 +693,11 @@ const buildInitialState = (product) => ({
   price: product.price ?? '',
   discount: product.discount ?? '',
   description: product.description || '',
+  metaTitle: product.metaTitle || '',
+  metaDescription: product.metaDescription || '',
+  seoKeywords: Array.isArray(product.seoKeywords)
+    ? product.seoKeywords.join(', ')
+    : '',
   plainTextDetails: product.plainTextDetails || '',
   more_details: product.more_details || {},
   brandId:
@@ -946,7 +951,11 @@ const EditProductAdmin = ({ close, data: propsData, fetchProductData }) => {
       ...data,
       category: data.category.filter(Boolean),
       subCategory: data.subCategory.filter(Boolean),
-      brandId: data.brandId || null
+      brandId: data.brandId || null,
+      seoKeywords: String(data.seoKeywords || '')
+        .split(',')
+        .map((k) => k.trim())
+        .filter(Boolean),
     };
 
     try {
@@ -1054,6 +1063,52 @@ const EditProductAdmin = ({ close, data: propsData, fetchProductData }) => {
                     Selected brand: <strong>{selectedBrand.name}</strong>
                   </p>
                 )}
+              </div>
+
+              <div className="grid gap-2 border rounded-lg p-3 bg-slate-50">
+                <p className="font-medium text-sm">SEO (optional — overrides auto titles in Google)</p>
+                <div className="grid gap-1">
+                  <label htmlFor="metaTitle" className="text-sm font-medium">
+                    Meta title
+                  </label>
+                  <input
+                    id="metaTitle"
+                    name="metaTitle"
+                    type="text"
+                    value={data.metaTitle}
+                    onChange={handleChange}
+                    placeholder="e.g. NYX Worth The Hype Mascara Price in Cameroon"
+                    className="border rounded px-2 py-1"
+                  />
+                </div>
+                <div className="grid gap-1">
+                  <label htmlFor="metaDescription" className="text-sm font-medium">
+                    Meta description
+                  </label>
+                  <textarea
+                    id="metaDescription"
+                    name="metaDescription"
+                    value={data.metaDescription}
+                    onChange={handleChange}
+                    rows={3}
+                    placeholder="Authentic stock, XAF price, delivery Douala & nationwide."
+                    className="border rounded px-2 py-1"
+                  />
+                </div>
+                <div className="grid gap-1">
+                  <label htmlFor="seoKeywords" className="text-sm font-medium">
+                    SEO keywords (comma-separated)
+                  </label>
+                  <input
+                    id="seoKeywords"
+                    name="seoKeywords"
+                    type="text"
+                    value={data.seoKeywords}
+                    onChange={handleChange}
+                    placeholder="nyx mascara, buy nyx douala"
+                    className="border rounded px-2 py-1"
+                  />
+                </div>
               </div>
 
               <div className="grid gap-1">

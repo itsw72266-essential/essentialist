@@ -688,31 +688,7 @@ import {
 } from '@/lib/seo/catalogMetadata';
 import { localeRequestHeaders } from '@/lib/seo/serverFetch';
 import { isLocalePathPrefix } from '@/lib/seo/localePaths';
-
-const SEO_KEYWORDS = {
-  'face makeup': 'beginner face makeup kit with brushes',
-  'eye makeup': 'everyday eye makeup kit for beginners',
-  'lip makeup': 'non sticky lip gloss set',
-  'foundation': 'foundation shade finder kit',
-  'setting powder': 'no flashback setting powder',
-  'blush makeup': 'cream blush for mature skin',
-  'makeup sets': 'beginner makeup set with bag',
-  'makeup kits': 'travel makeup kit essentials',
-  'makeup palettes': 'all in one makeup palette',
-  'liquid foundation': 'lightweight liquid foundation for acne prone skin',
-  'powder foundation': 'buildable powder foundation for mature skin',
-  'stick foundation': 'stick foundation for oily skin',
-  'concealer': 'full coverage concealer for dark circles',
-  'setting spray': 'alcohol free setting spray for dry skin',
-  'loose powder': 'talc free loose setting powder',
-  'highlighter': 'dewy liquid highlighter for natural glow',
-  'bronzer': 'matte bronzer for fair cool undertone',
-  'eyeliner': 'smudge proof eyeliner for oily lids',
-  'mascara': 'tubing mascara for short lashes',
-  'eyeshadow palette': 'mini eyeshadow palette for travel',
-  'lipstick': 'transfer proof lipstick for weddings',
-  'liquid lipstick': 'comfortable liquid lipstick non drying',
-};
+import { getCategorySeoTitle } from '@/lib/seo/gscCatalogTitles';
 
 const SITEWIDE_QUICK_WINS = [
   'lipstick set gift under 10000 FCFA',
@@ -831,8 +807,7 @@ export async function generateMetadata({ params }) {
     canonicalCategorySlug = category.slug || categorySlug;
   }
 
-  const key = toKey(categoryName);
-  const primarySeo = SEO_KEYWORDS[key] || `${categoryName} Essentials`;
+  const primarySeo = getCategorySeoTitle(categoryName);
 
   return buildCategoryMetadata({
     categoryName,
@@ -899,8 +874,7 @@ export default async function CategoryPage({ params, searchParams }) {
   const subcats = await fetchSubCategoriesOfCategory(categoryId);
 
   const categoryName = category?.name || 'Category';
-  const key = toKey(categoryName);
-  const primarySeo = SEO_KEYWORDS[key] || categoryName;
+  const primarySeo = getCategorySeoTitle(categoryName);
 
   let { products, totalCount } = await fetchProductsByCategory({ categoryId, page });
   if (products.length === 0 && subcats.length > 0) {

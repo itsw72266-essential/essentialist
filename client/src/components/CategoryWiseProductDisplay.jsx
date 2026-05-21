@@ -5,6 +5,7 @@ import React, { useMemo, useEffect, useRef, useState } from 'react'
 import CardProduct from './CardProduct'
 import { FaAngleLeft, FaAngleRight, FaArrowRight } from 'react-icons/fa6'
 import { buildCategoryPath, buildSubCategoryPath } from '@/lib/catalogSlugs'
+import { pickBrandLinksFromProducts } from '@/lib/seo/popularProductLinks'
 import Link from 'next/link'
 import { useTranslation } from 'react-i18next'
 import '@/lib/i18n'
@@ -45,6 +46,11 @@ const CategoryWiseProductDisplay = ({
     setRedirectURL(computedRedirectURL)
   }, [computedRedirectURL])
 
+  const brandLinks = useMemo(
+    () => pickBrandLinksFromProducts(products, 4),
+    [products],
+  )
+
   const handleScrollRight = () => {
     if (containerRef.current) {
       containerRef.current.scrollLeft += 200
@@ -74,6 +80,24 @@ const CategoryWiseProductDisplay = ({
           <FaArrowRight className="transition-all duration-300" />
         </Link>
       </div>
+
+      {brandLinks.length > 0 && (
+        <nav
+          className="container mx-auto px-2 pb-2 flex flex-wrap gap-2"
+          aria-label={`${displayName} brands`}
+        >
+          {brandLinks.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              prefetch={linkPrefetch}
+              className="text-xs px-2.5 py-1 rounded-full bg-slate-50 text-pink-700 border border-pink-100 hover:bg-pink-50"
+            >
+              {link.label}
+            </Link>
+          ))}
+        </nav>
+      )}
 
       {/* Product Grid: Restored original Next.js styles (small gaps, px-1 on cards, horizontal scroll) */}
       <div className="relative flex items-center cursor-pointer">

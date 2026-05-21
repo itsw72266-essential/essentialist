@@ -1,6 +1,10 @@
 import { localizeDocument } from "@/fullstack/lib/localization";
 
 import { buildPageMetadata } from "@/lib/seo/buildMetadata";
+import {
+  formatBrandProductTypes,
+  getBrandQueryPhrases,
+} from "@/lib/seo/gscCatalogTitles";
 
 export function getLocalizedField(doc, field, locale) {
   if (!doc) return "";
@@ -120,20 +124,25 @@ export function buildBrandPageMetadata({
   const shortDesc =
     plainDesc.length > 60 ? `${plainDesc.substring(0, 60)}...` : plainDesc;
   const total = metrics.totalProducts ?? 0;
+  const productTypes = formatBrandProductTypes(metrics.subCategories);
+  const queryPhrases = getBrandQueryPhrases(brandSlug, name);
+  const typeSegment = productTypes ? `${productTypes} | ` : "";
 
   if (locale === "fr") {
     const description = shortDesc
-      ? `${shortDesc} Achetez ${name} authentique chez Essentialist. ${total} produits. Livraison au Cameroun.`
-      : `Achetez le maquillage ${name} authentique chez Essentialist. ${total} produits. Livraison à Douala et partout au pays.`;
+      ? `${shortDesc} Achetez ${name} authentique (${total} produits). Prix XAF. Livraison Douala & Cameroun.`
+      : `Achetez ${name} authentique — ${productTypes || "maquillage"}. ${total} produits. Livraison à Douala et partout au Cameroun.`;
 
     return buildPageMetadata({
       path,
       locale,
-      title: `Acheter ${name} | Maquillage au Cameroun | Essentialist`,
+      title: `${name} ${typeSegment}Prix XAF | Douala | Essentialist`,
       description,
       keywords: [
         name,
+        ...queryPhrases,
         `${name} maquillage Cameroun`,
+        `${name} prix cameroun`,
         `acheter ${name} Douala`,
         "cosmétiques authentiques",
       ],
@@ -146,17 +155,19 @@ export function buildBrandPageMetadata({
   }
 
   const description = shortDesc
-    ? `${shortDesc} Shop authentic ${name} at Essentialist. ${total} products. Fast delivery in Cameroon.`
-    : `Shop authentic ${name} makeup at Essentialist. Browse ${total} products. Fast delivery in Douala & nationwide.`;
+    ? `${shortDesc} Shop authentic ${name} (${total} products). XAF prices. Fast delivery Douala & Cameroon.`
+    : `Shop authentic ${name} ${productTypes || "makeup"} at Essentialist. ${total} products with XAF pricing. Fast delivery in Douala & nationwide.`;
 
   return buildPageMetadata({
     path,
     locale,
-    title: `Shop ${name} Makeup | Essentialist Makeup Store`,
+    title: `${name} ${typeSegment}XAF Prices | Douala | Essentialist`,
     description,
     keywords: [
       name,
+      ...queryPhrases,
       `${name} makeup Cameroon`,
+      `${name} price cameroon`,
       `buy ${name} Douala`,
       "authentic cosmetics",
     ],

@@ -475,68 +475,17 @@ import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import "@/lib/i18n";
 import CardProduct from "../../../components/CardProduct";
+import PopularProductLinks from "@/components/seo/PopularProductLinks.client";
 import { getSubCategorySlug } from "@/lib/catalogSlugs";
+import { getSubCategoryCommercialTitle } from "@/lib/seo/gscCatalogTitles";
+import { pickPopularProductLinks } from "@/lib/seo/popularProductLinks";
 import SummaryApi, { callSummaryApi } from "@/backend/contracts/summaryApi";
 import { linkPrefetch } from "@/lib/devPerformance";
 
 const PAGE_SIZE = 12;
 
-const subCategoryBestTitles = {
-  Foundation: "Transfer Proof Foundation For Masks",
-  "Foundation Makeup": "Foundation Shade Finder Kit",
-  "Liquid Foundation": "Lightweight Liquid Foundation For Acne Prone Skin",
-  "Powder Foundation": "Buildable Powder Foundation For Mature Skin",
-  "Stick foundation": "Stick Foundation For oily Skin",
-  "Total Control Drop Foundation": "Drop Foundation Full Coverage Adjustable",
-  "Foundation Primers": "Gripping Primer For Long Wear Makeup",
-  "Face Primer": "Pore Blurring Primer For Oily Skin",
-  "Tinted Moisturizer": "Tinted Moisturizer With SPF For Oily Skin",
-  "Setting Spray": "Alcohol Free Setting Spray For Dry Skin",
-  "SETTING POWDER": "No Flashback Setting Powder",
-  "All Setting Powder": "Translucent Setting Powder For Oily Skin",
-  Concealer: "Full Coverage Concealer For Dark Circles",
-  "Concealers & Neutralizers": "Peach Color Corrector For Dark Circles",
-  "Dark circle concealer": "Orange Concealer For Dark Circles",
-  "Blush Makeup": "Cream Blush For Mature Skin",
-  "All Blush": "Best Affordable Blush For Fair Skin",
-  "High Definition Blush": "HD Cream Blush For Camera Ready Look",
-  "Highlighters & Luminizers": "Subtle Highlighter For Mature Skin",
-  Illuminator: "Liquid Illuminator Under Foundation",
-  "Liquid highlighter": "Dewy Liquid Highlighter For Natural Glow",
-  Bronzy: "Subtle Bronzy Makeup Look Products",
-  "Bronzy Powder": "Warm Bronzer Powder For Olive Skin",
-  "Matte bronzer": "Matte Bronzer For Fair Cool Undertone",
-  "Eye Makeup": "Everyday Eye Makeup Kit For Beginners",
-  "Eye Shadow": "Neutral Eyeshadow For Blue Eyes",
-  "Eye Shadow Palette": "Mini Eyeshadow Palette For Travel",
-  Eyeliner: "Smudge Proof Eyeliner For Oily Lids",
-  Kajal: "Long Lasting Kajal For Watery Eyes",
-  Mascara: "Tubing Mascara For Short Lashes",
-  "Eye Cream & Treatment": "Eye Cream for Dark Circles",
-  "Lip Makeup": "Lip Makeup Set Gift For Her",
-  Lipstick: "Transfer Proof Lipstick For Weddings",
-  "Liquid Lipstick": "Comfortable Liquid Lipstick Non Drying",
-  "Matte Lip Sticks": "Matte Lipstick Set Nude",
-  "Lip Gloss": "Non Sticky Lip Gloss Set",
-  "Makeup Palettes": "All In One Makeup Palette With Mirror",
-  "Makeup Sets": "Beginner Makeup Set With Bag",
-  "Makeup Kits": "Travel Makeup Kit Essentials",
-  "Face Makeup": "Beginner Face Makeup Kit With Brushes",
-  Compact: "Compact Powder For Oily Skin Long Lasting",
-  "Loose Powder": "Talc Free Loose Setting Powder",
-};
-
 function safeArray(value) {
   return Array.isArray(value) ? value : [];
-}
-
-function bestSeoTitleForSubcategory(subCategoryName = "") {
-  if (subCategoryBestTitles[subCategoryName]) return subCategoryBestTitles[subCategoryName];
-  const key = Object.keys(subCategoryBestTitles).find(
-    (k) => k.toLowerCase() === String(subCategoryName).toLowerCase()
-  );
-  if (key) return subCategoryBestTitles[key];
-  return `${subCategoryName} Essentials Cameroon`;
 }
 
 async function fetchSubCategoriesForCategory(categoryId) {
@@ -692,8 +641,12 @@ export default function SubCategoryClientBlock({
 
   const resolvedSubCategoryName = activeSubCategory?.name || subCategoryNameFromSlug || "Subcategory";
   const resolvedCategoryName = (Array.isArray(activeSubCategory?.category) ? activeSubCategory?.category?.[0]?.name : undefined) || categoryNameFromSlug || "Category";
-  const h1Commercial = bestSeoTitleForSubcategory(resolvedSubCategoryName);
-  
+  const h1Commercial = getSubCategoryCommercialTitle(resolvedSubCategoryName);
+  const popularLinks = useMemo(
+    () => pickPopularProductLinks(allProducts, 6),
+    [allProducts],
+  );
+
   const combinedErrorMessage = productsError?.message || subCategoriesError?.message || "Something went wrong while loading this collection.";
 
   return (
@@ -888,6 +841,11 @@ export default function SubCategoryClientBlock({
           )}
         </section>
       </main>
+
+      <PopularProductLinks
+        title="Shop popular products in this collection"
+        links={popularLinks}
+      />
     </>
   );
 }

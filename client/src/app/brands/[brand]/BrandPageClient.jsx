@@ -880,6 +880,8 @@ import {
   useCategoriesQuery,
   useSubCategoriesQuery
 } from '@/hooks/queries/useCatalogQueries'
+import PopularProductLinks from '@/components/seo/PopularProductLinks.client'
+import { pickPopularProductLinks } from '@/lib/seo/popularProductLinks'
 
 const SITE_URL = 'https://www.esmakeupstore.com'
 const SITE_NAME = 'Essentialist Makeup Store'
@@ -1512,6 +1514,10 @@ export default function BrandPageClient({ brandSlug }) {
   );
 
   const metrics = useMemo(() => computeBrandMetrics(productRows), [productRows])
+  const popularLinks = useMemo(
+    () => pickPopularProductLinks(productRows, 8),
+    [productRows],
+  )
 
   const brandForNavigation = useMemo(
     () =>
@@ -1717,6 +1723,11 @@ export default function BrandPageClient({ brandSlug }) {
           {' '}for a personalized consultation. Enjoy fast, reliable delivery nationwide!
         </p>
       </section>
+
+      <PopularProductLinks
+        title={`Popular ${brandData.name} products to shop now`}
+        links={popularLinks}
+      />
 
       <script
         type="application/ld+json"
