@@ -103,9 +103,10 @@ export function useBrandsQuery({
   ...queryOptions
 } = {}) {
   const dispatch = useDispatch();
+  const { i18n } = useTranslation();
 
   const queryResult = useQuery({
-    queryKey: ["brands"],
+    queryKey: ["brands", i18n.language],
     enabled,
     queryFn: async () => {
       const response = await Axios(SummaryApi.getBrands);

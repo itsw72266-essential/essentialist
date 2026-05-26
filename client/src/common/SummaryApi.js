@@ -358,6 +358,11 @@ const SummaryApi = {
   productFilterMeta: { url: '/api/next/product/filter-meta', method: 'post' },
   adminDashboard: { url: '/api/next/admin/dashboard', method: 'get' },
   adminSummary: { url: '/api/next/admin/summary', method: 'get' },
+  i18n: {
+    stats: { url: '/api/next/admin/i18n/stats', method: 'get' },
+    missing: { url: '/api/next/admin/i18n/missing', method: 'get' },
+    backfill: { url: '/api/next/admin/i18n/backfill', method: 'post' },
+  },
   getGuestOrders: { url: '/api/next/admin/guest-orders', method: 'get' },
   adminOrders: { url: '/api/next/admin/orders', method: 'get' },
   markOrderDelivered: (orderId) => ({

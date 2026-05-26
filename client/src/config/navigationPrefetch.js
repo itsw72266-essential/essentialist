@@ -19,6 +19,7 @@ const DASHBOARD_ADMIN_ONLY_PATHS = [
   "/dashboard/brands",
   "/dashboard/blog",
   "/dashboard/reviews",
+  "/dashboard/translations",
 ];
 
 export const DASHBOARD_ADMIN_PATHS = [

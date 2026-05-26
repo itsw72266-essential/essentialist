@@ -317,3 +317,93 @@ export async function backfillFrenchTranslations({
 
   return report;
 }
+
+const ADMIN_EDIT_PATHS = {
+  products: "/dashboard/product",
+  brands: "/dashboard/brands",
+  categories: "/dashboard/category",
+  subcategories: "/dashboard/subcategory",
+  blogs: "/dashboard/blog",
+};
+
+/**
+ * Fields on a document that have English content but no French translation yet.
+ * @param {object} doc
+ * @param {string[]} fields
+ */
+export function getMissingFrenchFields(doc, fields) {
+  if (!doc || !fields?.length) return [];
+  const fr = doc.translations?.fr;
+  return fields.filter((field) => {
+    if (!isFilled(doc[field])) return false;
+    if (!fr || typeof fr !== "object") return true;
+    return !isFilled(fr[field]);
+  });
+}
+
+/**
+ * List catalog rows that still need translations.fr.* (for admin + CLI).
+ * @param {{
+ *   entity?: string,
+ *   limit?: number,
+ *   skip?: number,
+ *   search?: string,
+ *   field?: string,
+ * }} [options]
+ */
+export async function listMissingFrenchTranslations({
+  entity = "products",
+  limit = 50,
+  skip = 0,
+  search = "",
+  field = "",
+} = {}) {
+  const config = BACKFILL_ENTITIES[entity];
+  if (!config) {
+    throw new Error(
+      `Unknown entity "${entity}". Use: ${Object.keys(BACKFILL_ENTITIES).join(", ")}`,
+    );
+  }
+
+  const { model, fields } = config;
+  const select = [...new Set(["_id", "slug", "name", "title", ...fields, "translations"])].join(
+    " ",
+  );
+  const docs = await model.find({}).select(select).lean();
+  const q = String(search || "")
+    .trim()
+    .toLowerCase();
+  const fieldFilter = String(field || "").trim();
+
+  const allMissing = [];
+  for (const doc of docs) {
+    if (!needsFrenchSync(doc, fields)) continue;
+    const missingFields = getMissingFrenchFields(doc, fields);
+    if (fieldFilter && !missingFields.includes(fieldFilter)) continue;
+
+    const label = doc.name || doc.title || String(doc._id);
+    if (q) {
+      const haystack = `${label} ${doc.slug || ""} ${doc._id}`.toLowerCase();
+      if (!haystack.includes(q)) continue;
+    }
+
+    allMissing.push({
+      _id: String(doc._id),
+      slug: doc.slug || null,
+      label,
+      missingFields,
+      editHref: ADMIN_EDIT_PATHS[entity] || null,
+    });
+  }
+
+  allMissing.sort((a, b) => a.label.localeCompare(b.label, "en"));
+
+  return {
+    entity,
+    translatableFields: fields,
+    total: allMissing.length,
+    skip: Math.max(0, Number(skip) || 0),
+    limit: Math.min(Math.max(Number(limit) || 50, 1), 500),
+    items: allMissing.slice(skip, skip + Math.min(Math.max(Number(limit) || 50, 1), 500)),
+  };
+}

@@ -914,6 +914,8 @@ import Breadcrumbs from '@/components/seo/Breadcrumbs.client'
 import { homeBreadcrumbItem } from '@/lib/seo/breadcrumbs'
 import SummaryApi from '@/backend/contracts/summaryApi'
 import Axios from '@/lib/apiClient'
+import { getLocalizedContent } from '@/helpers/localizeContent'
+import { useLocalizedHref } from '@/hooks/useLocalizedHref'
 
 const SITE_URL = 'https://www.esmakeupstore.com/brands'
 const ROOT_URL = 'https://www.esmakeupstore.com'
@@ -1061,12 +1063,13 @@ function extractPrice(product = {}, role) {
   )
 }
 
-function normalizeProductRow(product = {}) {
+function normalizeProductRow(product = {}, locale = 'en') {
   const brandEntity = product?.brand || product?.brandId || product?.brandInfo
   const brandName =
     typeof brandEntity === 'string'
       ? brandEntity
-      : brandEntity?.name ||
+      : getLocalizedContent(brandEntity, 'name', locale) ||
+        brandEntity?.name ||
         product?.brandName ||
         product?.brand_title ||
         ''
@@ -1080,7 +1083,7 @@ function normalizeProductRow(product = {}) {
     typeof subCategory === 'object' ? subCategory?._id : subCategory
   const subCategoryName =
     typeof subCategory === 'object'
-      ? subCategory?.name
+      ? getLocalizedContent(subCategory, 'name', locale) || subCategory?.name
       : product?.subCategoryName ||
         product?.subcategoryName ||
         product?.subcategory ||
@@ -1096,17 +1099,22 @@ function normalizeProductRow(product = {}) {
       : product?.categoryId || categoryEntity
   const categoryName =
     typeof categoryEntity === 'object'
-      ? categoryEntity?.name
+      ? getLocalizedContent(categoryEntity, 'name', locale) || categoryEntity?.name
       : product?.categoryName || ''
 
   const productSlug = createProductSlug(product)
+  const productName =
+    getLocalizedContent(product, 'name', locale) ||
+    product?.name ||
+    product?.title ||
+    'Unnamed product'
 
   return {
     id:
       product?._id ||
       product?.id ||
       `${brandSlug}-${product?.name || 'item'}`,
-    name: product?.name || product?.title || 'Unnamed product',
+    name: productName,
     brandName,
     brandSlug,
     productSlug,
@@ -1260,25 +1268,34 @@ function buildSubCatUrl(mainCat, subCat) {
 
 // ---------- UI helpers ----------
 
-function BrandDirectoryGrid({ brandStats = [] }) {
+function BrandDirectoryGrid({ brandStats = [], locale = 'en' }) {
+  const { t } = useTranslation()
+  const localizedHref = useLocalizedHref()
+
   if (!Array.isArray(brandStats) || !brandStats.length) return null
 
   return (
     <section className="container mx-auto px-4 py-5">
       <header className="mb-10 text-center max-w-3xl mx-auto">
         <h1 className="text-3xl md:text-4xl font-extrabold text-pink-600 mb-4 tracking-tight">
-          Shop Top Makeup Brands
+          {t('brandsPage.directoryTitle')}
         </h1>
         <p className="text-gray-600 text-base md:text-lg leading-relaxed">
-          Discover our curated collection of authentic <strong>cosmetic products</strong> and professional beauty essentials. Browse top brands, compare FCFA prices, and find your perfect shade with fast delivery in Douala and across Cameroon.
+          {t('brandsPage.directoryIntro')}
         </p>
       </header>
 
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        {brandStats.map((brand) => (
+        {brandStats.map((brand) => {
+          const displayName =
+            getLocalizedContent(brand, 'name', locale) || brand.name || brand.slug
+          const displayDescription =
+            getLocalizedContent(brand, 'description', locale) || brand.description
+
+          return (
           <Link
             key={brand._id || brand.slug}
-            href={`/brands/${brand.slug}`}
+            href={localizedHref(`/brands/${brand.slug}`)}
             className="group border rounded-lg bg-white shadow-sm hover:shadow-md transition-shadow"
           >
             <div className="p-6 flex flex-col items-center gap-4">
@@ -1287,39 +1304,43 @@ function BrandDirectoryGrid({ brandStats = [] }) {
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={brand.logo}
-                    alt={`${brand.name} cosmetics`}
+                    alt={t('brandsPage.brandLogoAlt', { brand: displayName })}
                     className="object-contain h-full w-full"
                   />
                 ) : (
                   <span className="text-xs text-gray-400 text-center px-2">
-                    Logo coming soon
+                    {t('brandsPage.logoComingSoon')}
                   </span>
                 )}
               </div>
-              <h2 className="text-lg font-semibold text-center">{brand.name}</h2>
+              <h2 className="text-lg font-semibold text-center">{displayName}</h2>
               {brand.isFeatured && (
                 <span className="text-xs font-semibold text-yellow-600 bg-yellow-50 border border-yellow-200 px-3 py-1 rounded-full">
-                  Featured
+                  {t('brandsPage.featured')}
                 </span>
               )}
               <p className="text-sm text-gray-500 line-clamp-3 text-center">
-                {brand.description
-                  ? brand.description
+                {displayDescription
+                  ? displayDescription
                       .replace(/\[(.*?)\]\((.*?)\)/g, '$1')
                       .slice(0, 140)
                       .concat('…')
-                  : 'Discover signature products from this brand.'}
+                  : t('brandsPage.brandCardFallback')}
               </p>
               <div className="text-xs text-gray-500">
-                {brand.metrics?.totalProducts || 0} products •{' '}
+                {t('brandsPage.productsCount', {
+                  count: brand.metrics?.totalProducts || 0,
+                })}{' '}
+                •{' '}
                 {brand.metrics?.avgSellingPrice
                   ? FCFA(brand.metrics.avgSellingPrice)
                   : '—'}{' '}
-                avg
+                {t('brandsPage.avgPrice')}
               </div>
             </div>
           </Link>
-        ))}
+          )
+        })}
       </div>
     </section>
   )
@@ -1501,8 +1522,9 @@ async function pingIndexNow() {
 // ---------- Main client component ----------
 
 export default function BrandsDirectoryClient({ canUseRemoteApi }) {
-  const { i18n } = useTranslation()
+  const { t, i18n } = useTranslation()
   const locale = i18n.resolvedLanguage || i18n.language || 'en'
+  const localizedHref = useLocalizedHref()
 
   // Pagination & Filtering States
   const [currentPage, setCurrentPage] = useState(1)
@@ -1539,8 +1561,11 @@ export default function BrandsDirectoryClient({ canUseRemoteApi }) {
   }, [canUseRemoteApi])
 
   const productRows = useMemo(
-    () => (Array.isArray(products) ? products.map(normalizeProductRow) : []),
-    [products]
+    () =>
+      Array.isArray(products)
+        ? products.map((row) => normalizeProductRow(row, locale))
+        : [],
+    [products, locale],
   )
 
   const brandStats = useMemo(
@@ -1616,7 +1641,7 @@ export default function BrandsDirectoryClient({ canUseRemoteApi }) {
         <BrandSearch />
       </div>
 
-      <BrandDirectoryGrid brandStats={brandStats} />
+      <BrandDirectoryGrid brandStats={brandStats} locale={locale} />
 
       <section
         aria-labelledby="product-table-heading"
@@ -1624,16 +1649,16 @@ export default function BrandsDirectoryClient({ canUseRemoteApi }) {
       >
         <div className="flex flex-col sm:flex-row justify-between items-center p-4 border-b border-pink-200 bg-gradient-to-r from-pink-100 to-pink-50">
           <h2 id="product-table-heading" className="text-xl font-bold text-pink-600 mb-4 sm:mb-0">
-            Complete Product Price List
+            {t('brandsPage.priceListTitle')}
           </h2>
           
           <select
             value={selectedBrandFilter}
             onChange={(e) => setSelectedBrandFilter(e.target.value)}
             className="w-full sm:w-auto p-2 border border-pink-300 rounded-md text-sm text-gray-700 focus:ring-pink-500 focus:border-pink-500 bg-white"
-            aria-label="Filter products by brand"
+            aria-label={t('brandsPage.filterByBrand')}
           >
-            <option value="">All Brands</option>
+            <option value="">{t('brandsPage.filterAllBrands')}</option>
             {brandStats.map(b => (
               <option key={b.slug} value={b.slug}>{b.name}</option>
             ))}
@@ -1643,18 +1668,18 @@ export default function BrandsDirectoryClient({ canUseRemoteApi }) {
         <table className="min-w-full text-sm md:text-base">
           <thead>
             <tr className="bg-white border-b text-gray-700">
-              <th scope="col" className="py-3 px-2 md:px-4 font-bold text-left">Product</th>
-              <th scope="col" className="py-3 px-2 md:px-4 font-bold text-left hidden sm:table-cell">Subcategory</th>
-              <th scope="col" className="py-3 px-2 md:px-4 font-bold text-left hidden md:table-cell">Brand</th>
-              <th scope="col" className="py-3 px-2 md:px-4 font-bold text-right">Bulk Price</th>
-              <th scope="col" className="py-3 px-2 md:px-4 font-bold text-right">Selling Price</th>
+              <th scope="col" className="py-3 px-2 md:px-4 font-bold text-left">{t('brandsPage.colProduct')}</th>
+              <th scope="col" className="py-3 px-2 md:px-4 font-bold text-left hidden sm:table-cell">{t('brandsPage.colSubcategory')}</th>
+              <th scope="col" className="py-3 px-2 md:px-4 font-bold text-left hidden md:table-cell">{t('brandsPage.colBrand')}</th>
+              <th scope="col" className="py-3 px-2 md:px-4 font-bold text-right">{t('brandsPage.colBulkPrice')}</th>
+              <th scope="col" className="py-3 px-2 md:px-4 font-bold text-right">{t('brandsPage.colSellingPrice')}</th>
             </tr>
           </thead>
           <tbody>
             {paginatedRows.length === 0 ? (
               <tr>
                 <td colSpan={5} className="py-8 px-4 text-center text-gray-500 italic bg-white">
-                  No products found for this selection.
+                  {t('brandsPage.noProductsSelection')}
                 </td>
               </tr>
             ) : (
@@ -1667,9 +1692,9 @@ export default function BrandsDirectoryClient({ canUseRemoteApi }) {
                     <td className="py-3 px-2 md:px-4 font-semibold text-gray-900">
                       {row.productSlug ? (
                         <Link
-                          href={`/product/${row.productSlug}`}
+                          href={localizedHref(`/product/${row.productSlug}`)}
                           className="text-gray-900 hover:text-pink-600 underline decoration-pink-300 decoration-2 underline-offset-2 transition-colors font-medium"
-                          aria-label={`View ${row.name}`}
+                          aria-label={t('brandsPage.viewProduct', { name: row.name })}
                         >
                           {row.name}
                         </Link>
@@ -1680,10 +1705,10 @@ export default function BrandsDirectoryClient({ canUseRemoteApi }) {
                     <td className="py-3 px-2 md:px-4 hidden sm:table-cell">
                       {linkMeta ? (
                         <Link
-                          href={buildSubCatUrl(linkMeta.mainCat, linkMeta.subCat)}
+                          href={localizedHref(buildSubCatUrl(linkMeta.mainCat, linkMeta.subCat))}
                           className="text-blue-600 hover:text-pink-600 transition font-medium focus:outline-none focus:ring-2 focus:ring-pink-300 rounded"
                         >
-                          {row.subCategoryName || row.categoryName || 'View'}
+                          {row.subCategoryName || row.categoryName || t('brandsPage.viewLink')}
                         </Link>
                       ) : (
                         <span className="text-gray-500">{row.subCategoryName || row.categoryName || '—'}</span>
@@ -1691,7 +1716,7 @@ export default function BrandsDirectoryClient({ canUseRemoteApi }) {
                     </td>
                     <td className="py-3 px-2 md:px-4 hidden md:table-cell">
                       <Link
-                        href={`/brands/${row.brandSlug}`}
+                        href={localizedHref(`/brands/${row.brandSlug}`)}
                         className="text-gray-600 hover:text-pink-600 font-medium transition-colors"
                       >
                         {row.brandName}
@@ -1713,7 +1738,11 @@ export default function BrandsDirectoryClient({ canUseRemoteApi }) {
         {/* This Pagination Bar will ALWAYS render so you can see it */}
         <div className="flex flex-col sm:flex-row justify-between items-center p-4 border-t border-pink-200 bg-white">
           <span className="text-sm text-gray-600 mb-4 sm:mb-0">
-            Showing {filteredRows.length > 0 ? (currentPage - 1) * ITEMS_PER_PAGE + 1 : 0} to {Math.min(currentPage * ITEMS_PER_PAGE, filteredRows.length)} of {filteredRows.length} products
+            {t('brandsPage.paginationShowing', {
+              from: filteredRows.length > 0 ? (currentPage - 1) * ITEMS_PER_PAGE + 1 : 0,
+              to: Math.min(currentPage * ITEMS_PER_PAGE, filteredRows.length),
+              total: filteredRows.length,
+            })}
           </span>
           <div className="flex gap-2">
             <button
@@ -1721,17 +1750,17 @@ export default function BrandsDirectoryClient({ canUseRemoteApi }) {
               disabled={currentPage === 1}
               className="px-4 py-2 text-sm font-medium text-pink-600 bg-white border border-pink-300 rounded hover:bg-pink-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              Previous
+              {t('common.previous')}
             </button>
             <div className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-50 border border-gray-200 rounded">
-              Page {currentPage} of {totalPages}
+              {t('brandsPage.paginationPage', { current: currentPage, total: totalPages })}
             </div>
             <button
               onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
               disabled={currentPage === totalPages || totalPages === 0}
               className="px-4 py-2 text-sm font-medium text-pink-600 bg-white border border-pink-300 rounded hover:bg-pink-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              Next
+              {t('common.next')}
             </button>
           </div>
         </div>
@@ -1739,46 +1768,44 @@ export default function BrandsDirectoryClient({ canUseRemoteApi }) {
 
       <section className="text-center mb-8 mt-12 bg-pink-50 p-8 rounded-xl border border-pink-100 max-w-4xl mx-auto">
         <h2 className="text-2xl md:text-3xl font-bold text-pink-600 mb-3">
-          Your Trusted Makeup Store in Cameroon
+          {t('brandsPage.trustedStoreTitle')}
         </h2>
         <p className="text-gray-700 mb-4 leading-relaxed">
-          At the Essentialist Makeup Store, we pride ourselves on offering a wide range of authentic beauty products. 
-          Whether you are looking for top-tier 
-          {brandNames.length ? ` brands like ${brandNames.slice(0, 5).join(', ')}` : ' cosmetic brands'} 
-          or specific essentials like 
-          {subCategoryNames.length ? ` ${subCategoryNames.slice(0, 4).join(', ')}` : ' foundations and setting powders'}, 
-          we have you covered with the best FCFA pricing and fast nationwide delivery.
+          {t('brandsPage.trustedStoreBody', {
+            brands: brandNames.length
+              ? brandNames.slice(0, 5).join(', ')
+              : t('brandsPage.trustedStoreBrandsFallback'),
+            categories: subCategoryNames.length
+              ? subCategoryNames.slice(0, 4).join(', ')
+              : t('brandsPage.trustedStoreCategoriesFallback'),
+          })}
         </p>
         <p className="text-gray-500 text-sm font-medium">
-          Currently tracking {totalProducts.toLocaleString()} premium products in our active catalog.
+          {t('brandsPage.trackingProducts', {
+            count: totalProducts.toLocaleString(locale === 'fr' ? 'fr-FR' : 'en-US'),
+          })}
         </p>
       </section>
 
       <section className="max-w-4xl mx-auto bg-white border border-pink-200 rounded-lg shadow p-6 space-y-4">
-        <h2 className="text-2xl font-bold text-pink-600">Brand FAQs</h2>
+        <h2 className="text-2xl font-bold text-pink-600">{t('brandsPage.faqTitle')}</h2>
         <details className="p-3 bg-pink-50 rounded">
           <summary className="font-semibold text-gray-800 cursor-pointer focus:outline-none focus:ring-2 focus:ring-pink-300">
-            Do you deliver NYX, MAC, and Estée Lauder nationwide in Cameroon?
+            {t('brandsPage.faqDeliveryQ')}
           </summary>
-          <p className="text-gray-700 mt-2">
-            Yes. We ship from Douala to cities nationwide. Delivery is fast and payment is 100% secure online.
-          </p>
+          <p className="text-gray-700 mt-2">{t('brandsPage.faqDeliveryA')}</p>
         </details>
         <details className="p-3 bg-pink-50 rounded">
           <summary className="font-semibold text-gray-800 cursor-pointer focus:outline-none focus:ring-2 focus:ring-pink-300">
-            Are the products authentic?
+            {t('brandsPage.faqAuthenticQ')}
           </summary>
-          <p className="text-gray-700 mt-2">
-            All items are 100% authentic. We publish FCFA price lists for transparency and keep popular items marked In stock.
-          </p>
+          <p className="text-gray-700 mt-2">{t('brandsPage.faqAuthenticA')}</p>
         </details>
         <details className="p-3 bg-pink-50 rounded">
           <summary className="font-semibold text-gray-800 cursor-pointer focus:outline-none focus:ring-2 focus:ring-pink-300">
-            How can I find my foundation shade?
+            {t('brandsPage.faqShadeQ')}
           </summary>
-          <p className="text-gray-700 mt-2">
-            Open any brand page and filter by category. For Estée Lauder Double Wear or MAC Studio Fix, contact support for a quick shade guide.
-          </p>
+          <p className="text-gray-700 mt-2">{t('brandsPage.faqShadeA')}</p>
         </details>
       </section>
 
@@ -1791,26 +1818,26 @@ export default function BrandsDirectoryClient({ canUseRemoteApi }) {
             mainEntity: [
               {
                 '@type': 'Question',
-                name: 'Do you deliver NYX, MAC, and Estée Lauder nationwide in Cameroon?',
+                name: t('brandsPage.faqDeliveryQ'),
                 acceptedAnswer: {
                   '@type': 'Answer',
-                  text: 'Yes. We ship from Douala to cities nationwide. Delivery is fast and payment is 100% secure online.'
+                  text: t('brandsPage.faqDeliveryA'),
                 }
               },
               {
                 '@type': 'Question',
-                name: 'Are the products authentic?',
+                name: t('brandsPage.faqAuthenticQ'),
                 acceptedAnswer: {
                   '@type': 'Answer',
-                  text: 'All items are 100% authentic. We publish FCFA price lists for transparency and keep popular items marked In stock.'
+                  text: t('brandsPage.faqAuthenticA'),
                 }
               },
               {
                 '@type': 'Question',
-                name: 'How can I find my foundation shade?',
+                name: t('brandsPage.faqShadeQ'),
                 acceptedAnswer: {
                   '@type': 'Answer',
-                  text: 'Open any brand page and filter by category. For Estée Lauder Double Wear or MAC Studio Fix, contact support for a quick shade guide.'
+                  text: t('brandsPage.faqShadeA'),
                 }
               }
             ]

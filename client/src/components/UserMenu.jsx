@@ -201,6 +201,7 @@ import {
   Tag,
   FileText,
   Star,
+  Languages,
   ShoppingBag,
   MapPinned,
   LogOut,
@@ -242,6 +243,7 @@ const ADMIN_NAV = [
   { href: '/dashboard/brands', tKey: 'brands', Icon: Tag },
   { href: '/dashboard/blog', tKey: 'blogManager', Icon: FileText },
   { href: '/dashboard/reviews', tKey: 'reviewManager', Icon: Star },
+  { href: '/dashboard/translations', tKey: 'frenchTranslations', Icon: Languages },
 ];
 
 const UserMenu = ({ onSelect }) => {

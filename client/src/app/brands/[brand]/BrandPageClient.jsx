@@ -884,6 +884,8 @@ import PopularProductLinks from '@/components/seo/PopularProductLinks.client'
 import Breadcrumbs from '@/components/seo/Breadcrumbs.client'
 import { pickPopularProductLinks } from '@/lib/seo/popularProductLinks'
 import { brandsIndexBreadcrumbItems } from '@/lib/seo/breadcrumbs'
+import { getLocalizedContent } from '@/helpers/localizeContent'
+import { useLocalizedHref } from '@/hooks/useLocalizedHref'
 
 const SITE_URL = 'https://www.esmakeupstore.com'
 const SITE_NAME = 'Essentialist Makeup Store'
@@ -991,12 +993,13 @@ function extractPrice(product = {}, role) {
   )
 }
 
-function normalizeProductRow(product = {}) {
+function normalizeProductRow(product = {}, locale = 'en') {
   const brandEntity = product?.brand || product?.brandId || product?.brandInfo
   const brandName =
     typeof brandEntity === 'string'
       ? brandEntity
-      : brandEntity?.name ||
+      : getLocalizedContent(brandEntity, 'name', locale) ||
+        brandEntity?.name ||
         product?.brandName ||
         product?.brand_title ||
         ''
@@ -1010,7 +1013,7 @@ function normalizeProductRow(product = {}) {
     typeof subCategory === 'object' ? subCategory?._id : subCategory
   const subCategoryName =
     typeof subCategory === 'object'
-      ? subCategory?.name
+      ? getLocalizedContent(subCategory, 'name', locale) || subCategory?.name
       : product?.subCategoryName ||
         product?.subcategoryName ||
         product?.subcategory ||
@@ -1026,17 +1029,22 @@ function normalizeProductRow(product = {}) {
       : product?.categoryId || categoryEntity
   const categoryName =
     typeof categoryEntity === 'object'
-      ? categoryEntity?.name
+      ? getLocalizedContent(categoryEntity, 'name', locale) || categoryEntity?.name
       : product?.categoryName || ''
 
   const productSlug = createProductSlug(product)
+  const productName =
+    getLocalizedContent(product, 'name', locale) ||
+    product?.name ||
+    product?.title ||
+    'Unnamed product'
 
   return {
     id:
       product?._id ||
       product?.id ||
       `${brandSlug}-${product?.name || 'item'}`,
-    name: product?.name || product?.title || 'Unnamed product',
+    name: productName,
     brandName,
     brandSlug,
     productSlug,
@@ -1166,8 +1174,10 @@ function buildSubCatUrl(mainCat = {}, subCat = {}) {
 }
 
 function useBrandDetailsQuery(brandSlug, { enabled = true, initialData } = {}) {
+  const { i18n } = useTranslation()
+
   return useQuery({
-    queryKey: ['brand-detail', brandSlug],
+    queryKey: ['brand-detail', brandSlug, i18n.language],
     enabled: enabled && Boolean(brandSlug),
     initialData,
     queryFn: async () => {
@@ -1335,35 +1345,39 @@ function BrandStructuredData({ brand = {}, products = [] }) {
   )
 }
 
-function BrandNavigation({ brands = [], currentSlug }) {
+function BrandNavigation({ brands = [], currentSlug, locale = 'en' }) {
+  const { t } = useTranslation()
+  const localizedHref = useLocalizedHref()
+
   if (!Array.isArray(brands) || brands.length === 0) return null
 
   return (
     <div className="mb-8 bg-white rounded-lg shadow-md p-4">
       <h3 className="text-lg font-semibold text-gray-800 mb-4">
-        Shop by Brand:
+        {t('brandsPage.shopByBrand')}
       </h3>
       <div className="flex flex-wrap gap-2">
         <Link
-          href="/brands"
+          href={localizedHref('/brands')}
           className="px-4 py-2 rounded-full border transition-colors bg-gray-100 text-gray-700 border-gray-300 hover:bg-pink-50 hover:border-pink-300"
         >
-          All Brands
+          {t('brandsPage.allBrands')}
         </Link>
         {brands.map((brand) => {
           const slug = brand.slug || createBrandSlug(brand.name || '')
+          const label = getLocalizedContent(brand, 'name', locale) || brand.name || slug
           const isActive = slug === currentSlug
           return (
             <Link
               key={brand._id || slug}
-              href={`/brands/${slug}`}
+              href={localizedHref(`/brands/${slug}`)}
               className={`px-4 py-2 rounded-full border transition-colors ${
                 isActive
                   ? 'bg-pink-500 text-white border-pink-500'
                   : 'bg-white text-gray-700 border-gray-300 hover:bg-pink-50 hover:border-pink-300'
               }`}
             >
-              {brand.name}
+              {label}
             </Link>
           )
         })}
@@ -1440,8 +1454,9 @@ async function pingBrandIndexNow(brandSlug) {
 }
 
 export default function BrandPageClient({ brandSlug }) {
-  const { i18n } = useTranslation()
+  const { t, i18n } = useTranslation()
   const locale = i18n.resolvedLanguage || i18n.language || 'en'
+  const localizedHref = useLocalizedHref()
   const [currentPage, setCurrentPage] = useState(1);
 
   const {
@@ -1498,10 +1513,15 @@ export default function BrandPageClient({ brandSlug }) {
   }, [brandSlug])
 
   // THE FIX: Strict client-side filter to toss out products not matching this brand
+  const displayBrandName = useMemo(
+    () => getLocalizedContent(brandData, 'name', locale) || brandData?.name || '',
+    [brandData, locale],
+  )
+
   const productRows = useMemo(() => {
     if (!Array.isArray(brandProducts)) return [];
     
-    const allNormalized = brandProducts.map(normalizeProductRow);
+    const allNormalized = brandProducts.map((row) => normalizeProductRow(row, locale));
     
     // Safety Net: Filter out anything that doesn't exactly match the current brand slug
     if (currentSlug) {
@@ -1509,7 +1529,7 @@ export default function BrandPageClient({ brandSlug }) {
     }
     
     return allNormalized;
-  }, [brandProducts, currentSlug])
+  }, [brandProducts, currentSlug, locale])
 
   const totalPages = Math.ceil(productRows.length / ITEMS_PER_PAGE);
   const paginatedRows = productRows.slice(
@@ -1524,9 +1544,9 @@ export default function BrandPageClient({ brandSlug }) {
   )
 
   const breadcrumbItems = useMemo(() => {
-    if (!brandData?.name) return []
-    return brandsIndexBreadcrumbItems(brandData.name, locale)
-  }, [brandData?.name, locale])
+    if (!displayBrandName) return []
+    return brandsIndexBreadcrumbItems(displayBrandName, locale)
+  }, [displayBrandName, locale])
 
   const brandForNavigation = useMemo(
     () =>
@@ -1540,7 +1560,10 @@ export default function BrandPageClient({ brandSlug }) {
   )
 
   const plainBrandDescription = stripMarkdown(
-    brandData?.description || brandData?.shortDescription || ''
+    getLocalizedContent(brandData, 'description', locale) ||
+      brandData?.description ||
+      brandData?.shortDescription ||
+      '',
   )
 
   const brandStillLoading =
@@ -1581,17 +1604,17 @@ export default function BrandPageClient({ brandSlug }) {
 
       <header className="text-center mb-8">
         <h1 className="text-4xl md:text-6xl font-extrabold text-pink-400 mb-2 tracking-tight">
-          Shop {String(brandData.name || '').toUpperCase()} Makeup
+          {t('brandsPage.shopBrandMakeup', { brand: String(displayBrandName).toUpperCase() })}
         </h1>
         <h2 className="text-lg md:text-2xl text-gray-700 font-semibold">
-          Authentic {brandData.name} Cosmetic Products in Cameroon
+          {t('brandsPage.authenticInCameroon', { brand: displayBrandName })}
         </h2>
 
         <p className="text-gray-600 text-sm mt-4">
-          Categories:{' '}
+          {t('brandsPage.categoriesLabel')}{' '}
           {metrics.subCategories.length
             ? metrics.subCategories.slice(0, 8).join(', ')
-            : 'Foundation, Lip makeup, Eye makeup'}
+            : t('brandsPage.categoriesFallback')}
           {metrics.subCategories.length > 8 ? '…' : ''}
         </p>
         {plainBrandDescription && (
@@ -1601,7 +1624,7 @@ export default function BrandPageClient({ brandSlug }) {
         )}
       </header>
 
-      <BrandNavigation brands={brandForNavigation} currentSlug={currentSlug} />
+      <BrandNavigation brands={brandForNavigation} currentSlug={currentSlug} locale={locale} />
 
       <section
         aria-labelledby="brand-products"
@@ -1609,10 +1632,13 @@ export default function BrandPageClient({ brandSlug }) {
       >
         <div className="bg-gradient-to-r from-pink-300 to-pink-200 text-gray-700 p-4">
           <h2 id="brand-products" className="text-xl font-bold">
-            Complete {brandData.name} Product Catalog
+            {t('brandsPage.catalogTitle', { brand: displayBrandName })}
           </h2>
           <p className="text-gray-700 text-sm mt-1">
-            All {metrics.totalProducts} authentic {brandData.name} products with current FCFA pricing
+            {t('brandsPage.catalogSubtitle', {
+              brand: displayBrandName,
+              count: metrics.totalProducts,
+            })}
           </p>
         </div>
 
@@ -1620,16 +1646,16 @@ export default function BrandPageClient({ brandSlug }) {
           <thead>
             <tr className="bg-pink-100 text-black">
               <th scope="col" className="py-3 px-2 md:px-4 font-bold text-left">
-                Product
+                {t('brandsPage.colProduct')}
               </th>
               <th scope="col" className="py-3 px-2 md:px-4 font-bold text-left">
-                Category
+                {t('brandsPage.colCategory')}
               </th>
               <th scope="col" className="py-3 px-2 md:px-4 font-bold text-right">
-                Bulk Price
+                {t('brandsPage.colBulkPrice')}
               </th>
               <th scope="col" className="py-3 px-2 md:px-4 font-bold text-right">
-                Selling Price
+                {t('brandsPage.colSellingPrice')}
               </th>
             </tr>
           </thead>
@@ -1640,7 +1666,7 @@ export default function BrandPageClient({ brandSlug }) {
                   colSpan={4}
                   className="py-6 px-4 text-center text-gray-500 italic bg-white"
                 >
-                  No products listed yet for this brand.
+                  {t('brandsPage.noProductsBrand')}
                 </td>
               </tr>
             ) : (
@@ -1651,15 +1677,18 @@ export default function BrandPageClient({ brandSlug }) {
                   row
                 )
                 const rowClass = index % 2 === 0 ? 'bg-white' : 'bg-pink-50'
+                const mainCatLabel = linkMeta
+                  ? getLocalizedContent(linkMeta.mainCat, 'name', locale) || linkMeta.mainCat?.name
+                  : ''
 
                 return (
                   <tr key={row.id || `${row.name}-${index}`} className={rowClass}>
                     <td className="py-3 px-2 md:px-4 font-semibold text-gray-900">
                       {row.productSlug ? (
                         <Link
-                          href={`/product/${row.productSlug}`}
+                          href={localizedHref(`/product/${row.productSlug}`)}
                           className="text-gray-900 hover:text-pink-500 underline decoration-pink-300 decoration-2 underline-offset-2 transition-colors font-medium"
-                          aria-label={`View ${row.name}`}
+                          aria-label={t('brandsPage.viewProduct', { name: row.name })}
                         >
                           {row.name}
                         </Link>
@@ -1670,11 +1699,14 @@ export default function BrandPageClient({ brandSlug }) {
                     <td className="py-3 px-2 md:px-4">
                       {linkMeta ? (
                         <Link
-                          href={buildSubCatUrl(linkMeta.mainCat, linkMeta.subCat)}
+                          href={localizedHref(buildSubCatUrl(linkMeta.mainCat, linkMeta.subCat))}
                           className="underline text-blue-700 hover:text-pink-500 transition font-medium focus:outline-none focus:ring-2 focus:ring-pink-300 rounded"
-                          aria-label={`Browse ${row.subCategoryName} in ${linkMeta.mainCat?.name}`}
+                          aria-label={t('brandsPage.browseInCategory', {
+                            subcategory: row.subCategoryName || row.categoryName,
+                            category: mainCatLabel,
+                          })}
                         >
-                          {row.subCategoryName || row.categoryName || 'View'}
+                          {row.subCategoryName || row.categoryName || t('brandsPage.viewLink')}
                         </Link>
                       ) : (
                         <span className="text-gray-500">
@@ -1698,7 +1730,11 @@ export default function BrandPageClient({ brandSlug }) {
         {totalPages > 1 && (
           <div className="flex flex-col sm:flex-row justify-between items-center p-4 border-t border-pink-200 bg-white">
             <span className="text-sm text-gray-600 mb-4 sm:mb-0">
-              Showing {(currentPage - 1) * ITEMS_PER_PAGE + 1} to {Math.min(currentPage * ITEMS_PER_PAGE, productRows.length)} of {productRows.length} products
+              {t('brandsPage.paginationShowing', {
+                from: productRows.length > 0 ? (currentPage - 1) * ITEMS_PER_PAGE + 1 : 0,
+                to: Math.min(currentPage * ITEMS_PER_PAGE, productRows.length),
+                total: productRows.length,
+              })}
             </span>
             <div className="flex gap-2">
               <button
@@ -1706,17 +1742,17 @@ export default function BrandPageClient({ brandSlug }) {
                 disabled={currentPage === 1}
                 className="px-4 py-2 text-sm font-medium text-pink-600 bg-white border border-pink-300 rounded hover:bg-pink-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
-                Previous
+                {t('common.previous')}
               </button>
               <div className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-50 border border-gray-200 rounded">
-                Page {currentPage} of {totalPages}
+                {t('brandsPage.paginationPage', { current: currentPage, total: totalPages })}
               </div>
               <button
                 onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                 disabled={currentPage === totalPages || totalPages === 0}
                 className="px-4 py-2 text-sm font-medium text-pink-600 bg-white border border-pink-300 rounded hover:bg-pink-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
-                Next
+                {t('common.next')}
               </button>
             </div>
           </div>
@@ -1725,20 +1761,15 @@ export default function BrandPageClient({ brandSlug }) {
 
       <section className="mt-8 max-w-4xl mx-auto text-center text-gray-700 bg-pink-50 p-6 rounded-lg border border-pink-100">
         <p className="leading-relaxed">
-          Looking to buy <strong>{brandData.name} makeup in Douala</strong> or anywhere in Cameroon?
-          The Essentialist Makeup Store is your trusted source for authentic <strong>cosmetic products</strong>
-          and professional beauty supplies. Compare our transparent FCFA prices on top-rated {brandData.name}
-          foundations, blurring setting powders, lip glosses, and other skin essentials.
-          Need help matching your shade or building your makeup kit?{' '}
+          {t('brandsPage.brandSeoParagraph', { brand: displayBrandName })}{' '}
           <a href="mailto:info@esmakeupstore.com" className="font-semibold text-pink-500 hover:text-pink-600 underline decoration-pink-300">
-            Email our beauty team
+            {t('brandsPage.emailBeautyTeam')}
           </a>
-          {' '}for a personalized consultation. Enjoy fast, reliable delivery nationwide!
         </p>
       </section>
 
       <PopularProductLinks
-        title={`Popular ${brandData.name} products to shop now`}
+        title={t('brandsPage.popularProductsTitle', { brand: displayBrandName })}
         links={popularLinks}
       />
 
@@ -1751,18 +1782,18 @@ export default function BrandPageClient({ brandSlug }) {
             mainEntity: [
               {
                 '@type': 'Question',
-                name: `Is ${brandData.name} available in stock?`,
+                name: t('brandsPage.faqInStockQ', { brand: displayBrandName }),
                 acceptedAnswer: {
                   '@type': 'Answer',
-                  text: `Yes, most ${brandData.name} items listed here are marked In stock and ship nationwide in Cameroon.`
+                  text: t('brandsPage.faqInStockA', { brand: displayBrandName }),
                 }
               },
               {
                 '@type': 'Question',
-                name: `How much is ${brandData.name} foundation in FCFA?`,
+                name: t('brandsPage.faqFoundationQ', { brand: displayBrandName }),
                 acceptedAnswer: {
                   '@type': 'Answer',
-                  text: 'Prices vary by shade and line. Check the table for live FCFA pricing or contact us for assistance.'
+                  text: t('brandsPage.faqFoundationA'),
                 }
               }
             ]

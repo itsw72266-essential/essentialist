@@ -35,18 +35,19 @@ export default function CategoryPageContent({
   hasMore = false,
   nextHref = "",
 }) {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const localizedHref = useLocalizedHref();
   const displayCategoryName =
     getLocalizedContent(category, "name", i18n.language) || categoryName;
   const heroTitle = capitalize(primarySeo || displayCategoryName);
   const heroTitleClasses = useAdaptiveTextClasses(heroTitle, "heroTitle");
-  const heroSubtitleClasses = useAdaptiveTextClasses(
-    `Shop authentic ${displayCategoryName} in Cameroon.`,
-    "heroSubtitle",
-  );
+  const heroSubtitleText = t("catalogPage.heroSubtitle", { name: displayCategoryName });
+  const sectionHeadingText = t("catalogPage.exploreCollections", {
+    name: displayCategoryName,
+  });
+  const heroSubtitleClasses = useAdaptiveTextClasses(heroSubtitleText, "heroSubtitle");
   const sectionHeadingClasses = useAdaptiveTextClasses(
-    `Explore ${displayCategoryName}`,
+    sectionHeadingText,
     "sectionHeading",
   );
 
@@ -117,10 +118,7 @@ export default function CategoryPageContent({
               <> — {heroTitle}</>
             ) : null}
           </h1>
-          <p className={heroSubtitleClasses}>
-            Shop authentic <strong>{displayCategoryName}</strong> in Cameroon.
-            Secure FCFA payments and fast delivery to Douala and Yaoundé.
-          </p>
+          <p className={heroSubtitleClasses}>{heroSubtitleText}</p>
         </div>
       </div>
 
@@ -129,7 +127,7 @@ export default function CategoryPageContent({
           <h2
             className={`${sectionHeadingClasses} container mx-auto px-4 text-center md:text-left`}
           >
-            Explore {displayCategoryName} Collections
+            {sectionHeadingText}
           </h2>
           <CategoryCircleGrid items={subcategoryItems} />
         </div>
@@ -150,17 +148,17 @@ export default function CategoryPageContent({
                 href={nextHref}
                 className="inline-flex items-center px-10 py-4 rounded-full bg-pink-600 text-white font-bold hover:bg-pink-700 transition-all shadow-lg hover:shadow-pink-200"
               >
-                Load More {displayCategoryName}
+                {t("catalogPage.loadMore", { name: displayCategoryName })}
               </Link>
               <p className="text-sm text-gray-500 mt-3">
-                {totalCount} items in this collection
+                {t("catalogPage.itemsInCollection", { count: totalCount })}
               </p>
             </div>
           ) : null}
         </>
       ) : (
         <div className="container mx-auto px-4 py-16 text-center text-gray-500">
-          <p>More {displayCategoryName} products arriving soon!</p>
+          <p>{t("catalogPage.arrivingSoon", { name: displayCategoryName })}</p>
         </div>
       )}
     </section>
