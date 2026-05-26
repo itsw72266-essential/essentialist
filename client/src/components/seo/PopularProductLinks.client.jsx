@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 
+import { useLocalizedHref } from "@/hooks/useLocalizedHref";
+
 /**
  * @param {{ title?: string, links?: Array<{ href: string, label: string }> }} props
  */
@@ -9,6 +11,8 @@ export default function PopularProductLinks({
   title = "Popular products",
   links = [],
 }) {
+  const localizedHref = useLocalizedHref();
+
   if (!links.length) return null;
 
   return (
@@ -23,7 +27,7 @@ export default function PopularProductLinks({
         {links.map((link) => (
           <li key={link.href}>
             <Link
-              href={link.href}
+              href={localizedHref(link.href)}
               className="inline-block text-xs sm:text-sm px-3 py-1.5 rounded-full bg-pink-50 text-pink-700 border border-pink-200 hover:bg-pink-100 transition-colors"
             >
               {link.label}

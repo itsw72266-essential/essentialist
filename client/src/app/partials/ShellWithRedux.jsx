@@ -15,6 +15,7 @@ import { usePathname } from "next/navigation";
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
 import useMobile from "../../hooks/useMobile";
+import { stripLocalePrefix } from "@/lib/seo/localePaths";
 import {
   useBrandsQuery,
   useCategoriesQuery,
@@ -36,10 +37,11 @@ const PathAwareShell = memo(function PathAwareShell({
 }) {
   const pathname = usePathname();
   const [isMobile] = useMobile();
-  const isHome = pathname === "/";
-  const isDashboard = pathname.startsWith("/dashboard");
+  const neutralPath = stripLocalePrefix(pathname);
+  const isHome = neutralPath === "/";
+  const isDashboard = neutralPath.startsWith("/dashboard");
   const showSidebar = isHome && !isMobile;
-  const isCheckout = pathname === "/checkout";
+  const isCheckout = neutralPath === "/checkout";
 
   const categories = navData?.categories ?? [];
   const subCategories = navData?.subCategories ?? [];

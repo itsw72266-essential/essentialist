@@ -12,6 +12,7 @@ import Breadcrumbs from "@/components/seo/Breadcrumbs.client";
 import { getLocalizedContent } from "@/helpers/localizeContent";
 import { useAdaptiveTextClasses } from "@/hooks/useAdaptiveTextClasses";
 import { buildSubCategoryPath } from "@/lib/catalogSlugs";
+import { useLocalizedHref } from "@/hooks/useLocalizedHref";
 
 const DESKTOP_BANNER =
   "/assets/fbb4343f-2d39-4c25-ac2f-1ab5037f50da.avif";
@@ -35,6 +36,7 @@ export default function CategoryPageContent({
   nextHref = "",
 }) {
   const { i18n } = useTranslation();
+  const localizedHref = useLocalizedHref();
   const displayCategoryName =
     getLocalizedContent(category, "name", i18n.language) || categoryName;
   const heroTitle = capitalize(primarySeo || displayCategoryName);
@@ -54,12 +56,12 @@ export default function CategoryPageContent({
     if (!category?._id || !Array.isArray(subcats)) return [];
     return subcats.map((sub) => ({
       id: String(sub._id),
-      href: buildSubCategoryPath(category, sub),
+      href: localizedHref(buildSubCategoryPath(category, sub)),
       image: sub.image,
       displayName:
         getLocalizedContent(sub, "name", i18n.language) || sub.name || "",
     }));
-  }, [category, subcats, i18n.language]);
+  }, [category, subcats, i18n.language, localizedHref]);
 
   return (
     <section className="bg-white pb-20">

@@ -11,6 +11,7 @@ import { useTranslation } from 'react-i18next'
 import '@/lib/i18n'
 import { useAdaptiveTextClasses } from '@/hooks/useAdaptiveTextClasses'
 import { linkPrefetch } from '@/lib/devPerformance'
+import { useLocalizedHref } from '@/hooks/useLocalizedHref'
 
 // No fetch/loading; render pre-fetched products directly for instant load
 const CategoryWiseProductDisplay = ({
@@ -21,6 +22,7 @@ const CategoryWiseProductDisplay = ({
   subCategories = [],
 }) => {
   const { t } = useTranslation()
+  const localizedHref = useLocalizedHref()
 
   const displayName = categoryLabel ?? name
 
@@ -37,10 +39,11 @@ const CategoryWiseProductDisplay = ({
       return filterData
     })
     const category = { _id: id, name }
-    return subcategory
+    const path = subcategory
       ? buildSubCategoryPath(category, subcategory)
       : buildCategoryPath(category)
-  }, [subCategories, name, id])
+    return localizedHref(path)
+  }, [subCategories, name, id, localizedHref])
 
   useEffect(() => {
     setRedirectURL(computedRedirectURL)
@@ -89,7 +92,7 @@ const CategoryWiseProductDisplay = ({
           {brandLinks.map((link) => (
             <Link
               key={link.href}
-              href={link.href}
+              href={localizedHref(link.href)}
               prefetch={linkPrefetch}
               className="text-xs px-2.5 py-1 rounded-full bg-slate-50 text-pink-700 border border-pink-100 hover:bg-pink-50"
             >

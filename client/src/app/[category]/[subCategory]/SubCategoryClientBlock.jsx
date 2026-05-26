@@ -483,6 +483,7 @@ import { getSubCategoryCommercialTitle } from "@/lib/seo/gscCatalogTitles";
 import { pickPopularProductLinks } from "@/lib/seo/popularProductLinks";
 import SummaryApi, { callSummaryApi } from "@/backend/contracts/summaryApi";
 import { linkPrefetch } from "@/lib/devPerformance";
+import { useLocalizedHref } from "@/hooks/useLocalizedHref";
 
 const PAGE_SIZE = 12;
 
@@ -566,6 +567,7 @@ export default function SubCategoryClientBlock({
 }) {
   const mobileContentRef = useRef(null);
   const { i18n } = useTranslation();
+  const localizedHref = useLocalizedHref();
 
   useEffect(() => {
     document.documentElement.style.scrollBehavior = 'auto';
@@ -677,7 +679,7 @@ export default function SubCategoryClientBlock({
                 return (
                   <Link
                     key={sub?._id}
-                    href={`/${categorySlug}/${getSubCategorySlug(sub)}`}
+                    href={localizedHref(`/${categorySlug}/${getSubCategorySlug(sub)}`)}
                     scroll={false} 
                     prefetch={linkPrefetch} 
                     className={`group relative w-full p-2 flex flex-col items-center md:flex-row md:h-16 box-border md:gap-4 border-b transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white ${
@@ -773,7 +775,7 @@ export default function SubCategoryClientBlock({
                   return (
                     <Link
                       key={sub._id}
-                      href={`/${categorySlug}/${getSubCategorySlug(sub)}`}
+                      href={localizedHref(`/${categorySlug}/${getSubCategorySlug(sub)}`)}
                       scroll={false} 
                       prefetch={linkPrefetch} 
                       className={`flex items-center gap-3 p-3 rounded-xl transition-all duration-200 border ${

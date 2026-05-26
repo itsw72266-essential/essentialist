@@ -14,6 +14,7 @@ import {
   buildCategoryPath,
   buildSubCategoryPath,
 } from "@/lib/catalogSlugs";
+import { useLocalizedHref } from "@/hooks/useLocalizedHref";
 
 function buildCategoryUrl(category, subCategory) {
   if (!category?._id) return "#";
@@ -32,6 +33,7 @@ export default function HomeCategoryGrid({
   initialSubCategories,
 }) {
   const { i18n } = useTranslation();
+  const localizedHref = useLocalizedHref();
   const { data: categories = [], isLoading: categoriesLoading } =
     useCategoriesQuery({
       syncToRedux: false,
@@ -54,13 +56,13 @@ export default function HomeCategoryGrid({
         );
         return {
           id: String(cat._id),
-          href: buildCategoryUrl(cat, subcategory),
+          href: localizedHref(buildCategoryUrl(cat, subcategory)),
           image: cat.image,
           displayName,
         };
       })
       .filter(Boolean);
-  }, [categories, subCategories, i18n.language]);
+  }, [categories, subCategories, i18n.language, localizedHref]);
 
   return (
     <CategoryCircleGrid items={items} isLoading={categoriesLoading} />

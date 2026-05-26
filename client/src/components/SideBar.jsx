@@ -716,6 +716,7 @@ import Link from "next/link";
 import { useTranslation } from "react-i18next";
 
 import { buildSubCategoryPath } from "@/lib/catalogSlugs";
+import { useLocalizedHref } from "@/hooks/useLocalizedHref";
 import {
   useBrandsQuery,
   useCategoriesQuery,
@@ -814,6 +815,7 @@ const SideBar = ({
   loadingCategory,
 }) => {
   const { t } = useTranslation();
+  const localizedHref = useLocalizedHref();
   // Avoid hydration mismatch for suspense/unified initial paint
   const [hydrated, setHydrated] = useState(false);
   useEffect(() => {
@@ -986,7 +988,7 @@ const SideBar = ({
           <ul className="space-y-1">
             <li>
               <Link
-                href="/brands"
+                href={localizedHref("/brands")}
                 prefetch={false}
                 onClick={onNavigate}
                 className={`${itemClasses} font-bold`}
@@ -997,7 +999,7 @@ const SideBar = ({
             {resolvedBrands.map((brand) => (
               <li key={brand.id}>
                 <Link
-                  href={`/brands/${brand.slug}`}
+                  href={localizedHref(`/brands/${brand.slug}`)}
                   prefetch={false}
                   onClick={onNavigate}
                   className={itemClasses}
@@ -1040,7 +1042,9 @@ const SideBar = ({
                   {subcategories.length > 0 ? (
                     <ul className={`space-y-1 py-2 ${isMobile ? "pl-4" : ""}`}>
                       {subcategories.map((subCat) => {
-                        const url = buildSubCategoryPath(category, subCat);
+                        const url = localizedHref(
+                          buildSubCategoryPath(category, subCat),
+                        );
 
                         return (
                           <li key={subCat._id}>

@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 
+import { useLocalizedHref } from "@/hooks/useLocalizedHref";
+
 function isHomeCrumb(item, index) {
   return index === 0 && (item.href === "/" || item.label === "Home" || item.label === "Accueil");
 }
@@ -14,6 +16,8 @@ export default function Breadcrumbs({
   className = "",
   hideHomeOnMobile = true,
 }) {
+  const localizedHref = useLocalizedHref();
+
   if (!items.length) return null;
 
   return (
@@ -51,7 +55,7 @@ export default function Breadcrumbs({
                 </span>
               ) : (
                 <Link
-                  href={item.href}
+                  href={localizedHref(item.href)}
                   className="text-slate-500 hover:text-pink-600 transition-colors whitespace-nowrap"
                 >
                   {item.label}

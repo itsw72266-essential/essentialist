@@ -246,6 +246,7 @@ import { useTranslation } from 'react-i18next'
 import '@/lib/i18n'
 import { getLocalizedContent, getLocalizedProductName } from '@/helpers/localizeContent'
 import { linkPrefetch } from '@/lib/devPerformance'
+import { useLocalizedHref } from '@/hooks/useLocalizedHref'
 
 const CardSkeleton = () => (
   <div className="relative flex flex-col border border-gray-200 overflow-hidden py-1 lg:p-2 rounded-lg bg-white shadow-sm animate-pulse">
@@ -272,6 +273,7 @@ const CardSkeleton = () => (
 
 const CardProduct = React.memo(({ data, isLoading = false, priority = false }) => {
   const { t, i18n } = useTranslation()
+  const localizedHref = useLocalizedHref()
   const displayName = useMemo(
     () => getLocalizedProductName(data, i18n.language),
     [data, i18n.language],
@@ -284,7 +286,10 @@ const CardProduct = React.memo(({ data, isLoading = false, priority = false }) =
     return <CardSkeleton />
   }
 
-  const productUrl = useMemo(() => buildProductPath(data), [data])
+  const productUrl = useMemo(
+    () => localizedHref(buildProductPath(data)),
+    [data, localizedHref],
+  )
 
   const discountedPrice = useMemo(() => {
     const basePrice = typeof data.bulkPrice === 'number' && data.bulkPrice > 0 ? data.bulkPrice : data.price

@@ -166,6 +166,7 @@ import { useTranslation } from "react-i18next";
 import "@/lib/i18n";
 import { getLocalizedContent } from "@/helpers/localizeContent";
 import { getAdaptiveTextClasses } from "@/lib/localeTypography";
+import { useLocalizedHref } from "@/hooks/useLocalizedHref";
 
 const normalizeCollection = (payload) => {
   if (!payload) return [];
@@ -179,6 +180,7 @@ const normalizeCollection = (payload) => {
 
 const Dropdown = () => {
   const { t, i18n } = useTranslation();
+  const localizedHref = useLocalizedHref();
   const [isHovered, setIsHovered] = useState(false);
   const dropdownRef = useRef(null);
   const timeoutRef = useRef(null);
@@ -257,12 +259,17 @@ const Dropdown = () => {
     [subCategoryData]
   );
 
-  const generateProductUrl = useCallback((categoryId, categoryName, subCategory) => {
-    return buildSubCategoryPath(
-      { _id: categoryId, name: categoryName },
-      subCategory,
-    );
-  }, []);
+  const generateProductUrl = useCallback(
+    (categoryId, categoryName, subCategory) => {
+      return localizedHref(
+        buildSubCategoryPath(
+          { _id: categoryId, name: categoryName },
+          subCategory,
+        ),
+      );
+    },
+    [localizedHref],
+  );
 
   return (
     <div

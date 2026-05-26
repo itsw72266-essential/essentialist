@@ -10,6 +10,7 @@ import {
   localizePath,
   stripLocalePrefix,
 } from "@/lib/seo/localePaths";
+import { LANGUAGE_STORAGE_KEY, normalizeLocale } from "@/lib/i18n";
 
 import "@/lib/i18n";
 
@@ -81,15 +82,21 @@ const LanguageSwitcher = ({ className = "", compact = false }) => {
   const gbClipId = useId();
 
   const pathLocale = getLocaleFromPathname(pathname);
-  const language = i18n.resolvedLanguage || i18n.language || pathLocale;
-  const isFrench = language.startsWith("fr");
-  const active = LOCALES.find((l) => l.code === (isFrench ? "fr" : "en")) || LOCALES[0];
+  const i18nLocale = normalizeLocale(i18n.resolvedLanguage || i18n.language);
+  const displayLocale =
+    pathLocale === "fr" || i18nLocale === "fr" ? "fr" : "en";
+  const isFrench = displayLocale === "fr";
+  const active = LOCALES.find((l) => l.code === displayLocale) || LOCALES[0];
 
   const setLocale = useCallback(
     (code) => {
-      void i18n.changeLanguage(code);
+      const locale = normalizeLocale(code);
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem(LANGUAGE_STORAGE_KEY, locale);
+      }
+      void i18n.changeLanguage(locale);
       const neutralPath = stripLocalePrefix(pathname);
-      const nextPath = localizePath(neutralPath, code);
+      const nextPath = localizePath(neutralPath, locale);
       if (nextPath !== pathname) {
         router.push(nextPath);
       }
