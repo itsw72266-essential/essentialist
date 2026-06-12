@@ -32,12 +32,17 @@ export function middleware(request) {
 
   const isFrench =
     pathname === "/fr" || pathname.startsWith("/fr/");
+  const locale = isFrench ? "fr" : "en";
+
+  // Forward locale + original pathname on the REQUEST headers so Server
+  // Components can read them via headers() (response headers are not visible
+  // to RSC). This is what lets the initial HTML render in the right language.
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set(LOCALE_HEADER, locale);
+  requestHeaders.set(PATHNAME_HEADER, pathname);
 
   if (!isFrench) {
-    const response = NextResponse.next();
-    response.headers.set(LOCALE_HEADER, "en");
-    response.headers.set(PATHNAME_HEADER, pathname);
-    return response;
+    return NextResponse.next({ request: { headers: requestHeaders } });
   }
 
   const stripped = pathname === "/fr" ? "/" : pathname.replace(/^\/fr/, "") || "/";
@@ -51,10 +56,9 @@ export function middleware(request) {
   const rewriteUrl = request.nextUrl.clone();
   rewriteUrl.pathname = stripped;
 
-  const response = NextResponse.rewrite(rewriteUrl);
-  response.headers.set(LOCALE_HEADER, "fr");
-  response.headers.set(PATHNAME_HEADER, pathname);
-  return response;
+  return NextResponse.rewrite(rewriteUrl, {
+    request: { headers: requestHeaders },
+  });
 }
 
 export const config = {

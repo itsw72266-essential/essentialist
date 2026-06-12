@@ -305,6 +305,7 @@ import './globals.css'
 
 import ClientLayoutShell from './partials/ClientLayoutShell'
 import { buildLanguageAlternates } from '@/lib/seo/localePaths'
+import { getServerLocale } from '@/lib/seo/serverLocale'
 
 // --- Font Configuration (Performance + Design) ---
 const inter = Inter({
@@ -668,13 +669,14 @@ const organizationSchema = {
 /**
  * Data Fetching Component with Error Handling
  */
-function LayoutContent({ children }) {
+function LayoutContent({ children, initialLocale }) {
   return (
     <ClientLayoutShell
       initialNavData={{
         categories: [],
         subCategories: [],
       }}
+      initialLocale={initialLocale}
     >
       {children}
     </ClientLayoutShell>
@@ -685,10 +687,14 @@ function LayoutContent({ children }) {
  * Root Layout Component
  * Handles HTML structure and global configuration
  */
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
+  // Locale is resolved per-request from the URL (via middleware → x-locale)
+  // so the initial HTML renders in the right language, not English-then-flip.
+  const locale = await getServerLocale()
+
   return (
     <html
-      lang="en"
+      lang={locale}
       data-scroll-behavior="smooth"
       className={`scroll-smooth ${inter.variable} ${poppins.variable} ${outfit.variable}`}
       suppressHydrationWarning
@@ -743,7 +749,7 @@ export default function RootLayout({ children }) {
             </div>
           }
         >
-          <LayoutContent>
+          <LayoutContent initialLocale={locale}>
             <main id="main-content" role="main">
               {children}
             </main>
