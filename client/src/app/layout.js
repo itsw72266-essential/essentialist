@@ -669,7 +669,15 @@ const organizationSchema = {
 /**
  * Data Fetching Component with Error Handling
  */
-function LayoutContent({ children, initialLocale }) {
+// Async + rendered inside the <Suspense> boundary below: resolving the
+// per-request locale reads headers(), which is dynamic. Next 16 Cache
+// Components requires dynamic access to live under a Suspense boundary so the
+// static shell can still be prerendered; the localized markup then streams in
+// server-rendered. <html lang> stays "en" in the shell and is corrected on the
+// client by useLanguageSync (document.documentElement.lang).
+async function LayoutContent({ children }) {
+  const initialLocale = await getServerLocale()
+
   return (
     <ClientLayoutShell
       initialNavData={{
@@ -687,14 +695,10 @@ function LayoutContent({ children, initialLocale }) {
  * Root Layout Component
  * Handles HTML structure and global configuration
  */
-export default async function RootLayout({ children }) {
-  // Locale is resolved per-request from the URL (via middleware → x-locale)
-  // so the initial HTML renders in the right language, not English-then-flip.
-  const locale = await getServerLocale()
-
+export default function RootLayout({ children }) {
   return (
     <html
-      lang={locale}
+      lang="en"
       data-scroll-behavior="smooth"
       className={`scroll-smooth ${inter.variable} ${poppins.variable} ${outfit.variable}`}
       suppressHydrationWarning
@@ -749,7 +753,7 @@ export default async function RootLayout({ children }) {
             </div>
           }
         >
-          <LayoutContent initialLocale={locale}>
+          <LayoutContent>
             <main id="main-content" role="main">
               {children}
             </main>
