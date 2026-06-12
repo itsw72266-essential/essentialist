@@ -1,7 +1,6 @@
 "use client";
 
 import i18n from "i18next";
-import LanguageDetector from "i18next-browser-languagedetector";
 import { initReactI18next } from "react-i18next";
 
 import en from "@/locales/en.json";
@@ -23,25 +22,30 @@ export const normalizeLocale = (value) => {
   return SUPPORTED_LOCALES.includes(code) ? code : DEFAULT_LOCALE;
 };
 
+// The URL is the single source of truth for locale. English is the default;
+// French is served only under the /fr path prefix. We deliberately do NOT
+// detect the browser/navigator language, so a French-language browser still
+// gets the English site by default and only switches to French on /fr.
+const getInitialLocale = () => {
+  if (typeof window === "undefined") return DEFAULT_LOCALE;
+  const { pathname } = window.location;
+  return pathname === "/fr" || pathname.startsWith("/fr/")
+    ? "fr"
+    : DEFAULT_LOCALE;
+};
+
 if (!i18n.isInitialized) {
-  void i18n
-    .use(LanguageDetector)
-    .use(initReactI18next)
-    .init({
-      resources: {
-        en: { translation: enTranslation },
-        fr: { translation: frTranslation },
-      },
-      fallbackLng: DEFAULT_LOCALE,
-      supportedLngs: SUPPORTED_LOCALES,
-      detection: {
-        order: ["localStorage", "navigator"],
-        caches: ["localStorage"],
-        lookupLocalStorage: LANGUAGE_STORAGE_KEY,
-      },
-      interpolation: { escapeValue: false },
-      returnEmptyString: false,
-    });
+  void i18n.use(initReactI18next).init({
+    resources: {
+      en: { translation: enTranslation },
+      fr: { translation: frTranslation },
+    },
+    lng: getInitialLocale(),
+    fallbackLng: DEFAULT_LOCALE,
+    supportedLngs: SUPPORTED_LOCALES,
+    interpolation: { escapeValue: false },
+    returnEmptyString: false,
+  });
 }
 
 export const getCurrentLocale = () =>

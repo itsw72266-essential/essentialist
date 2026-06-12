@@ -10,7 +10,7 @@ import {
   localizePath,
   stripLocalePrefix,
 } from "@/lib/seo/localePaths";
-import { LANGUAGE_STORAGE_KEY, normalizeLocale } from "@/lib/i18n";
+import { normalizeLocale } from "@/lib/i18n";
 
 import "@/lib/i18n";
 
@@ -91,9 +91,6 @@ const LanguageSwitcher = ({ className = "", compact = false }) => {
   const setLocale = useCallback(
     (code) => {
       const locale = normalizeLocale(code);
-      if (typeof window !== "undefined") {
-        window.localStorage.setItem(LANGUAGE_STORAGE_KEY, locale);
-      }
       void i18n.changeLanguage(locale);
       const neutralPath = stripLocalePrefix(pathname);
       const nextPath = localizePath(neutralPath, locale);

@@ -1,54 +1,27 @@
 import { useEffect } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
-import { LANGUAGE_STORAGE_KEY, normalizeLocale } from "@/lib/i18n";
+import { normalizeLocale } from "@/lib/i18n";
 import { isLocaleSensitiveQuery } from "@/lib/localeQueries";
-import {
-  getLocaleFromPathname,
-  localizePath,
-  stripLocalePrefix,
-} from "@/lib/seo/localePaths";
-
-function getStoredLocale() {
-  if (typeof window === "undefined") return null;
-  const raw = window.localStorage?.getItem(LANGUAGE_STORAGE_KEY);
-  return raw ? normalizeLocale(raw) : null;
-}
+import { getLocaleFromPathname } from "@/lib/seo/localePaths";
 
 export function useLanguageSync() {
   const { i18n } = useTranslation();
   const queryClient = useQueryClient();
   const pathname = usePathname();
-  const router = useRouter();
 
+  // The URL is the single source of truth for locale: /fr* renders French,
+  // every other path renders English. Keep i18n in lockstep with the path and
+  // never redirect based on a stored preference — that fought the EN switch.
   useEffect(() => {
     const pathLocale = getLocaleFromPathname(pathname);
     const i18nLocale = normalizeLocale(i18n.resolvedLanguage || i18n.language);
-    const stored = getStoredLocale();
-    const preferred = stored || i18nLocale;
-
-    if (pathLocale === "fr") {
-      if (i18nLocale !== "fr") {
-        void i18n.changeLanguage("fr");
-      }
-      return;
-    }
-
-    // User chose French but landed on an unprefixed URL — fix the URL, do not reset i18n/localStorage to EN.
-    if (preferred === "fr") {
-      const nextPath = localizePath(stripLocalePrefix(pathname), "fr");
-      if (nextPath !== pathname) {
-        router.replace(nextPath);
-        return;
-      }
-    }
-
-    if (i18nLocale !== pathLocale) {
+    if (pathLocale !== i18nLocale) {
       void i18n.changeLanguage(pathLocale);
     }
-  }, [pathname, i18n, router]);
+  }, [pathname, i18n]);
 
   useEffect(() => {
     const applyLanguage = (language) => {
