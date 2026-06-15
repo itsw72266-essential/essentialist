@@ -1,16 +1,27 @@
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, revalidateTag } from 'next/cache';
 import { NextResponse } from 'next/server';
 
+// Bust caches on demand:
+//   /revalidate?path=/blog        → purge a route's cache
+//   /revalidate?tag=blog-list     → purge a cache tag (repeatable: ?tag=a&tag=b)
+// With neither, defaults to revalidating the homepage.
 export async function GET(request) {
-  // Grab the path from the URL, or default to the homepage '/'
-  const path = request.nextUrl.searchParams.get('path') || '/';
-  
-  // This tells Next.js 15 to instantly purge the Data Cache for this exact path
-  revalidatePath(path, 'page');
-  
-  return NextResponse.json({ 
-    revalidated: true, 
-    path: path, 
-    message: 'Next.js 15 cache successfully busted!' 
+  const { searchParams } = request.nextUrl;
+  const tags = searchParams.getAll('tag').filter(Boolean);
+  const path = searchParams.get('path');
+
+  for (const tag of tags) {
+    revalidateTag(tag);
+  }
+
+  if (path || tags.length === 0) {
+    revalidatePath(path || '/', 'page');
+  }
+
+  return NextResponse.json({
+    revalidated: true,
+    tags,
+    path: path || (tags.length === 0 ? '/' : null),
+    message: 'Cache revalidated.',
   });
 }

@@ -1,5 +1,6 @@
 import SubCategoryModel from "../../models/subCategory.model.js";
 import { invalidateCacheNamespaces } from "../../lib/cacheNoop.js";
+import { revalidateSubCategoryTags } from "../../lib/revalidateContent.js";
 import {
   buildVaryHeader,
   getRequestLocale,
@@ -70,6 +71,7 @@ export const AddSubCategoryController = async (request, response) => {
       ...SUBCATEGORY_CACHE_NAMESPACES,
       ...PRODUCT_CACHE_NAMESPACES
     ]);
+    revalidateSubCategoryTags({ categoryIds: save.category });
 
     scheduleAutoTranslate(() =>
       autoTranslateSubCategory(save._id, save.toObject?.() ?? save),
@@ -165,6 +167,7 @@ export const updateSubCategoryController = async (request, response) => {
       ...SUBCATEGORY_CACHE_NAMESPACES,
       ...PRODUCT_CACHE_NAMESPACES
     ]);
+    revalidateSubCategoryTags({ categoryIds: updateSubCategory?.category });
 
     scheduleAutoTranslate(() => autoTranslateSubCategory(_id));
 
@@ -193,6 +196,7 @@ export const deleteSubCategoryController = async (request, response) => {
       ...SUBCATEGORY_CACHE_NAMESPACES,
       ...PRODUCT_CACHE_NAMESPACES
     ]);
+    revalidateSubCategoryTags({ categoryIds: deleteSub?.category });
 
     return response.json({
       message: "Delete successfully",

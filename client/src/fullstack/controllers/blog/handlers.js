@@ -3,6 +3,7 @@ import slugify from "slugify";
 import BlogModel from "../../models/blog.model.js";
 import UserModel from "../../models/user.model.js";
 import { invalidateCacheNamespaces } from "../../lib/cacheNoop.js";
+import { revalidateBlogTags } from "../../lib/revalidateContent.js";
 import {
   buildVaryHeader,
   getRequestLocale,
@@ -117,6 +118,7 @@ export const createBlogController = async (request, response) => {
     });
 
     await safeInvalidateBlogCache();
+    revalidateBlogTags({ slug: blog.slug });
 
     scheduleAutoTranslate(() =>
       autoTranslateBlog(blog._id, blog.toObject?.() ?? blog),
@@ -249,6 +251,7 @@ export const updateBlogController = async (request, response) => {
 
     await blog.save();
     await safeInvalidateBlogCache();
+    revalidateBlogTags({ slug: blog.slug });
 
     scheduleAutoTranslate(() =>
       autoTranslateBlog(blog._id, blog.toObject?.() ?? blog),
@@ -264,8 +267,9 @@ export const deleteBlogController = async (request, response) => {
   try {
     const deletion = await BlogModel.findByIdAndDelete(request.params.id);
     if (!deletion) return response.status(404).json({ message: "Blog not found" });
-    
+
     await safeInvalidateBlogCache();
+    revalidateBlogTags({ slug: deletion.slug });
     return response.json({ message: "Blog deleted", success: true });
   } catch (error) {
     return response.status(500).json({ message: error.message, error: true, success: false });

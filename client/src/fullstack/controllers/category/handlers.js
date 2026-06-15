@@ -139,6 +139,7 @@ import CategoryModel from "../../models/category.model.js";
 import SubCategoryModel from "../../models/subCategory.model.js";
 import ProductModel from "../../models/product.model.js";
 import { invalidateCacheNamespaces } from "../../lib/cacheNoop.js";
+import { revalidateCategoryTags } from "../../lib/revalidateContent.js";
 import {
   getRequestLocale,
   localizeDocuments,
@@ -188,6 +189,7 @@ export const AddCategoryController = async (request, response) => {
     }
 
     await invalidateCategoryCache();
+    revalidateCategoryTags({ categoryId: saveCategory._id });
 
     scheduleAutoTranslate(() =>
       autoTranslateCategory(saveCategory._id, saveCategory.toObject?.() ?? saveCategory),
@@ -258,6 +260,7 @@ export const updateCategoryController = async (request, response) => {
     );
 
     await invalidateCategoryCache();
+    revalidateCategoryTags({ categoryId: _id });
 
     if (_id) {
       scheduleAutoTranslate(() => autoTranslateCategory(_id));
@@ -305,6 +308,7 @@ export const deleteCategoryController = async (request, response) => {
     const deleteCategory = await CategoryModel.deleteOne({ _id: _id });
 
     await invalidateCategoryCache();
+    revalidateCategoryTags({ categoryId: _id });
 
     return response.json({
       message: "Delete category successfully",

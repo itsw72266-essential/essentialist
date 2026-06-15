@@ -7,6 +7,7 @@ import { generateUniqueCatalogSlug } from '../../lib/catalogSlugDb.js';
 import ProductModel from '../../models/product.model.js';
 import BrandModel from '../../models/brand.model.js';
 import { invalidateCacheNamespaces } from '../../lib/cacheNoop.js';
+import { revalidateProductTags } from '../../lib/revalidateContent.js';
 import {
   buildVaryHeader,
   getRequestLocale,
@@ -328,6 +329,7 @@ export const createProductController = async (request, response) => {
     const saveProduct = await product.save();
 
     await safeInvalidateCacheNamespaces(PRODUCT_CACHE_NAMESPACES);
+    revalidateProductTags({ productId: saveProduct._id, categoryIds: saveProduct.category });
 
     scheduleAutoTranslate(() =>
       autoTranslateProduct(saveProduct._id, saveProduct.toObject?.() ?? saveProduct),
@@ -701,6 +703,7 @@ export const updateProductDetails = async (request, response) => {
     const updatedProduct = await product.save();
 
     await safeInvalidateCacheNamespaces(PRODUCT_CACHE_NAMESPACES);
+    revalidateProductTags({ productId: updatedProduct._id, categoryIds: updatedProduct.category });
 
     scheduleAutoTranslate(() =>
       autoTranslateProduct(updatedProduct._id, updatedProduct.toObject?.() ?? updatedProduct),
@@ -733,9 +736,12 @@ export const deleteProductDetails = async (request, response) => {
       });
     }
 
+    // Capture categories before deletion so we can bust the right page caches.
+    const existing = await ProductModel.findById(_id).select("category").lean();
     const deleteProduct = await ProductModel.deleteOne({ _id });
 
     await safeInvalidateCacheNamespaces(PRODUCT_CACHE_NAMESPACES);
+    revalidateProductTags({ productId: _id, categoryIds: existing?.category });
 
     return response.json({
       message: "Delete successfully",
