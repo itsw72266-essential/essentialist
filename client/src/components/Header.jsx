@@ -107,6 +107,7 @@ const Header = () => {
     }, [locale]);
 
     const handleCloseUserMenu = useCallback(() => setOpenUserMenu(false), []);
+    const handleOpenUserMenu = useCallback(() => setOpenUserMenu(true), []);
 
     const handleMobileUser = useCallback(() => {
         if (!user?._id) {
@@ -270,14 +271,14 @@ const Header = () => {
 
                     <div className="hidden lg:flex items-center gap-2">
                         {user?._id ? (
-                            <div className="relative">
+                            <div className="relative" onMouseEnter={handleOpenUserMenu} onMouseLeave={handleCloseUserMenu}>
                                 <div onClick={toggleUserMenu} className="flex select-none items-center gap-1 cursor-pointer text-lg font-bold">
                                     <span>{t('header.account')}</span>
                                     {openUserMenu ? <GoTriangleUp size={22} /> : <GoTriangleDown size={22} />}
                                 </div>
                                 {openUserMenu && (
-                                    <div className='absolute right-0 top-9 z-50'>
-                                        <div className='bg-white text-black rounded p-3 min-w-40 shadow-lg'>
+                                    <div className='absolute right-0 top-full pt-2 z-50'>
+                                        <div className='bg-white text-black rounded p-3 w-max min-w-[14rem] max-w-[22rem] shadow-lg'>
                                             <UserMenu onSelect={handleCloseUserMenu} />
                                         </div>
                                     </div>
