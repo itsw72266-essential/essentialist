@@ -892,8 +892,8 @@
  * FIXED: OpenGraph type validation error (use 'website' not 'og:product')
  */
 
-import { notFound } from "next/navigation"
-import { unstable_cache } from "next/cache"
+import { notFound, redirect } from "next/navigation"
+import { unstable_cache, cacheLife, cacheTag } from "next/cache"
 import ProductDisplayClient from "./ProductDisplayClient"
 import ProductRecommendationsLazy from "./ProductRecommendationsLazy.client"
 import { pricewithDiscount } from "../../../utils/PriceWithDiscount"
@@ -1480,15 +1480,19 @@ function StructuredData({ product, slug, reviewStats, locale = "en", breadcrumbI
 /**
  * Main Product Detail Page Component
  */
-export default async function ProductDisplayPage({ params }) {
-  const resolvedParams = await params
-  const slug = resolvedParams?.slug
-  const locale = await getServerLocale()
+/**
+ * Cached render keyed by (productId, canonicalSlug, locale). Moving the heavy
+ * PDP render (JSON-LD + RSC tree) out of the per-request dynamic hole and into
+ * a cached scope cuts Fluid Active CPU: it runs once per cache window instead of
+ * on every product view. The thin wrapper below stays dynamic only to read the
+ * request locale and handle canonical redirects / 404s.
+ */
+async function CachedProductView({ productId, canonicalSlug, locale }) {
+  "use cache"
+  cacheLife("minutes")
+  cacheTag(`product-${productId}`)
 
-  const resolved = await resolveProductRoute(slug, locale)
-  if (!resolved) return notFound()
-
-  const { product: productData, productId, canonicalSlug } = resolved
+  const productData = await getCachedProduct(canonicalSlug, locale)
 
   let reviewStatsSnapshot = { average: 0, count: 0 }
   try {
@@ -1534,5 +1538,26 @@ export default async function ProductDisplayPage({ params }) {
         currentProductData={productData}
       />
     </>
+  )
+}
+
+export default async function ProductDisplayPage({ params }) {
+  const resolvedParams = await params
+  const slug = resolvedParams?.slug
+  const locale = await getServerLocale()
+
+  // Dynamic + cheap: resolve canonical slug and handle redirect / 404 here
+  // (redirect() and notFound() are not allowed inside "use cache").
+  const resolved = await resolveProductRoute(slug, locale)
+  if (!resolved) return notFound()
+
+  const { productId, canonicalSlug } = resolved
+
+  return (
+    <CachedProductView
+      productId={productId}
+      canonicalSlug={canonicalSlug}
+      locale={locale}
+    />
   )
 }

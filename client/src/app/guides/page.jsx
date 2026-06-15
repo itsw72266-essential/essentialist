@@ -5,6 +5,7 @@ import BreadcrumbJsonLd from "@/components/seo/BreadcrumbJsonLd";
 import { buildPageMetadata } from "@/lib/seo/buildMetadata";
 import { homeBreadcrumbItem } from "@/lib/seo/breadcrumbs";
 import { getServerLocale } from "@/lib/seo/serverLocale";
+import { cacheLife, cacheTag } from "next/cache";
 import { LOCAL_SEO_GUIDES } from "@/lib/seo/localSeoGuides";
 
 export const metadata = buildPageMetadata({
@@ -21,8 +22,11 @@ export const metadata = buildPageMetadata({
   ],
 });
 
-export default async function GuidesIndexPage() {
-  const locale = await getServerLocale();
+async function CachedGuidesIndex({ locale }) {
+  "use cache";
+  cacheLife("hours");
+  cacheTag("guides-index");
+
   const breadcrumbItems = [
     homeBreadcrumbItem(locale),
     { label: "Guides" },
@@ -52,4 +56,9 @@ export default async function GuidesIndexPage() {
       </ul>
     </main>
   );
+}
+
+export default async function GuidesIndexPage() {
+  const locale = await getServerLocale();
+  return <CachedGuidesIndex locale={locale} />;
 }

@@ -6,6 +6,7 @@ import BreadcrumbJsonLd from "@/components/seo/BreadcrumbJsonLd";
 import { buildPageMetadata } from "@/lib/seo/buildMetadata";
 import { homeBreadcrumbItem } from "@/lib/seo/breadcrumbs";
 import { getServerLocale } from "@/lib/seo/serverLocale";
+import { cacheLife, cacheTag } from "next/cache";
 import {
   getAllLocalSeoGuideSlugs,
   getLocalSeoGuide,
@@ -50,11 +51,13 @@ function FaqJsonLd({ faq }) {
   );
 }
 
-export default async function LocalSeoGuidePage({ params }) {
-  const { slug } = await params;
-  const locale = await getServerLocale();
+async function CachedGuide({ slug, locale }) {
+  "use cache";
+  cacheLife("hours");
+  cacheTag(`guide-${slug}`);
+
   const guide = getLocalSeoGuide(slug);
-  if (!guide) notFound();
+  if (!guide) return null;
 
   const breadcrumbItems = [
     homeBreadcrumbItem(locale),
@@ -118,4 +121,14 @@ export default async function LocalSeoGuidePage({ params }) {
       <FaqJsonLd faq={guide.faq} />
     </main>
   );
+}
+
+export default async function LocalSeoGuidePage({ params }) {
+  const { slug } = await params;
+  const locale = await getServerLocale();
+
+  // Dynamic + cheap: decide 404 here (notFound() can't run inside "use cache").
+  if (!getLocalSeoGuide(slug)) notFound();
+
+  return <CachedGuide slug={slug} locale={locale} />;
 }

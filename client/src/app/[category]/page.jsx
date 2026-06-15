@@ -671,6 +671,7 @@
 
 // src/app/[category]/page.jsx
 import { notFound } from 'next/navigation';
+import { cacheLife, cacheTag } from 'next/cache';
 import SummaryApi, { baseURL } from '@/backend/contracts/summaryApi';
 import CategoryPageContent from './CategoryPageContent.client';
 import { getServerLocale } from '@/lib/seo/serverLocale';
@@ -841,30 +842,28 @@ function StructuredData({ categorySlug, categoryName, products = [], locale = 'e
   );
 }
 
-/* ----------------------- Page ----------------------- */
-export default async function CategoryPage({ params, searchParams }) {
-  const resolvedParams = await params;
-  const resolvedSearchParams = await searchParams;
-  const categorySlug = resolvedParams?.category;
-  const page = Number(resolvedSearchParams?.page || 1);
-  if (isLocalePathPrefix(categorySlug)) return notFound();
+/* ----------------------- Cached render ----------------------- */
+/**
+ * Heavy render (product grid + JSON-LD) cached per (categoryId, page, locale).
+ * This moves the category render out of the per-request dynamic hole so it runs
+ * once per cache window instead of on every visit — the Fluid Active CPU win.
+ * The dynamic wrapper below only reads locale and handles redirect / 404.
+ */
+async function CachedCategoryView({ categorySlug, categoryId, page, locale }) {
+  'use cache';
+  cacheLife('minutes');
+  cacheTag(`category-${categoryId}`);
 
-  const locale = await getServerLocale();
   const categories = await fetchCategories(locale);
-  const category = findCategoryByParam(categories, categorySlug);
-  if (!category) return notFound();
+  const category =
+    findCategoryByParam(categories, categorySlug) ||
+    categories.find((c) => String(c?._id) === String(categoryId));
 
-  if (shouldRedirectCatalogParam(category, categorySlug)) {
-    redirect(localizePath(buildCategoryPath(category), locale));
-  }
-
-  const categoryId = category._id;
-  const canonicalCategorySlug = category.slug || categorySlug;
+  const canonicalCategorySlug = category?.slug || categorySlug;
+  const categoryName = category?.name || parseNameFromSlug(categorySlug) || 'Category';
+  const primarySeo = getCategorySeoTitle(categoryName);
 
   const subcats = await fetchSubCategoriesOfCategory(categoryId);
-
-  const categoryName = category?.name || 'Category';
-  const primarySeo = getCategorySeoTitle(categoryName);
 
   let { products, totalCount } = await fetchProductsByCategory({ categoryId, page });
   if (products.length === 0 && subcats.length > 0) {
@@ -881,10 +880,10 @@ export default async function CategoryPage({ params, searchParams }) {
   );
 
   const categoryPayload = {
-    _id: String(category._id),
-    name: category.name,
-    image: category.image,
-    slug: category.slug,
+    _id: String(categoryId),
+    name: category?.name,
+    image: category?.image,
+    slug: category?.slug,
   };
 
   const breadcrumbItems = [
@@ -916,5 +915,32 @@ export default async function CategoryPage({ params, searchParams }) {
         nextHref={nextHref}
       />
     </>
+  );
+}
+
+/* ----------------------- Page ----------------------- */
+export default async function CategoryPage({ params, searchParams }) {
+  const resolvedParams = await params;
+  const resolvedSearchParams = await searchParams;
+  const categorySlug = resolvedParams?.category;
+  const page = Number(resolvedSearchParams?.page || 1);
+  if (isLocalePathPrefix(categorySlug)) return notFound();
+
+  const locale = await getServerLocale();
+  const categories = await fetchCategories(locale);
+  const category = findCategoryByParam(categories, categorySlug);
+  if (!category) return notFound();
+
+  if (shouldRedirectCatalogParam(category, categorySlug)) {
+    redirect(localizePath(buildCategoryPath(category), locale));
+  }
+
+  return (
+    <CachedCategoryView
+      categorySlug={category.slug || categorySlug}
+      categoryId={String(category._id)}
+      page={page}
+      locale={locale}
+    />
   );
 }

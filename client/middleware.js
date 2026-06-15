@@ -62,5 +62,9 @@ export function middleware(request) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|.*\\..*).*)"],
+  // Exclude API routes from middleware entirely. The handler already no-ops on
+  // `/api` (locale logic doesn't apply), so invoking middleware per API call was
+  // pure overhead — every client fetch (cart, products, reviews-batch, …) paid a
+  // needless function invocation that counts toward Fluid Active CPU.
+  matcher: ["/((?!api|_next/static|_next/image|.*\\..*).*)"],
 };

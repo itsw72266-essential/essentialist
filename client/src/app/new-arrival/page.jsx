@@ -208,6 +208,7 @@
 
 // src/app/new-arrival/page.jsx
 import SummaryApi, { apiFetch } from "@/backend/contracts/summaryApi";
+import { cacheLife, cacheTag } from "next/cache";
 import NewArrivalContent from "../../components/NewArrivalContent";
 import { getStaticPageMetadata } from "@/lib/seo/staticPages";
 import { getServerLocale } from "@/lib/seo/serverLocale";
@@ -237,18 +238,26 @@ async function loadProducts() {
     onlyActive: true,
   };
 
+  // force-cache so these POST fetches are valid inside the "use cache" page body
+  // (the default 'no-store' is rejected there). TTL is governed by cacheLife().
   const [allRes, newRes, hotRes] = await Promise.allSettled([
-    apiFetch(SummaryApi.getProduct.url, { method: "POST", body: basePayload }),
+    apiFetch(SummaryApi.getProduct.url, {
+      method: "POST",
+      body: basePayload,
+      cache: "force-cache",
+    }),
     USE_CATEGORY_BLOCKS
       ? apiFetch(SummaryApi.getProductByCategory.url, {
           method: "POST",
           body: { ...basePayload, categoryId: NEW_CATEGORY_ID, limit: 16 },
+          cache: "force-cache",
         })
       : Promise.resolve({ value: [] }),
     USE_CATEGORY_BLOCKS
       ? apiFetch(SummaryApi.getProductByCategory.url, {
           method: "POST",
           body: { ...basePayload, categoryId: NEW_HOT_CATEGORY_ID, limit: 16 },
+          cache: "force-cache",
         })
       : Promise.resolve({ value: [] }),
   ]);
@@ -310,6 +319,12 @@ function normalizeProducts(products) {
 }
 
 export default async function NewArrivalPage() {
+  // Locale-independent body → cache the whole render. Only generateMetadata stays
+  // dynamic (it reads the request locale), as on the home page.
+  "use cache";
+  cacheLife("minutes");
+  cacheTag("new-arrival");
+
   const { feedProducts, newCategoryProducts, hotCategoryProducts } = await loadProducts();
 
   const normalizedFeed = normalizeProducts(feedProducts);

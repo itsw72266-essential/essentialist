@@ -175,6 +175,7 @@ import { notFound } from "next/navigation"
 import sanitizeHtml from "sanitize-html"
 import { getServerSideApiBaseUrl } from "@/lib/serverApiOrigin"
 import { getServerLocale } from "@/lib/seo/serverLocale"
+import { cacheLife, cacheTag } from "next/cache"
 import { buildBlogArticleMetadata } from "@/lib/seo/catalogMetadata"
 import { localeRequestHeaders } from "@/lib/seo/serverFetch"
 import Breadcrumbs from "@/components/seo/Breadcrumbs.client"
@@ -368,17 +369,19 @@ function StructuredData({ blog, slug, breadcrumbItems = [], locale = "en" }) {
 /**
  * Blog Detail Page Component
  */
-const BlogDetailsPage = async ({ params }) => {
-  const { slug } = await params
-  const locale = await getServerLocale()
+/**
+ * Cached article render keyed by (slug, locale). Sanitizing + rendering the
+ * article HTML is CPU-heavy; caching it keeps that work off the per-request
+ * path (the Fluid Active CPU win).
+ */
+async function CachedBlogArticle({ slug, locale }) {
+  "use cache"
+  cacheLife("minutes")
+  cacheTag(`blog-${slug}`)
 
   const payload = await fetchBlog(slug, locale)
-
-  if (!payload?.data) {
-    notFound()
-  }
-
-  const blog = payload.data
+  const blog = payload?.data
+  if (!blog) return null
 
   const breadcrumbItems = [
     homeBreadcrumbItem(locale),
@@ -565,6 +568,17 @@ const BlogDetailsPage = async ({ params }) => {
       </article>
     </>
   )
+}
+
+const BlogDetailsPage = async ({ params }) => {
+  const { slug } = await params
+  const locale = await getServerLocale()
+
+  // Dynamic + cheap: decide 404 here (notFound() can't run inside "use cache").
+  const payload = await fetchBlog(slug, locale)
+  if (!payload?.data) notFound()
+
+  return <CachedBlogArticle slug={slug} locale={locale} />
 }
 
 export default BlogDetailsPage

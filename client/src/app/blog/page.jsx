@@ -30,6 +30,7 @@ const API_BASE_URL =
 
 import { getStaticPageMetadata } from "@/lib/seo/staticPages";
 import { getServerLocale } from "@/lib/seo/serverLocale";
+import { cacheLife, cacheTag } from "next/cache";
 import Breadcrumbs from "@/components/seo/Breadcrumbs.client";
 import BreadcrumbJsonLd from "@/components/seo/BreadcrumbJsonLd";
 import { homeBreadcrumbItem } from "@/lib/seo/breadcrumbs";
@@ -44,11 +45,14 @@ export async function generateMetadata() {
  */
 async function fetchBlogs(page = 1, locale = "en") {
   try {
-    const cookieStore = await cookies()
-    const resolvedLocale =
-      locale ||
-      cookieStore.get("essentialist_lang")?.value?.split("-")[0] ||
-      "en"
+    // Only read cookies when a locale wasn't supplied — cookies() is forbidden
+    // inside the "use cache" scope that now wraps the listing render.
+    let resolvedLocale = locale
+    if (!resolvedLocale) {
+      const cookieStore = await cookies()
+      resolvedLocale =
+        cookieStore.get("essentialist_lang")?.value?.split("-")[0] || "en"
+    }
 
     const url = new URL("/api/next/blog/list", API_BASE_URL)
     url.searchParams.set("status", "published")
@@ -229,10 +233,14 @@ function StructuredData({ posts, currentPage, totalPages, breadcrumbItems = [], 
 /**
  * Blog Listing Page Component
  */
-const BlogPage = async ({ searchParams }) => {
-  const params = await searchParams
-  const currentPage = parseInt(params.page) || 1
-  const locale = await getServerLocale()
+/**
+ * Cached listing render keyed by (page, locale): the post grid + JSON-LD render
+ * once per cache window instead of on every visit (the Fluid Active CPU win).
+ */
+async function CachedBlogList({ page: currentPage, locale }) {
+  "use cache"
+  cacheLife("minutes")
+  cacheTag("blog-list")
 
   const payload = await fetchBlogs(currentPage, locale)
   const posts = payload?.data || []
@@ -416,6 +424,14 @@ const BlogPage = async ({ searchParams }) => {
       </section>
     </>
   )
+}
+
+const BlogPage = async ({ searchParams }) => {
+  const params = await searchParams
+  const currentPage = parseInt(params.page) || 1
+  const locale = await getServerLocale()
+
+  return <CachedBlogList page={currentPage} locale={locale} />
 }
 
 export default BlogPage
