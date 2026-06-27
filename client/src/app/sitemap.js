@@ -17,11 +17,13 @@ function pushLocalized(items, path, options) {
   const base = path.startsWith("/") ? path : `/${path}`;
   const languages = buildLanguageAlternates(base);
 
-  items.push({
-    url: languages.en,
-    ...options,
-    alternates: { languages },
-  });
+  // List the EN and FR URLs as separate <url> entries instead of bundling the French
+  // version as an <xhtml:link> alternate. hreflang already lives in every page's <head>
+  // (a valid, single place for it), so the sitemap doesn't need to repeat it. Dropping
+  // the XHTML-namespaced tags also lets Chrome render the sitemap as a clean indented
+  // tree again, while both language URLs stay listed for discovery.
+  items.push({ url: languages.en, ...options });
+  items.push({ url: languages.fr, ...options });
 }
 
 const API_URL = (
@@ -44,6 +46,12 @@ async function fetchJSON(path) {
   }
 }
 
+// Stable last-modified for genuinely static pages/guides. Bump this only when the
+// static pages themselves meaningfully change. Using `now` here would re-stamp these
+// URLs on every ~24h regeneration even though they didn't change, which teaches Google
+// to distrust our `lastmod` and wastes crawl budget re-fetching unchanged pages.
+const STATIC_LAST_MODIFIED = "2026-06-27T00:00:00.000Z";
+
 export default async function sitemap() {
   const now = new Date().toISOString();
   /** @type {import("next").MetadataRoute.Sitemap} */
@@ -62,7 +70,7 @@ export default async function sitemap() {
 
   for (const page of staticPages) {
     pushLocalized(items, page.path, {
-      lastModified: now,
+      lastModified: STATIC_LAST_MODIFIED,
       changeFrequency: page.changeFrequency,
       priority: page.priority,
     });
@@ -70,7 +78,7 @@ export default async function sitemap() {
 
   for (const guideSlug of getAllLocalSeoGuideSlugs()) {
     pushLocalized(items, `/guides/${guideSlug}`, {
-      lastModified: now,
+      lastModified: STATIC_LAST_MODIFIED,
       changeFrequency: "monthly",
       priority: 0.7,
     });
