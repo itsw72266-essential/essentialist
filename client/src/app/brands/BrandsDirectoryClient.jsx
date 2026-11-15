@@ -927,19 +927,23 @@ const MAX_PRODUCTS_FOR_STRUCTURED_DATA = 20
 // Set how many items you want per page here!
 const ITEMS_PER_PAGE = 20 
 
-function useProductCatalogQuery({ enabled }) {
+// Only the current page of products is fetched from the API (not the whole
+// catalog) so this page stays fast and doesn't hammer the backend with a
+// 500-product payload on every load.
+function useProductCatalogQuery({ enabled, page, limit, brandId }) {
   const { i18n } = useTranslation()
 
   return useQuery({
-    queryKey: ['product-catalog', i18n.language],
+    queryKey: ['product-catalog', i18n.language, page, limit, brandId || 'all'],
     enabled,
     queryFn: async () => {
       const response = await Axios({
         ...SummaryApi.getProduct,
         data: {
-          page: 1,
-          limit: 500,
+          page,
+          limit,
           onlyActive: true,
+          ...(brandId ? { brandId } : {}),
           include: ['brand', 'category', 'subCategory']
         }
       })
@@ -957,9 +961,12 @@ function useProductCatalogQuery({ enabled }) {
         throw new Error('Unexpected product catalog response')
       }
 
-      return items
+      const totalNoPage = Number(payload?.totalNoPage ?? payload?.pages ?? 1) || 1
+
+      return { items, totalNoPage }
     },
-    staleTime: 5 * 60_000,
+    keepPreviousData: true,
+    staleTime: 60_000,
     refetchOnWindowFocus: false,
     retry: 1
   })
@@ -1548,11 +1555,17 @@ export default function BrandsDirectoryClient({ canUseRemoteApi }) {
   } = useSubCategoriesQuery({ enabled: canUseRemoteApi })
 
   const {
-    data: products = [],
+    data: productPage,
     isLoading: isProductsLoading,
+    isFetching: isProductsFetching,
     isError: isProductsError,
     error: productsError
-  } = useProductCatalogQuery({ enabled: canUseRemoteApi })
+  } = useProductCatalogQuery({
+    enabled: canUseRemoteApi,
+    page: currentPage,
+    limit: ITEMS_PER_PAGE,
+    brandId: selectedBrandFilter || undefined
+  })
 
   useEffect(() => {
     if (!canUseRemoteApi) return
@@ -1560,17 +1573,19 @@ export default function BrandsDirectoryClient({ canUseRemoteApi }) {
     pingIndexNow()
   }, [canUseRemoteApi])
 
-  const productRows = useMemo(
+  const paginatedRows = useMemo(
     () =>
-      Array.isArray(products)
-        ? products.map((row) => normalizeProductRow(row, locale))
+      Array.isArray(productPage?.items)
+        ? productPage.items.map((row) => normalizeProductRow(row, locale))
         : [],
-    [products, locale],
+    [productPage, locale],
   )
 
+  // Brand cards use the lightweight brand metrics the backend already
+  // computes, not an aggregation over the (now paginated) product list.
   const brandStats = useMemo(
-    () => aggregateBrandStats(brands || [], productRows),
-    [brands, productRows]
+    () => aggregateBrandStats(brands || [], []),
+    [brands]
   )
 
   const breadcrumbItems = useMemo(
@@ -1581,41 +1596,30 @@ export default function BrandsDirectoryClient({ canUseRemoteApi }) {
     [locale],
   )
 
-  // Filter logic
-  const filteredRows = useMemo(() => {
-    let rows = productRows;
-    if (selectedBrandFilter) {
-      rows = rows.filter(row => row.brandSlug === selectedBrandFilter);
-    }
-    return rows;
-  }, [productRows, selectedBrandFilter]);
-
   // Reset page to 1 if filter changes
   useEffect(() => {
     setCurrentPage(1);
   }, [selectedBrandFilter]);
 
-  // Pagination logic
-  const totalPages = Math.max(1, Math.ceil(filteredRows.length / ITEMS_PER_PAGE));
-  const paginatedRows = filteredRows.slice(
-    (currentPage - 1) * ITEMS_PER_PAGE, 
-    currentPage * ITEMS_PER_PAGE
-  );
+  const totalPages = Math.max(1, Number(productPage?.totalNoPage ?? 1))
 
   const brandNames = brandStats.map((brand) => brand.name).filter(Boolean)
   const subCategoryNames = Array.from(
-    new Set(productRows.map((row) => row.subCategoryName).filter(Boolean))
+    new Set(paginatedRows.map((row) => row.subCategoryName).filter(Boolean))
   )
   const categoryNames = Array.from(
-    new Set(productRows.map((row) => row.categoryName).filter(Boolean))
+    new Set(paginatedRows.map((row) => row.categoryName).filter(Boolean))
   )
-  const totalProducts = productRows.length
+  const totalProducts = brandStats.reduce(
+    (sum, brand) => sum + (brand.metrics?.totalProducts || 0),
+    0
+  )
 
   if (!canUseRemoteApi) {
     return <ApiUnavailableNotice />
   }
 
-  if (isBrandsLoading || isProductsLoading || isCategoriesLoading || isSubCategoriesLoading) {
+  if (isBrandsLoading || (isProductsLoading && !productPage) || isCategoriesLoading || isSubCategoriesLoading) {
     return <LoadingState />
   }
 
@@ -1633,7 +1637,7 @@ export default function BrandsDirectoryClient({ canUseRemoteApi }) {
 
   return (
     <main className="bg-gradient-to-b from-pink-50 to-white min-h-screen py-10 px-2 md:px-10">
-      <StructuredData products={productRows} brandStats={brandStats} />
+      <StructuredData products={paginatedRows} brandStats={brandStats} />
 
       <Breadcrumbs items={breadcrumbItems} className="mb-4 max-w-6xl mx-auto" />
 
@@ -1660,7 +1664,7 @@ export default function BrandsDirectoryClient({ canUseRemoteApi }) {
           >
             <option value="">{t('brandsPage.filterAllBrands')}</option>
             {brandStats.map(b => (
-              <option key={b.slug} value={b.slug}>{b.name}</option>
+              <option key={b._id || b.slug} value={b._id}>{b.name}</option>
             ))}
           </select>
         </div>
@@ -1738,16 +1742,14 @@ export default function BrandsDirectoryClient({ canUseRemoteApi }) {
         {/* This Pagination Bar will ALWAYS render so you can see it */}
         <div className="flex flex-col sm:flex-row justify-between items-center p-4 border-t border-pink-200 bg-white">
           <span className="text-sm text-gray-600 mb-4 sm:mb-0">
-            {t('brandsPage.paginationShowing', {
-              from: filteredRows.length > 0 ? (currentPage - 1) * ITEMS_PER_PAGE + 1 : 0,
-              to: Math.min(currentPage * ITEMS_PER_PAGE, filteredRows.length),
-              total: filteredRows.length,
-            })}
+            {isProductsFetching
+              ? '…'
+              : t('brandsPage.paginationShowingPage', { count: paginatedRows.length })}
           </span>
           <div className="flex gap-2">
             <button
               onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-              disabled={currentPage === 1}
+              disabled={currentPage === 1 || isProductsFetching}
               className="px-4 py-2 text-sm font-medium text-pink-600 bg-white border border-pink-300 rounded hover:bg-pink-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               {t('common.previous')}
@@ -1757,7 +1759,7 @@ export default function BrandsDirectoryClient({ canUseRemoteApi }) {
             </div>
             <button
               onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-              disabled={currentPage === totalPages || totalPages === 0}
+              disabled={currentPage === totalPages || totalPages === 0 || isProductsFetching}
               className="px-4 py-2 text-sm font-medium text-pink-600 bg-white border border-pink-300 rounded hover:bg-pink-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               {t('common.next')}

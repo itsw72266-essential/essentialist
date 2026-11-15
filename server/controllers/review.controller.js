@@ -1091,6 +1091,32 @@ import ReviewCommentModel from "../models/reviewComment.model.js";
 import ProductModel from "../models/product.model.js";
 import RatingModel from "../models/rating.model.js";
 import UserModel from "../models/user.model.js";
+import OrderModel from "../models/order.model.js";
+
+// A review may only be marked as a verified purchase (and only accepted at
+// all, for registered shoppers) once the customer actually has a delivered
+// order for this product: either paid, or Cash on Delivery once an admin has
+// marked it delivered.
+const DELIVERED_FULFILLMENT_STATUSES = new Set(["delivered"]);
+
+async function hasDeliveredPurchase(userId, productId) {
+  if (!userId || !productId) return false;
+  const order = await OrderModel.findOne({
+    userId,
+    "products.productId": productId,
+    $or: [
+      { deliveredAt: { $ne: null } },
+      {
+        fulfillment_status: {
+          $regex: /^delivered$/i,
+        },
+      },
+    ],
+  })
+    .select("_id")
+    .lean();
+  return Boolean(order);
+}
 
 const REVIEW_TOKEN_HEADER = "x-review-token";
 const SUBJECT_TYPES = [
@@ -1493,6 +1519,21 @@ export const createOrUpdateReview = async (req, res) => {
       const resolvedAuthorName =
         sanitizePlainText(user.name, 140) || "Essentialist Shopper";
 
+      const isAdminAuthor = Boolean(user.role?.includes("ADMIN"));
+      let verifiedPurchase = false;
+
+      if (subjectType === "product" && productRef) {
+        verifiedPurchase = await hasDeliveredPurchase(req.userId, productRef);
+        if (!verifiedPurchase && !isAdminAuthor) {
+          return res.status(403).json({
+            success: false,
+            error: true,
+            message:
+              "Only customers who purchased and received this product can leave a review.",
+          });
+        }
+      }
+
       const match = {
         user: req.userId,
         subjectType,
@@ -1509,7 +1550,7 @@ export const createOrUpdateReview = async (req, res) => {
             comment: sanitizedComment,
             contentHtml: sanitizedHtml,
             contentDelta: sanitizedDelta,
-            authorType: user.role?.includes("ADMIN") ? "admin" : "registered",
+            authorType: isAdminAuthor ? "admin" : "registered",
             authorName: resolvedAuthorName,
             authorEmail: user.email,
             authorAvatar: user.avatar,
@@ -1517,7 +1558,7 @@ export const createOrUpdateReview = async (req, res) => {
             experienceTags: normalizedTags,
             locationContext: locationNote,
             status: "published",
-            isVerifiedPurchase: Boolean(req.body.isVerifiedPurchase),
+            isVerifiedPurchase: verifiedPurchase,
           },
         },
         { new: true, upsert: true, setDefaultsOnInsert: true }
@@ -1531,6 +1572,15 @@ export const createOrUpdateReview = async (req, res) => {
         );
       }
     } else {
+      if (subjectType === "product") {
+        return res.status(401).json({
+          success: false,
+          error: true,
+          message:
+            "Please log in with the account you used to purchase this product to leave a review.",
+        });
+      }
+
       const clientIp = getClientIp(req);
       const normalizedSubmittedEmail = normalizeEmail(authorEmail);
       const fallbackEmail = guestReviewDoc?.authorEmail

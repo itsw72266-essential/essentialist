@@ -306,6 +306,7 @@
     "viewProduct": "Voir {{name}}",
     "viewLink": "Voir",
     "paginationShowing": "Affichage de {{from}} à {{to}} sur {{total}} produits",
+    "paginationShowingPage": "Affichage de {{count}} produits sur cette page",
     "paginationPage": "Page {{current}} sur {{total}}",
     "trustedStoreTitle": "Votre boutique maquillage de confiance au Cameroun",
     "trustedStoreBody": "Chez Essentialist Makeup Store, nous proposons une large gamme de produits beauté authentiques. Que vous cherchiez des marques comme {{brands}} ou des essentiels comme {{categories}}, nous vous offrons les meilleurs prix en FCFA et une livraison rapide partout au pays.",
