@@ -28,6 +28,47 @@ function runInBackground(label, task) {
   });
 }
 
+// Sends the "payment received" emails (admin + customer) exactly once per
+// order, however the success is detected: the Payunit webhook, or the
+// frontend polling the order-status endpoint after redirect. Polling is the
+// path a Mobile Money (MTN/Orange) payment actually confirms through when
+// the webhook can't reach this server (e.g. no public notify_url in dev),
+// so without this guard a MoMo payment could complete with no email sent.
+async function notifyPayunitSuccessIfNeeded(orderWithProof, overrides = {}) {
+  if (!orderWithProof?._id) return orderWithProof;
+
+  const alreadyNotified = Boolean(
+    orderWithProof.metadata?.notifications?.orderEmailSentAt
+  );
+  if (alreadyNotified) return orderWithProof;
+
+  await OrderModel.updateOne(
+    { _id: orderWithProof._id },
+    { $set: { "metadata.notifications.orderEmailSentAt": new Date() } }
+  );
+
+  await sendOrderNotificationToAdmin([orderWithProof]);
+  await sendOrderNotificationToCustomer(orderWithProof);
+
+  await sendPayunitPaymentNotification({
+    orderId: orderWithProof.orderId,
+    transactionId:
+      overrides.transactionId ?? orderWithProof.metadata?.payunit?.transactionId,
+    amount: overrides.amount ?? orderWithProof.totalAmt,
+    currency: overrides.currency ?? orderWithProof.currency ?? "XAF",
+    status: overrides.status ?? orderWithProof.payment_status,
+    channel:
+      overrides.channelLabel ??
+      orderWithProof.metadata?.payunit?.channelLabel ??
+      "Payunit",
+    customerName: orderWithProof.contact_info?.name,
+    customerEmail: orderWithProof.contact_info?.customer_email,
+    customerPhone: orderWithProof.contact_info?.mobile,
+  });
+
+  return orderWithProof;
+}
+
 const stripTrailingSlash = (value = "") =>
   value.toString().trim().replace(/\/+$/, "");
 
@@ -814,30 +855,12 @@ export async function paymentsWebhook(req, res) {
 
   runInBackground("payunit-webhook-post", async () => {
     if (updateResult.isSuccess && updateResult.statusChanged) {
-      const alreadyNotified =
-        Boolean(orderWithProof.metadata?.notifications?.orderEmailSentAt);
-
-      if (!alreadyNotified) {
-        await OrderModel.updateOne(
-          { _id: orderWithProof._id },
-          { $set: { "metadata.notifications.orderEmailSentAt": new Date() } }
-        );
-
-        await sendOrderNotificationToAdmin([orderWithProof]);
-        await sendOrderNotificationToCustomer(orderWithProof);
-      }
-
-      await sendPayunitPaymentNotification({
-        orderId: orderWithProof.orderId,
+      await notifyPayunitSuccessIfNeeded(orderWithProof, {
         transactionId,
-        amount: amount ?? orderWithProof.totalAmt,
-        currency: currency ?? orderWithProof.currency ?? "XAF",
+        amount,
+        currency,
         status: updateResult.normalizedStatus ?? status,
-        channel: channelLabel,
-        customerName: orderWithProof.contact_info?.name ?? customerName,
-        customerEmail:
-          orderWithProof.contact_info?.customer_email ?? customerEmail,
-        customerPhone: orderWithProof.contact_info?.mobile ?? customerPhone,
+        channelLabel,
       });
 
       if (orderWithProof.userId) {
@@ -954,6 +977,16 @@ export async function paymentsGetOrderStatus(req, res) {
             });
 
             updatedOrder = updateResult?.order ?? orderWithProof;
+
+            if (updateResult?.isSuccess && updateResult?.statusChanged) {
+              await notifyPayunitSuccessIfNeeded(updatedOrder, {
+                transactionId,
+                amount,
+                currency,
+                status,
+                channelLabel,
+              });
+            }
           }
         } catch (error) {
           console.error("[Payunit:order-status poll]", error);
@@ -1035,6 +1068,16 @@ export async function paymentsGetGuestOrderStatus(req, res) {
             });
 
             updatedOrder = updateResult?.order ?? orderWithProof;
+
+            if (updateResult?.isSuccess && updateResult?.statusChanged) {
+              await notifyPayunitSuccessIfNeeded(updatedOrder, {
+                transactionId,
+                amount,
+                currency,
+                status,
+                channelLabel,
+              });
+            }
           }
         } catch (error) {
           console.error("[Payunit:guest-order-status poll]", error);

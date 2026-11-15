@@ -569,7 +569,9 @@ const CheckoutPage = () => {
           )}
         </button>
 
-        <button
+        {/* Orange Money is not in use right now — keeping the handler/markup
+            in place so it can be re-enabled by uncommenting this block. */}
+        {/* <button
           className={baseClass(
             "bg-orange-500",
             "hover:bg-orange-600",
@@ -587,7 +589,7 @@ const CheckoutPage = () => {
           ) : (
             t("checkout.orangeMoney")
           )}
-        </button>
+        </button> */}
 
         <button
           className={`py-2.5 px-4 border-2 border-pink-400 font-semibold 
