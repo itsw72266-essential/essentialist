@@ -25,14 +25,14 @@ import {
 import { cacheResponse } from "../middleware/cache.middleware.js";
 
 const categoryRouter = Router();
-const ONE_MONTH_SECONDS = 60 * 60 * 24 * 30;
+const ONE_HOUR_SECONDS = 60 * 60;
 
 categoryRouter.post("/add-category", auth, AddCategoryController);
 categoryRouter.get(
   "/get",
   cacheResponse({
     namespace: CATEGORY_CACHE_NAMESPACE,
-    ttlSeconds: ONE_MONTH_SECONDS,
+    ttlSeconds: ONE_HOUR_SECONDS,
   }),
   getCategoryController
 );
