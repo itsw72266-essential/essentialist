@@ -151,7 +151,7 @@ export default function LeaveReviewModal({
               onChange={(e) => setTitle(e.target.value)}
               maxLength={140}
               placeholder={t('product.reviews.modal.headlinePlaceholder')}
-              className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-pink-400"
+              className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-pink-400"
             />
           </div>
 
@@ -169,7 +169,7 @@ export default function LeaveReviewModal({
               rows={4}
               maxLength={5000}
               placeholder={t('product.reviews.modal.experiencePlaceholder')}
-              className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-slate-900 text-sm resize-y min-h-[100px] focus:outline-none focus:ring-2 focus:ring-pink-400"
+              className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-slate-900 text-sm resize-y min-h-[100px] focus:outline-none focus:ring-2 focus:ring-pink-400"
             />
           </div>
         </div>

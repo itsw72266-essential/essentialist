@@ -147,6 +147,7 @@
       "sectionTitle": "Customer reviews",
       "sectionIntro": "Share your experience with {{productName}}. Reviews help other shoppers choose with confidence.",
       "leaveReview": "Leave a Review",
+      "verifiedOnlyNotice": "Reviews are limited to customers who purchased this product and have received their order (including Cash on Delivery once marked delivered).",
       "noReviewsYet": "No published reviews yet.",
       "count_one": "{{count}} review",
       "count_other": "{{count}} reviews",

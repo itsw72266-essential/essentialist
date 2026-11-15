@@ -1275,11 +1275,21 @@ function buildSubCatUrl(mainCat, subCat) {
 
 // ---------- UI helpers ----------
 
+const BRANDS_PER_PAGE = 12
+
 function BrandDirectoryGrid({ brandStats = [], locale = 'en' }) {
   const { t } = useTranslation()
   const localizedHref = useLocalizedHref()
+  const [brandPage, setBrandPage] = useState(1)
 
   if (!Array.isArray(brandStats) || !brandStats.length) return null
+
+  const totalBrandPages = Math.max(1, Math.ceil(brandStats.length / BRANDS_PER_PAGE))
+  const safeBrandPage = Math.min(brandPage, totalBrandPages)
+  const visibleBrands = brandStats.slice(
+    (safeBrandPage - 1) * BRANDS_PER_PAGE,
+    safeBrandPage * BRANDS_PER_PAGE
+  )
 
   return (
     <section className="container mx-auto px-4 py-5">
@@ -1293,7 +1303,7 @@ function BrandDirectoryGrid({ brandStats = [], locale = 'en' }) {
       </header>
 
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        {brandStats.map((brand) => {
+        {visibleBrands.map((brand) => {
           const displayName =
             getLocalizedContent(brand, 'name', locale) || brand.name || brand.slug
           const displayDescription =
@@ -1349,6 +1359,30 @@ function BrandDirectoryGrid({ brandStats = [], locale = 'en' }) {
           )
         })}
       </div>
+
+      {totalBrandPages > 1 && (
+        <div className="mt-8 flex items-center justify-center gap-2">
+          <button
+            type="button"
+            onClick={() => setBrandPage((p) => Math.max(1, p - 1))}
+            disabled={safeBrandPage === 1}
+            className="px-4 py-2 text-sm font-medium text-pink-600 bg-white border border-pink-300 rounded hover:bg-pink-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            {t('common.previous')}
+          </button>
+          <div className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-50 border border-gray-200 rounded">
+            {t('brandsPage.paginationPage', { current: safeBrandPage, total: totalBrandPages })}
+          </div>
+          <button
+            type="button"
+            onClick={() => setBrandPage((p) => Math.min(totalBrandPages, p + 1))}
+            disabled={safeBrandPage === totalBrandPages}
+            className="px-4 py-2 text-sm font-medium text-pink-600 bg-white border border-pink-300 rounded hover:bg-pink-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            {t('common.next')}
+          </button>
+        </div>
+      )}
     </section>
   )
 }

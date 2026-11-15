@@ -147,6 +147,7 @@
       "sectionTitle": "Avis clients",
       "sectionIntro": "Partagez votre experience avec {{productName}}. Vos avis aident les autres clientes a choisir en toute confiance.",
       "leaveReview": "Laisser un avis",
+      "verifiedOnlyNotice": "Les avis sont réservés aux clients ayant acheté ce produit et ayant reçu leur commande (y compris en paiement à la livraison une fois marquée comme livrée).",
       "noReviewsYet": "Aucun avis publie pour le moment.",
       "count_one": "{{count}} avis",
       "count_other": "{{count}} avis",

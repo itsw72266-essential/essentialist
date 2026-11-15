@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next'
 import Axios from '@/lib/apiClient'
 import SummaryApi from '@/backend/contracts/summaryApi'
 import { readPersistedUser } from '@/utils/authUserStorage'
+import useCanReviewProduct from '@/hooks/useCanReviewProduct'
 import LeaveReviewModal from './LeaveReviewModal.client'
 
 const OPEN_REVIEW_EVENT = 'essentialist:open-review-modal'
@@ -52,6 +53,8 @@ export default function ReviewsSection({ productId, productName }) {
   const searchParams = useSearchParams()
   const [modalOpen, setModalOpen] = useState(false)
   const [page] = useState(1)
+  const { canReview, isLoggedIn: viewerIsLoggedIn, isLoading: isEligibilityLoading } =
+    useCanReviewProduct(productId)
 
   const returnPath = useMemo(() => {
     const qs = searchParams?.toString()
@@ -69,18 +72,19 @@ export default function ReviewsSection({ productId, productName }) {
       router.push(`/login?redirect=${redirect}`)
       return
     }
+    if (!canReview) return
     setModalOpen(true)
-  }, [isLoggedIn, returnPath, router])
+  }, [isLoggedIn, returnPath, router, canReview])
 
   useEffect(() => {
     if (typeof window === 'undefined') return
     const shouldOpen =
       searchParams?.get('writeReview') === '1' ||
       searchParams?.get('openReview') === '1'
-    if (shouldOpen && isLoggedIn()) {
+    if (shouldOpen && isLoggedIn() && canReview) {
       setModalOpen(true)
     }
-  }, [searchParams, isLoggedIn])
+  }, [searchParams, isLoggedIn, canReview])
 
   useEffect(() => {
     const handler = () => openReviewModal()
@@ -125,15 +129,23 @@ export default function ReviewsSection({ productId, productName }) {
         <h2 className="text-xl font-bold text-slate-900">
           {t('product.reviews.sectionTitle')}
         </h2>
-        <button
-          type="button"
-          onClick={openReviewModal}
-          className="inline-flex shrink-0 items-center gap-2 rounded-lg border border-slate-900 bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-400"
-        >
-          <Star className="h-4 w-4 fill-amber-400 text-amber-400" aria-hidden />
-          {t('product.reviews.leaveReview')}
-        </button>
+        {!isEligibilityLoading && canReview && (
+          <button
+            type="button"
+            onClick={openReviewModal}
+            className="inline-flex shrink-0 items-center gap-2 rounded-lg border border-slate-900 bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-400"
+          >
+            <Star className="h-4 w-4 fill-amber-400 text-amber-400" aria-hidden />
+            {t('product.reviews.leaveReview')}
+          </button>
+        )}
       </div>
+
+      {viewerIsLoggedIn && !isEligibilityLoading && !canReview && (
+        <p className="mt-3 text-xs text-slate-500">
+          {t('product.reviews.verifiedOnlyNotice')}
+        </p>
+      )}
 
       <LeaveReviewModal
         open={modalOpen}
