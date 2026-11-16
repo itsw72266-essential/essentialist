@@ -154,11 +154,36 @@ export const getBrandsController = async (request, response) => {
     const skip = (numericPage - 1) * numericLimit;
 
     const [data, totalCount] = await Promise.all([
-      BrandModel.find(query)
-        .sort(sortOption)
-        .skip(skip)
-        .limit(numericLimit)
-        .lean(),
+      BrandModel.aggregate([
+        { $match: query },
+        { $sort: sortOption },
+        { $skip: skip },
+        { $limit: numericLimit },
+        {
+          $lookup: {
+            from: ProductModel.collection.name,
+            let: { brandId: "$_id" },
+            pipeline: [
+              { $match: { $expr: { $eq: ["$brand", "$$brandId"] }, publish: true } },
+              { $project: { price: 1 } }
+            ],
+            as: "products"
+          }
+        },
+        {
+          $addFields: {
+            productCount: { $size: "$products" },
+            avgPrice: {
+              $cond: [
+                { $gt: [{ $size: "$products" }, 0] },
+                { $round: [{ $avg: "$products.price" }, 0] },
+                null
+              ]
+            }
+          }
+        },
+        { $project: { products: 0 } }
+      ]),
       BrandModel.countDocuments(query)
     ]);
 
@@ -210,11 +235,17 @@ export const getBrandDetailsController = async (request, response) => {
       });
     }
 
+    const products = await ProductModel.find({ brand: brand._id, publish: true }).select("price").lean();
+    const productCount = products.length;
+    const avgPrice = productCount > 0
+      ? Math.round(products.reduce((sum, p) => sum + (p.price || 0), 0) / productCount)
+      : null;
+
     setCacheHeaders(response, DEFAULT_CACHE);
 
     return response.json({
       message: "Brand details",
-      data: localizeDocument(brand, ["name", "description"], locale),
+      data: localizeDocument({ ...brand, productCount, avgPrice }, ["name", "description"], locale),
       error: false,
       success: true
     });
