@@ -215,14 +215,10 @@
     "categoriesSoon": "Categories will appear here soon.",
     "catalogUpdating": "We are currently updating our product catalog. Please check back soon!",
     "contactWhatsapp": "Contact Us on WhatsApp",
-    "heroPanel1Eyebrow": "Black Friday Week",
-    "heroPanel1Title": "Save Big on Beauty",
-    "heroPanel2Eyebrow": "Low prices, every day",
-    "heroPanel2Title": "Spend less on festive makeup",
-    "heroPanel3Eyebrow": "Get the glam look",
-    "heroPanel3Title": "Holiday makeup essentials",
-    "heroPanel4Eyebrow": "Gifts that sparkle",
-    "heroPanel4Title": "Makeup gifts at prices you'll love"
+    "heroPanel1Title": "Black Friday Week — Save up to 45% on beauty",
+    "heroPanel2Title": "Low prices, every day — Spend less on festive makeup",
+    "heroPanel3Title": "Get the glam look — Holiday makeup essentials",
+    "heroPanel4Title": "Gifts that sparkle — Makeup gifts at prices you'll love"
   },
   "dashboard": {
     "dashboard": "Dashboard",

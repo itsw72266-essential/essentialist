@@ -14,6 +14,7 @@ import { usePathname } from "next/navigation";
 
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
+import HomeHero from "../../components/home/HomeHero.client";
 import useMobile from "../../hooks/useMobile";
 import { stripLocalePrefix } from "@/lib/seo/localePaths";
 import {
@@ -56,6 +57,7 @@ const PathAwareShell = memo(function PathAwareShell({
         <main className="min-h-screen bg-white">{children}</main>
       ) : (
         <main className="min-h-[78vh] bg-[#faf6f3] relative">
+          {isHome && <HomeHero />}
           <div className="container mx-auto py-1">
             <div className="flex flex-col md:flex-row gap-4">
               {showSidebar && !isCheckout && (

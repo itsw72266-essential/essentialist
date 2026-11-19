@@ -5,7 +5,6 @@
 // import { cacheLife } from 'next/cache'
 
 // import ProductRecommendations from '../components/ProductRecommendations'
-import HomeHero from '../components/home/HomeHero.client'
 import HomeCategoryGrid from '../components/home/HomeCategoryGrid.client'
 // import TikTokGallery from '../components/TikTokGallery'
 // import CategorySectionsInfinite from '../components/CategorySectionsInfinite'
@@ -567,7 +566,6 @@ export default async function Home() {
         <StructuredData categoryProducts={categoryProducts} />
 
         <section className="bg-white">
-          <HomeHero />          {/* FIX 2: PRODUCT RECOMMENDATIONS MOVED BELOW HERO */}
           <ProductRecommendations />
 
           <HomeCategoryGrid

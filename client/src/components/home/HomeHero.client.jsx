@@ -7,26 +7,24 @@ import { IoChevronBack, IoChevronForward } from 'react-icons/io5'
 
 import '@/lib/i18n'
 
+// Each image already has its own promo copy baked in by design, so the
+// panel only needs an accessible alt text — no text overlay on top.
 const PANELS = [
   {
     src: '/assets/black-friday-beauty-gift-display.png',
-    eyebrowKey: 'home.heroPanel1Eyebrow',
-    titleKey: 'home.heroPanel1Title',
+    altKey: 'home.heroPanel1Title',
   },
   {
     src: '/assets/festive-makeup-savings-ad.png',
-    eyebrowKey: 'home.heroPanel2Eyebrow',
-    titleKey: 'home.heroPanel2Title',
+    altKey: 'home.heroPanel2Title',
   },
   {
     src: '/assets/holiday-glam-makeup-display.png',
-    eyebrowKey: 'home.heroPanel3Eyebrow',
-    titleKey: 'home.heroPanel3Title',
+    altKey: 'home.heroPanel3Title',
   },
   {
     src: '/assets/holiday-makeup-gift-celebration.png',
-    eyebrowKey: 'home.heroPanel4Eyebrow',
-    titleKey: 'home.heroPanel4Title',
+    altKey: 'home.heroPanel4Title',
   },
 ]
 
@@ -57,7 +55,7 @@ export default function HomeHero() {
             >
               <Image
                 src={panel.src}
-                alt={t(panel.titleKey)}
+                alt={t(panel.altKey)}
                 fill
                 priority={index === 0}
                 fetchPriority={index === 0 ? 'high' : 'auto'}
@@ -66,15 +64,6 @@ export default function HomeHero() {
                 className="object-cover"
                 sizes="(min-width: 1024px) 25vw, (min-width: 640px) 42vw, 74vw"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
-              <div className="absolute top-3 left-3 right-3 sm:top-5 sm:left-5 sm:right-5 text-white">
-                <p className="text-xs sm:text-sm font-medium opacity-90">
-                  {t(panel.eyebrowKey)}
-                </p>
-                <h2 className="text-base sm:text-xl lg:text-2xl font-extrabold leading-tight mt-1">
-                  {t(panel.titleKey)}
-                </h2>
-              </div>
             </div>
           ))}
         </div>
