@@ -12,12 +12,12 @@ import CardLoading from './CardLoading'
 function CategoryFallback() {
   return (
     <div className="mb-12">
-      <div className="container mx-auto px-2 flex items-center justify-between p-2">
+      <div className="w-full px-2 flex items-center justify-between p-2">
         <h2 className="font-bold text-[20px] md:text-[40px] animate-pulse bg-gray-200 h-8 w-48 rounded"></h2>
         <div className="animate-pulse bg-gray-200 h-6 w-20 rounded"></div>
       </div>
       <div className="relative flex items-center">
-        <div className="grid grid-cols-2 sm:grid-cols-2 md:flex gap-1 md:gap-1 lg:gap-1 container mx-auto overflow-x-auto scrollbar-none scroll-smooth touch-pan-y">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:flex gap-1 md:gap-1 lg:gap-1 w-full overflow-x-auto scrollbar-none scroll-smooth touch-pan-y">
           {Array.from({ length: 6 }).map((_, i) => (
             <div key={i} className="px-1">
               <div className="relative flex flex-col border border-gray-200 overflow-hidden py-1 lg:p-2 rounded-lg bg-white shadow-sm animate-pulse">
@@ -113,7 +113,7 @@ export default function CategorySectionsInfinite({
 
   if (!total) {
     return (
-      <div className="container mx-auto px-4 py-8 text-center text-gray-500">
+      <div className="w-full px-4 py-8 text-center text-gray-500">
         <p>Products will appear here soon. Please check back later.</p>
       </div>
     )
@@ -139,7 +139,7 @@ export default function CategorySectionsInfinite({
       })}
 
       {hasMore && (
-        <div className="container mx-auto px-4 py-4">
+        <div className="w-full px-4 py-4">
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
             {Array.from({ length: 10 }).map((_, i) => (
               <CardLoading key={`home-loading-${i}`} />

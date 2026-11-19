@@ -16,7 +16,7 @@ export default function CategoryCircleGrid({ items = [], isLoading = false }) {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto px-4 my-8 grid grid-cols-4 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4">
+      <div className="w-full px-4 my-8 grid grid-cols-4 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4">
         {Array.from({ length: 8 }).map((_, index) => (
           <div key={index} className="animate-pulse text-center">
             <div className="aspect-square w-full rounded-full bg-gray-200" />
@@ -30,7 +30,7 @@ export default function CategoryCircleGrid({ items = [], isLoading = false }) {
   if (!items.length) return null;
 
   return (
-    <div className="container mx-auto px-4 my-8 grid grid-cols-4 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4">
+    <div className="w-full px-4 my-8 grid grid-cols-4 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4">
       {items.map((item) => (
         <Link
           key={item.id}

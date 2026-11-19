@@ -69,7 +69,7 @@ const CategoryWiseProductDisplay = ({
   return (
     <div className="mb-12">
       {/* Header: Restored original Next.js flex justify-between (title left, See All right) */}
-      <div className="container mx-auto px-2 flex items-center justify-between gap-2 p-2">
+      <div className="w-full px-2 flex items-center justify-between gap-2 p-2">
         <h2 className={headingClasses}>
           {displayName}
         </h2>
@@ -86,7 +86,7 @@ const CategoryWiseProductDisplay = ({
 
       {brandLinks.length > 0 && (
         <nav
-          className="container mx-auto px-2 pb-2 flex flex-wrap gap-2"
+          className="w-full px-2 pb-2 flex flex-wrap gap-2"
           aria-label={`${displayName} brands`}
         >
           {brandLinks.map((link) => (
@@ -107,7 +107,7 @@ const CategoryWiseProductDisplay = ({
         <div
           className="grid grid-cols-2 sm:grid-cols-2 md:flex items-stretch
                      gap-1 md:gap-1 lg:gap-1
-                     container mx-auto
+                     w-full
                      overflow-x-auto scrollbar-none scroll-smooth
                      touch-pan-y"
           ref={containerRef}
@@ -131,7 +131,7 @@ const CategoryWiseProductDisplay = ({
           )}
         </div>
         {/* Scroll Buttons: Restored original positioning and classes */}
-        <div className="w-full left-0 right-0 container mx-auto px-2 absolute hidden lg:flex justify-between">
+        <div className="w-full left-0 right-0 w-full px-2 absolute hidden lg:flex justify-between">
           <button
             onClick={handleScrollLeft}
             className="z-10 relative bg-white hover:bg-gray-100 shadow-lg text-lg p-2 rounded-full focus:outline-none focus:ring-2 focus:ring-pink-300"

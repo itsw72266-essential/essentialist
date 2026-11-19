@@ -160,7 +160,7 @@ function PaginatedProductsSection({ title, initialProducts, initialTotalCount, f
   );
 
   return (
-    <section className="container mx-auto px-4 mt-10">
+    <section className="w-full px-4 mt-10">
       <h2 className="text-xl font-bold text-neutral-800 mb-4">{title}</h2>
       {products.length === 0 ? (
         <div className="bg-white border rounded-lg p-8 text-center">
@@ -216,7 +216,7 @@ export default function NewArrivalContent({
 }) {
   return (
     <div className="min-h-screen bg-gradient-to-b from-white via-pink-50 to-white pb-16">
-      <div className="container mx-auto px-4 py-12 text-center">
+      <div className="w-full px-4 py-12 text-center">
         <h1 className="text-4xl md:text-5xl font-extrabold text-pink-700 tracking-tight mb-4">
           {hero.title}
         </h1>
@@ -228,7 +228,7 @@ export default function NewArrivalContent({
         </p>
       </div>
 
-      <section className="container mx-auto px-4">
+      <section className="w-full px-4">
         <h2 className="text-xl font-bold text-neutral-800 mb-4">All New Arrivals</h2>
         {feedProducts.length === 0 ? (
           <div className="bg-white border rounded-lg p-8 text-center">

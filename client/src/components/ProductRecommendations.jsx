@@ -128,7 +128,7 @@
 //   if (isHomePage) {
 //     if (displayHistory.length === 0) return null;
 //     return (
-//       <section className="container mx-auto px-4 py-8">
+//       <section className="w-full px-4 py-8">
 //         <h2 className="text-2xl font-semibold text-black mb-4">
 //           Recently Viewed
 //         </h2>
@@ -148,7 +148,7 @@
 //   // On Product Detail Page: Show Related Products then Browsing History.
 //   return (
 //     <section className="products-showcase bg-white py-8 rounded-lg shadow-sm">
-//       <div className="container mx-auto px-4 space-y-12">
+//       <div className="w-full px-4 space-y-12">
 //         {/* Related Products Section */}
 //         {relatedProducts.length > 0 && (
 //           <div className="border-t pt-8">
@@ -157,7 +157,7 @@
 //             </h2>
 //             <div className="grid grid-cols-2 sm:grid-cols-2 md:flex
 //                           gap-4 sm:gap-6 md:gap-20
-//                           container mx-auto 
+//                           w-full 
 //                           overflow-x-auto scrollbar-none scroll-smooth">
 //               {relatedProducts.map((product) => (
 //                 <div key={`related-${product._id}`} className="flex-shrink-0 w-full sm:w-auto md:w-52">
@@ -176,7 +176,7 @@
 //             </h2>
 //             <div className="grid grid-cols-2 sm:grid-cols-2 md:flex
 //                           gap-4 sm:gap-6 md:gap-10
-//                           container mx-auto 
+//                           w-full 
 //                           overflow-x-auto scrollbar-none scroll-smooth">
 //               {displayHistory.map((product) => (
 //                 <div key={`history-${product._id}`} className="flex-shrink-0 w-full sm:w-auto md:w-52">
@@ -401,7 +401,7 @@ const ProductRecommendations = ({ currentProductId, currentProductData }) => {
     return (
       <>
         {recommendedProducts.length > 0 && (
-          <section className="container mx-auto px-4 py-6">
+          <section className="w-full px-4 py-6">
             <h2 className="text-2xl font-semibold text-black mb-4">
               {t("recommendations.recommendedForYou")}
             </h2>
@@ -416,7 +416,7 @@ const ProductRecommendations = ({ currentProductId, currentProductData }) => {
         )}
 
         {displayHistory.length > 0 && (
-          <section className="container mx-auto px-4 py-6">
+          <section className="w-full px-4 py-6">
             <h2 className="text-2xl font-semibold text-black mb-4">
               {t("recommendations.recentlyViewed")}
             </h2>
@@ -440,7 +440,7 @@ const ProductRecommendations = ({ currentProductId, currentProductData }) => {
       ref={sectionRef}
       className="products-showcase bg-white pt-2 pb-6 rounded-lg shadow-sm -mt-1"
     >
-      <div className="container mx-auto px-4 space-y-6">
+      <div className="w-full px-4 space-y-6">
         {relatedProducts.length > 0 && (
           <div className="border-t border-slate-200 pt-4">
             <h2 className="text-2xl font-semibold text-black mb-4">
@@ -448,7 +448,7 @@ const ProductRecommendations = ({ currentProductId, currentProductData }) => {
             </h2>
             <div className="grid grid-cols-2 sm:grid-cols-2 md:flex
                           gap-1 md:gap-1 lg:gap-1
-                          container mx-auto
+                          w-full
                           overflow-x-auto scrollbar-none scroll-smooth">
               {relatedProducts.map((product) => (
                 <div key={`related-${product._id}`} className="flex-shrink-0 w-full sm:w-auto md:w-52">
@@ -466,7 +466,7 @@ const ProductRecommendations = ({ currentProductId, currentProductData }) => {
             </h2>
             <div className="grid grid-cols-2 sm:grid-cols-2 md:flex
                           gap-1 md:gap-1 lg:gap-1
-                          container mx-auto
+                          w-full
                           overflow-x-auto scrollbar-none scroll-smooth">
               {displayHistory.map((product) => (
                 <div key={`history-${product._id}`} className="flex-shrink-0 w-full sm:w-auto md:w-52">
