@@ -214,7 +214,15 @@
     "shopMakeupCategories": "Categories de maquillage et plus",
     "categoriesSoon": "Les categories apparaitront bientot ici.",
     "catalogUpdating": "Nous mettons actuellement notre catalogue a jour. Revenez bientot !",
-    "contactWhatsapp": "Contactez-nous sur WhatsApp"
+    "contactWhatsapp": "Contactez-nous sur WhatsApp",
+    "heroPanel1Eyebrow": "Semaine Black Friday",
+    "heroPanel1Title": "Grosses economies beaute",
+    "heroPanel2Eyebrow": "Petits prix, tous les jours",
+    "heroPanel2Title": "Depensez moins sur le maquillage des fetes",
+    "heroPanel3Eyebrow": "Adoptez le look glamour",
+    "heroPanel3Title": "Essentiels maquillage des fetes",
+    "heroPanel4Eyebrow": "Des cadeaux qui brillent",
+    "heroPanel4Title": "Cadeaux maquillage a prix doux"
   },
   "dashboard": {
     "dashboard": "Tableau de bord",
