@@ -51,7 +51,7 @@ export default function HomeHero() {
           {PANELS.map((panel, index) => (
             <div
               key={panel.src}
-              className="relative snap-start overflow-hidden h-[280px] sm:h-[420px] lg:h-[740px] bg-neutral-100"
+              className="relative snap-start overflow-hidden aspect-[993/1584] bg-neutral-100"
             >
               <Image
                 src={panel.src}
@@ -61,7 +61,7 @@ export default function HomeHero() {
                 fetchPriority={index === 0 ? 'high' : 'auto'}
                 loading={index === 0 ? 'eager' : 'lazy'}
                 unoptimized
-                className="object-cover"
+                className="object-contain"
                 sizes="(min-width: 1024px) 25vw, (min-width: 640px) 42vw, 94vw"
               />
             </div>
