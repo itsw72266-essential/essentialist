@@ -260,6 +260,7 @@ const ProductRecommendations = ({ currentProductId, currentProductData }) => {
   const { t } = useTranslation();
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [historyProducts, setHistoryProducts] = useState([]);
+  const [recommendedProducts, setRecommendedProducts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [visible, setVisible] = useState(false);
   const sectionRef = useRef(null);
@@ -299,6 +300,56 @@ const ProductRecommendations = ({ currentProductId, currentProductData }) => {
     );
     obs.observe(el);
     return () => obs.disconnect();
+  }, [isHomePage]);
+
+  // "Recommended for you" on the home page: derive the categories the
+  // user actually viewed from browsing history, then pull fresh products
+  // from those categories (excluding anything already in history).
+  useEffect(() => {
+    if (!isHomePage) return;
+
+    const storedHistory = getHistory();
+    if (storedHistory.length === 0) return;
+
+    const categoryIds = [
+      ...new Set(
+        storedHistory
+          .flatMap((p) =>
+            Array.isArray(p?.category)
+              ? p.category.map((c) => (typeof c === "string" ? c : c?._id))
+              : []
+          )
+          .filter(Boolean)
+      ),
+    ].slice(0, 5);
+
+    if (categoryIds.length === 0) return;
+
+    const viewedIds = new Set(storedHistory.map((p) => p._id));
+
+    const fetchRecommended = async () => {
+      try {
+        const response = await Axios({
+          ...SummaryApi.getProduct,
+          data: {
+            limit: 24,
+            page: 1,
+            sort: "newest",
+            onlyActive: true,
+            filters: { categoryIds },
+          },
+        });
+        if (response.data?.success) {
+          const items = (response.data.data || []).filter(
+            (p) => !viewedIds.has(p._id)
+          );
+          setRecommendedProducts(items.slice(0, 12));
+        }
+      } catch (error) {
+        console.error("Error fetching recommended products:", error);
+      }
+    };
+    fetchRecommended();
   }, [isHomePage]);
 
   useEffect(() => {
@@ -346,22 +397,41 @@ const ProductRecommendations = ({ currentProductId, currentProductData }) => {
     : historyProducts.filter(p => p._id !== currentProductId);
 
   if (isHomePage) {
-    if (displayHistory.length === 0) return null;
+    if (displayHistory.length === 0 && recommendedProducts.length === 0) return null;
     return (
-      <section className="container mx-auto px-4 py-6">
-        <h2 className="text-2xl font-semibold text-black mb-4">
-          {t("recommendations.recentlyViewed")}
-        </h2>
-        <div className="flex space-x-4 overflow-x-auto pb-4 scrollbar-none">
-          {displayHistory.map((product) => (
-            <CompactHistoryCard
-              key={`history-${product._id}`}
-              product={product}
-              onClick={handleClickProduct}
-            />
-          ))}
-        </div>
-      </section>
+      <>
+        {recommendedProducts.length > 0 && (
+          <section className="container mx-auto px-4 py-6">
+            <h2 className="text-2xl font-semibold text-black mb-4">
+              {t("recommendations.recommendedForYou")}
+            </h2>
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:flex gap-1 md:gap-1 lg:gap-1 overflow-x-auto scrollbar-none scroll-smooth">
+              {recommendedProducts.map((product) => (
+                <div key={`recommended-${product._id}`} className="flex-shrink-0 w-full sm:w-auto md:w-52">
+                  <CardProduct data={product} />
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {displayHistory.length > 0 && (
+          <section className="container mx-auto px-4 py-6">
+            <h2 className="text-2xl font-semibold text-black mb-4">
+              {t("recommendations.recentlyViewed")}
+            </h2>
+            <div className="flex space-x-4 overflow-x-auto pb-4 scrollbar-none">
+              {displayHistory.map((product) => (
+                <CompactHistoryCard
+                  key={`history-${product._id}`}
+                  product={product}
+                  onClick={handleClickProduct}
+                />
+              ))}
+            </div>
+          </section>
+        )}
+      </>
     );
   }
 

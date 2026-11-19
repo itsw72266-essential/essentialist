@@ -350,5 +350,11 @@
     "loadMore": "Voir plus de {{name}}",
     "itemsInCollection": "{{count}} articles dans cette collection",
     "arrivingSoon": "D'autres produits {{name}} arrivent bientôt !"
+  },
+  "recommendations": {
+    "recommendedForYou": "Recommande pour vous",
+    "recentlyViewed": "Votre historique de navigation",
+    "relatedProducts": "Produits similaires",
+    "browsingHistory": "Votre historique de navigation"
   }
 }

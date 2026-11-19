@@ -133,8 +133,14 @@ export const getTopCategoryBundles = cache(async (limit = 8) => {
   const categories = await getCategories()
   if (!Array.isArray(categories) || categories.length === 0) return []
 
+  // Categories with the most products show first on the home page, down to
+  // the fewest — matches how large e-commerce sites prioritize bigger catalogs.
+  const byProductCountDesc = [...categories].sort(
+    (a, b) => (Number(b?.productCount) || 0) - (Number(a?.productCount) || 0)
+  )
+
   const safeLimit = Math.max(1, Number(limit) || 1)
-  const topCategories = categories.slice(0, safeLimit)
+  const topCategories = byProductCountDesc.slice(0, safeLimit)
 
   const bundles = await Promise.all(
     topCategories.map(async (category) => {

@@ -213,7 +213,22 @@ export const AddCategoryController = async (request, response) => {
 export const getCategoryController = async (request, response) => {
   try {
     const locale = getRequestLocale(request);
-    const data = await CategoryModel.find().sort({ createdAt: -1 }).lean();
+    const data = await CategoryModel.aggregate([
+      { $sort: { createdAt: -1 } },
+      {
+        $lookup: {
+          from: ProductModel.collection.name,
+          let: { categoryId: "$_id" },
+          pipeline: [
+            { $match: { $expr: { $in: ["$$categoryId", { $ifNull: ["$category", []] }] }, publish: true } },
+            { $project: { _id: 1 } }
+          ],
+          as: "products"
+        }
+      },
+      { $addFields: { productCount: { $size: "$products" } } },
+      { $project: { products: 0 } }
+    ]);
 
     return response.json({
       data: localizeDocuments(data, ["name"], locale),
