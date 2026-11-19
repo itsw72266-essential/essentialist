@@ -76,18 +76,18 @@ const AddToCartButton = ({ data }) => {
     }
     
     return (
-        <div className='w-full max-w-[150px]'>
+        <div className='shrink-0 max-w-[110px]'>
             {
                 isAvailableCart ? (
                     <div className='flex w-full h-full'>
-                        <button onClick={decreaseQty} className='bg-pink-400 bg-yellow text-white flex-1 w-full p-1 rounded flex items-center justify-center'><FaMinus /></button>
+                        <button onClick={decreaseQty} className='bg-pink-400 bg-yellow text-white flex-1 p-1 rounded flex items-center justify-center shrink-0'><FaMinus /></button>
 
-                        <p className='flex-1 w-full font-semibold px-1 flex items-center justify-center'>{qty}</p>
+                        <p className='flex-1 font-semibold px-1 flex items-center justify-center'>{qty}</p>
 
-                        <button onClick={increaseQty} className='bg-pink-400 bg-yellow text-white flex-1 w-full p-1 rounded flex items-center justify-center'><FaPlus /></button>
+                        <button onClick={increaseQty} className='bg-pink-400 bg-yellow text-white flex-1 p-1 rounded flex items-center justify-center shrink-0'><FaPlus /></button>
                     </div>
                 ) : (
-                    <button onClick={handleADDTocart} className='bg-pink-400 bg-yellow text-white px-2 lg:px-4 py-2 rounded'>
+                    <button onClick={handleADDTocart} className='bg-pink-400 bg-yellow text-white px-2 lg:px-3 py-1.5 lg:py-2 rounded text-xs lg:text-sm whitespace-nowrap'>
                         {loading ? <Loading /> : t("product.addToCart")}
                     </button>
                 )

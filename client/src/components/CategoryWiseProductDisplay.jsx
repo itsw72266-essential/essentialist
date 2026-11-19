@@ -105,9 +105,9 @@ const CategoryWiseProductDisplay = ({
       {/* Product Grid: Restored original Next.js styles (small gaps, px-1 on cards, horizontal scroll) */}
       <div className="relative flex items-center cursor-pointer">
         <div
-          className="grid grid-cols-2 sm:grid-cols-2 md:flex
+          className="grid grid-cols-2 sm:grid-cols-2 md:flex items-stretch
                      gap-1 md:gap-1 lg:gap-1
-                     container mx-auto 
+                     container mx-auto
                      overflow-x-auto scrollbar-none scroll-smooth
                      touch-pan-y"
           ref={containerRef}
@@ -116,9 +116,9 @@ const CategoryWiseProductDisplay = ({
           {products.length > 0 ? (
             // Render pre-fetched products (instant, no loading delay)
             products.map((p, index) => (
-              <div 
+              <div
                 key={`${p._id}-${id}-${index}`}
-                className="px-1" // Original px-1 for tight spacing
+                className="px-1 flex md:w-[180px] md:shrink-0" // Original px-1 for tight spacing, equal card widths
               >
                 <CardProduct data={p} />
               </div>

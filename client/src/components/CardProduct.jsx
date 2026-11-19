@@ -307,8 +307,8 @@ const CardProduct = React.memo(({ data, isLoading = false, priority = false }) =
   }, [])
 
   // FIX: Moved min-width and max-width into Tailwind classes to prevent Hydration Mismatch
-  const cardClasses = useMemo(() => 
-    "relative flex flex-col border border-gray-200 overflow-hidden transition-all duration-300 ease-in-out py-1 lg:p-2 rounded-lg bg-white shadow-sm hover:shadow-md group hover:-translate-y-1 min-w-[1rem] max-w-[20rem]",
+  const cardClasses = useMemo(() =>
+    "relative flex flex-col w-full h-full border border-gray-200 overflow-hidden transition-all duration-300 ease-in-out py-1 lg:p-2 rounded-lg bg-white shadow-sm hover:shadow-md group hover:-translate-y-1 min-w-[1rem] max-w-[20rem]",
     []
   )
 
@@ -370,24 +370,24 @@ const CardProduct = React.memo(({ data, isLoading = false, priority = false }) =
           </div>
         )}
 
-        <div className="flex items-center justify-between mt-auto">
-          <div className="flex flex-col">
-            <div className="product-text-fixed font-black text-gray-900 text-sm">
+        <div className="flex items-center justify-between gap-1 mt-auto">
+          <div className="flex flex-col min-w-0">
+            <div className="product-text-fixed font-black text-gray-900 text-sm truncate">
               {DisplayPriceInRupees(discountedPrice)}
             </div>
             {Boolean(data.discount) && (
-              <div className="text-[10px] text-gray-400 line-through">
+              <div className="text-[10px] text-gray-400 line-through truncate">
                 {DisplayPriceInRupees(data.price)}
               </div>
             )}
           </div>
-          <div className="transition-transform duration-300 group-hover:scale-105">
+          <div className="transition-transform duration-300 group-hover:scale-105 shrink-0">
             {isInStock ? (
               <div data-add-to-cart className="pointer-events-auto">
                 <AddToCartButton data={data} />
               </div>
             ) : (
-              <p className="text-red-500 text-[10px] font-bold uppercase tracking-wider bg-red-50 px-2 py-1 rounded-full border border-red-100">{t('product.soldOut')}</p>
+              <p className="text-red-500 text-[10px] font-bold uppercase tracking-wider bg-red-50 px-2 py-1 rounded-full border border-red-100 whitespace-nowrap">{t('product.soldOut')}</p>
             )}
           </div>
         </div>
