@@ -18,6 +18,9 @@
     "previous": "Precedent",
     "viewAll": "Voir tout",
     "noData": "Aucune donnee",
+    "noDataTitle": "Rien a afficher ici !",
+    "noDataDescription": "Nous avons cherche partout, mais aucune donnee ne correspond a votre demande.",
+    "refreshPage": "Actualiser la page",
     "required": "Obligatoire",
     "success": "Succes",
     "error": "Erreur"

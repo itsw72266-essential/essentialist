@@ -18,6 +18,9 @@
     "previous": "Previous",
     "viewAll": "View all",
     "noData": "No data",
+    "noDataTitle": "Nothing to fetch here!",
+    "noDataDescription": "We sniffed everywhere, but couldn't find any data matching your request.",
+    "refreshPage": "Refresh Page",
     "required": "Required",
     "success": "Success",
     "error": "Error"
