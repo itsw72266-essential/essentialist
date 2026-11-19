@@ -377,8 +377,8 @@ const ProductRecommendations = ({ currentProductId, currentProductData }) => {
               {t("recommendations.relatedProducts")}
             </h2>
             <div className="grid grid-cols-2 sm:grid-cols-2 md:flex
-                          gap-4 sm:gap-6 md:gap-20
-                          container mx-auto 
+                          gap-1 md:gap-1 lg:gap-1
+                          container mx-auto
                           overflow-x-auto scrollbar-none scroll-smooth">
               {relatedProducts.map((product) => (
                 <div key={`related-${product._id}`} className="flex-shrink-0 w-full sm:w-auto md:w-52">
@@ -395,8 +395,8 @@ const ProductRecommendations = ({ currentProductId, currentProductData }) => {
               {t("recommendations.browsingHistory")}
             </h2>
             <div className="grid grid-cols-2 sm:grid-cols-2 md:flex
-                          gap-4 sm:gap-6 md:gap-10
-                          container mx-auto 
+                          gap-1 md:gap-1 lg:gap-1
+                          container mx-auto
                           overflow-x-auto scrollbar-none scroll-smooth">
               {displayHistory.map((product) => (
                 <div key={`history-${product._id}`} className="flex-shrink-0 w-full sm:w-auto md:w-52">
