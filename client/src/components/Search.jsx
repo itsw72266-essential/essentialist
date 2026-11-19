@@ -150,14 +150,14 @@ function SearchInner() {
   const searchText = searchParams.get('q') || ''
   const isSearchPage = pathname === '/search'
 
-  const redirectToSearchPage = () => {
-    router.push('/search')
-  }
-
   const handleOnChange = (e) => {
     const value = e.target.value
     const url = `/search?q=${encodeURIComponent(value)}`
-    router.push(url)
+    if (isSearchPage) {
+      router.replace(url)
+    } else {
+      router.push(url)
+    }
   }
 
   return (
@@ -190,29 +190,17 @@ function SearchInner() {
       </div>
 
       <div className="flex-1 w-0 h-full flex items-center">
-        {!isSearchPage ? (
-          <div
-            onClick={redirectToSearchPage}
-            className="w-full h-full flex items-center cursor-pointer pl-1 text-[0.98rem] md:text-base"
-          >
-            <span className="truncate text-gray-200">
-              {t('search.placeholder')}
-            </span>
-          </div>
-        ) : (
-          <div className="w-full h-full flex items-center">
-            <input
-              type="text"
-              placeholder={t('search.placeholder')}
-              autoFocus
-              defaultValue={searchText}
-              className="bg-transparent w-full h-full outline-none text-[0.99rem] md:text-base px-1"
-              onChange={handleOnChange}
-              style={{ minWidth: 0 }}
-              aria-label={t('search.inputAria')}
-            />
-          </div>
-        )}
+        <input
+          type="text"
+          placeholder={t('search.placeholder')}
+          autoFocus={isSearchPage}
+          defaultValue={searchText}
+          key={isSearchPage ? searchText : 'idle'}
+          className="bg-transparent w-full h-full outline-none text-[0.99rem] md:text-base px-1"
+          onChange={handleOnChange}
+          style={{ minWidth: 0 }}
+          aria-label={t('search.inputAria')}
+        />
       </div>
     </div>
   )
