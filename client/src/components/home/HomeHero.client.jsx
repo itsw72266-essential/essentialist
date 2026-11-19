@@ -26,6 +26,10 @@ const PANELS = [
     src: '/assets/holiday-makeup-gift-celebration.png',
     altKey: 'home.heroPanel4Title',
   },
+  {
+    src: '/assets/holiday-gifts-esmakeupstore.png',
+    altKey: 'home.heroPanel5Title',
+  },
 ]
 
 export default function HomeHero() {
@@ -45,7 +49,7 @@ export default function HomeHero() {
       <div className="relative">
         <div
           ref={trackRef}
-          className="grid grid-flow-col auto-cols-[94%] sm:auto-cols-[42%] lg:auto-cols-fr lg:grid-flow-row lg:grid-cols-4
+          className="grid grid-flow-col auto-cols-[94%] sm:auto-cols-[42%] lg:auto-cols-fr lg:grid-flow-row lg:grid-cols-5
                      gap-0 overflow-x-auto lg:overflow-visible snap-x snap-mandatory scrollbar-none"
         >
           {PANELS.map((panel, index) => (
