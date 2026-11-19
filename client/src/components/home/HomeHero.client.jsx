@@ -53,13 +53,14 @@ export default function HomeHero() {
       <div className="relative">
         <div
           ref={trackRef}
-          className="grid grid-flow-col auto-cols-[94%] sm:auto-cols-[42%] lg:auto-cols-fr lg:grid-flow-row lg:grid-cols-5
+          className="flex lg:grid lg:grid-cols-5
                      gap-0 overflow-x-auto lg:overflow-visible snap-x snap-mandatory scrollbar-none"
         >
           {PANELS.map((panel, index) => (
             <div
               key={panel.src}
-              className="relative snap-start overflow-hidden aspect-[993/1584] bg-neutral-100"
+              className="relative snap-start overflow-hidden aspect-[993/1584] bg-neutral-100
+                         flex-none basis-[92%] sm:basis-[46%] lg:basis-auto"
             >
               <Image
                 src={panel.src}
@@ -70,7 +71,7 @@ export default function HomeHero() {
                 loading={index === 0 ? 'eager' : 'lazy'}
                 unoptimized
                 className="object-contain"
-                sizes="(min-width: 1024px) 25vw, (min-width: 640px) 42vw, 94vw"
+                sizes="(min-width: 1024px) 20vw, (min-width: 640px) 46vw, 92vw"
               />
               {panel.overlayTitleKey && (
                 <div className="absolute inset-x-0 top-0 bg-gradient-to-b from-pink-600/90 to-pink-600/0 px-4 pt-4 pb-10">
