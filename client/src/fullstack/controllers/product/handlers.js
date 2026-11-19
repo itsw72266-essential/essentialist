@@ -36,21 +36,22 @@ const PRODUCT_CACHE_NAMESPACES = [
   'products:filter-meta',
 ];
 
-const ONE_MONTH_SECONDS = 60 * 60 * 24 * 30;
+const BROWSER_CACHE_SECONDS = 60;
+const CDN_CACHE_SECONDS = 60 * 60; // 1 hour
 
 const PRODUCT_DEFAULT_CACHE = {
-  maxAge: ONE_MONTH_SECONDS,
-  sMaxAge: ONE_MONTH_SECONDS,
+  maxAge: BROWSER_CACHE_SECONDS,
+  sMaxAge: CDN_CACHE_SECONDS,
 };
 
 const PRODUCT_DETAILS_CACHE = {
-  maxAge: ONE_MONTH_SECONDS,
-  sMaxAge: ONE_MONTH_SECONDS,
+  maxAge: BROWSER_CACHE_SECONDS,
+  sMaxAge: CDN_CACHE_SECONDS,
 };
 
 const PRODUCT_FILTER_CACHE = {
-  maxAge: ONE_MONTH_SECONDS,
-  sMaxAge: ONE_MONTH_SECONDS,
+  maxAge: BROWSER_CACHE_SECONDS,
+  sMaxAge: CDN_CACHE_SECONDS,
 };
 
 const setCacheHeaders = (res, { maxAge, sMaxAge }) => {

@@ -26,8 +26,8 @@ const PRODUCT_CACHE_NAMESPACES = [
 
 // const DEFAULT_CACHE = { maxAge: 120, sMaxAge: 600 };
 
-//cache for a month
-const DEFAULT_CACHE = { maxAge: 2592000, sMaxAge: 2592000 };
+//cache for 1 hour at the CDN, short-lived in the browser
+const DEFAULT_CACHE = { maxAge: 60, sMaxAge: 3600 };
 
 const setCacheHeaders = (res, { maxAge, sMaxAge }) => {
   res.set("Cache-Control", `public, max-age=${maxAge}, s-maxage=${sMaxAge}`);

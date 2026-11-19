@@ -16,8 +16,8 @@ import {
   scheduleAutoTranslate,
 } from "../../utils/auto-translate.js";
 
-// Cache for a month 
-const DEFAULT_CACHE = { maxAge: 2592000, sMaxAge: 2592000 };
+// Cache for 1 hour at the CDN, short-lived in the browser
+const DEFAULT_CACHE = { maxAge: 60, sMaxAge: 3600 };
 const BLOG_CACHE_NAMESPACES = ["blogs:list", "blogs:slug"];
 
 const setCacheHeaders = (res, cache = DEFAULT_CACHE) => {
