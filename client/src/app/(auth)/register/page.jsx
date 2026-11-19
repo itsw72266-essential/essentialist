@@ -97,7 +97,7 @@ const Register = () => {
                             name="name"
                             value={data.name}
                             onChange={handleChange}
-                            className="w-full px-3 py-2 border-2 border-gray-400 text-gray-700 text-base rounded-lg focus:border-pink-500 focus:outline-none placeholder-gray-400 font-medium transition"
+                            className="w-full px-3 py-2 border-2 border-gray-400 bg-white text-gray-700 text-base rounded-lg focus:border-pink-500 focus:outline-none placeholder-gray-400 font-medium transition"
                         />
                     </div>
                     <div>
@@ -109,7 +109,7 @@ const Register = () => {
                             value={data.email}
                             onChange={handleChange}
                             placeholder={t('auth.emailPlaceholder')}
-                            className="w-full px-3 py-2 border-2 border-gray-400 text-gray-700 text-base rounded-lg focus:border-pink-500 focus:outline-none placeholder-gray-400 font-medium transition"
+                            className="w-full px-3 py-2 border-2 border-gray-400 bg-white text-gray-700 text-base rounded-lg focus:border-pink-500 focus:outline-none placeholder-gray-400 font-medium transition"
                         />
                     </div>
                     <div>
@@ -122,9 +122,9 @@ const Register = () => {
                                 value={data.password}
                                 onChange={handleChange}
                                 placeholder="••••••••"
-                                className="w-full px-3 py-2 border-2 border-gray-400 text-gray-700 text-base rounded-lg focus:border-pink-500 focus:outline-none placeholder-gray-400 font-medium transition pr-10"
+                                className="w-full px-3 py-2 border-2 border-gray-400 bg-white text-gray-700 text-base rounded-lg focus:border-pink-500 focus:outline-none placeholder-gray-400 font-medium transition pr-10"
                             />
-                            <button 
+                            <button
                                 type="button"
                                 tabIndex={-1}
                                 onClick={() => setShowPassword(prev => !prev)}
@@ -145,9 +145,9 @@ const Register = () => {
                                 value={data.confirmPassword}
                                 onChange={handleChange}
                                 placeholder="••••••••"
-                                className="w-full px-3 py-2 border-2 border-gray-400 text-gray-700 text-base rounded-lg focus:border-pink-500 focus:outline-none placeholder-gray-400 font-medium transition pr-10"
+                                className="w-full px-3 py-2 border-2 border-gray-400 bg-white text-gray-700 text-base rounded-lg focus:border-pink-500 focus:outline-none placeholder-gray-400 font-medium transition pr-10"
                             />
-                            <button 
+                            <button
                                 type="button"
                                 tabIndex={-1}
                                 onClick={() => setShowConfirmPassword(prev => !prev)}

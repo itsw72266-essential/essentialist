@@ -169,6 +169,18 @@ html[lang="fr"] .product-text-fixed-xs {
   }
 }
 
+/* Form controls default to light styling unless a utility class overrides
+   the background/text color. Without this, browsers render inputs that
+   have no explicit background using the OS/browser dark color scheme,
+   producing black-on-black inputs. */
+@layer base {
+  input, textarea, select {
+    color-scheme: light;
+    background-color: white;
+    color: #1f2937;
+  }
+}
+
 /* Accessible focus defaults */
 a:focus-visible,
 button:focus-visible,

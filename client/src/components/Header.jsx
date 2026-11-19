@@ -334,9 +334,11 @@ const Header = () => {
                                 <GoTriangleDown className={`ml-1 transform transition-transform ${offersDropdownOpen ? 'rotate-180' : ''}`} />
                             </button>
                             {offersDropdownOpen && (
-                                <div className="absolute top-full right-0 mt-2 w-40 bg-white text-black rounded shadow-lg z-50">
-                                    <Link prefetch={linkPrefetch} href={localizePath("/offers", pathLocale)} className="block px-4 py-2 hover:bg-pink-50 hover:text-pink-700 transition-colors" onClick={() => setOffersDropdownOpen(false)}>{t('header.offers')}</Link>
-                                    <Link prefetch={linkPrefetch} href={localizePath("/clearance", pathLocale)} className="block px-4 py-2 hover:bg-pink-50 hover:text-pink-700 transition-colors" onClick={() => setOffersDropdownOpen(false)}>{t('header.clearance')}</Link>
+                                <div className="absolute top-full right-0 pt-2 w-40 z-50">
+                                    <div className="bg-white text-black rounded shadow-lg">
+                                        <Link prefetch={linkPrefetch} href={localizePath("/offers", pathLocale)} className="block px-4 py-2 hover:bg-pink-50 hover:text-pink-700 transition-colors" onClick={() => setOffersDropdownOpen(false)}>{t('header.offers')}</Link>
+                                        <Link prefetch={linkPrefetch} href={localizePath("/clearance", pathLocale)} className="block px-4 py-2 hover:bg-pink-50 hover:text-pink-700 transition-colors" onClick={() => setOffersDropdownOpen(false)}>{t('header.clearance')}</Link>
+                                    </div>
                                 </div>
                             )}
                         </li>

@@ -199,12 +199,12 @@ const Login = () => {
   return (
     <section className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-pink-50 p-2 md:p-4">
       <div className="w-full max-w-4xl flex flex-col md:flex-row overflow-hidden rounded-3xl shadow-2xl bg-white">
-        <div className="relative h-40 md:h-auto md:w-1/2 bg-pink-400">
+        <div className="relative h-40 md:h-auto md:w-1/2 bg-pink-400 p-4">
           <Image
             src="/assets/staymattebutnotflatpowderfoundationmain.jpg"
             alt=""
             fill
-            className="object-cover"
+            className="object-contain p-4"
             priority
             sizes="(max-width: 768px) 100vw, 50vw"
             style={{ zIndex: 1 }}
