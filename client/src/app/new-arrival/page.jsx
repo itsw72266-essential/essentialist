@@ -221,6 +221,20 @@ const HERO_DESCRIPTION =
   "Discover the latest additions to our collection. From newly launched NYX foundations to trending palettes, shop the freshest makeup arrivals in Cameroon at the best FCFA prices.";
 
 const NEW_WITHIN_DAYS = 90;
+export const SECTION_PAGE_SIZE = 12;
+
+// Only the fields the product grid cards actually render — keeps list
+// payloads small instead of shipping full product documents.
+const LIST_PROJECTION = {
+  name: 1,
+  slug: 1,
+  image: 1,
+  price: 1,
+  discount: 1,
+  brand: 1,
+  isHot: 1,
+  createdAt: 1,
+};
 
 export async function generateMetadata() {
   const locale = await getServerLocale();
@@ -234,6 +248,7 @@ async function loadProducts() {
     sortBy: "createdAt",
     sortOrder: "desc",
     onlyActive: true,
+    projection: LIST_PROJECTION,
   };
 
   // force-cache so these POST fetches are valid inside the "use cache" page body
@@ -248,7 +263,7 @@ async function loadProducts() {
       method: "POST",
       body: {
         ...basePayload,
-        limit: 16,
+        limit: SECTION_PAGE_SIZE,
         filters: { newWithinDays: NEW_WITHIN_DAYS },
       },
       cache: "force-cache",
@@ -257,7 +272,7 @@ async function loadProducts() {
       method: "POST",
       body: {
         ...basePayload,
-        limit: 16,
+        limit: SECTION_PAGE_SIZE,
         filters: { isHot: true },
       },
       cache: "force-cache",
@@ -284,10 +299,17 @@ async function loadProducts() {
     return allFetched;
   };
 
+  const extractTotalCount = (result) => {
+    if (result.status !== "fulfilled") return 0;
+    return Number(result.value?.totalCount) || 0;
+  };
+
   return {
-    feedProducts: extractProducts(allRes, true), 
+    feedProducts: extractProducts(allRes, true),
     newCategoryProducts: extractProducts(newRes),
     hotCategoryProducts: extractProducts(hotRes),
+    newCategoryTotalCount: extractTotalCount(newRes),
+    hotCategoryTotalCount: extractTotalCount(hotRes),
   };
 }
 
@@ -327,7 +349,13 @@ export default async function NewArrivalPage() {
   cacheLife("minutes");
   cacheTag("new-arrival");
 
-  const { feedProducts, newCategoryProducts, hotCategoryProducts } = await loadProducts();
+  const {
+    feedProducts,
+    newCategoryProducts,
+    hotCategoryProducts,
+    newCategoryTotalCount,
+    hotCategoryTotalCount,
+  } = await loadProducts();
 
   const normalizedFeed = normalizeProducts(feedProducts);
   const normalizedNew = normalizeProducts(newCategoryProducts);
@@ -374,6 +402,8 @@ export default async function NewArrivalPage() {
         feedProducts={normalizedFeed}
         newCategoryProducts={normalizedNew}
         hotCategoryProducts={normalizedHot}
+        newCategoryTotalCount={newCategoryTotalCount}
+        hotCategoryTotalCount={hotCategoryTotalCount}
       />
     </>
   );

@@ -1,9 +1,23 @@
 "use client";
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import SummaryApi from "@/backend/contracts/summaryApi";
+import SummaryApi, { callSummaryApi } from "@/backend/contracts/summaryApi";
 
 const PAGE_SIZE = 24;
+// Keep in sync with SECTION_PAGE_SIZE / NEW_WITHIN_DAYS in app/new-arrival/page.jsx
+const SECTION_PAGE_SIZE = 12;
+const NEW_WITHIN_DAYS = 90;
+
+const LIST_PROJECTION = {
+  name: 1,
+  slug: 1,
+  image: 1,
+  price: 1,
+  discount: 1,
+  brand: 1,
+  isHot: 1,
+  createdAt: 1,
+};
 
 const DEFAULT_FILTERS = {
   q: "",
@@ -88,22 +102,105 @@ function ProductCard({ product }) {
   );
 }
 
-function ProductsSection({ title, products }) {
+function normalizeProduct(product) {
+  if (!product || typeof product !== "object") return product;
+  const brandData = product.brand;
+  const brandName = typeof brandData === "string" ? brandData : (brandData?.name || "");
+  return {
+    ...product,
+    brand: brandName,
+    image: Array.isArray(product.image) ? product.image : (product.image ? [product.image] : []),
+  };
+}
+
+function PaginatedProductsSection({ title, initialProducts, initialTotalCount, filterKind, emptyMessage }) {
+  const [page, setPage] = useState(1);
+  const [products, setProducts] = useState(initialProducts);
+  const [totalCount, setTotalCount] = useState(initialTotalCount);
+  const [loading, setLoading] = useState(false);
+  const totalPages = Math.max(1, Math.ceil((totalCount || 0) / SECTION_PAGE_SIZE));
+
+  const fetchPage = useCallback(
+    async (nextPage) => {
+      if (nextPage === page || loading) return;
+
+      if (nextPage === 1) {
+        setProducts(initialProducts);
+        setTotalCount(initialTotalCount);
+        setPage(1);
+        return;
+      }
+
+      setLoading(true);
+      try {
+        const filters =
+          filterKind === "new" ? { newWithinDays: NEW_WITHIN_DAYS } : { isHot: true };
+        const res = await callSummaryApi(SummaryApi.getProduct, {
+          payload: {
+            limit: SECTION_PAGE_SIZE,
+            page: nextPage,
+            sortBy: "createdAt",
+            sortOrder: "desc",
+            onlyActive: true,
+            projection: LIST_PROJECTION,
+            filters,
+          },
+        });
+        const list = res?.data || res?.products || [];
+        setProducts(list.map(normalizeProduct));
+        setTotalCount(Number(res?.totalCount) || totalCount);
+        setPage(nextPage);
+      } catch (error) {
+        console.error("Failed to load page", error);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [filterKind, initialProducts, initialTotalCount, loading, page, totalCount],
+  );
+
   return (
     <section className="container mx-auto px-4 mt-10">
       <h2 className="text-xl font-bold text-neutral-800 mb-4">{title}</h2>
       {products.length === 0 ? (
         <div className="bg-white border rounded-lg p-8 text-center">
-          <p className="font-semibold text-neutral-700">
-            No products in this category yet. Check back soon!
-          </p>
+          <p className="font-semibold text-neutral-700">{emptyMessage}</p>
         </div>
       ) : (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
-          {products.map((product) => (
-            <ProductCard key={product?._id} product={product} />
-          ))}
-        </div>
+        <>
+          <div
+            className={`grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 ${
+              loading ? "opacity-50" : ""
+            }`}
+          >
+            {products.map((product) => (
+              <ProductCard key={product?._id} product={product} />
+            ))}
+          </div>
+          {totalPages > 1 ? (
+            <div className="flex items-center justify-center gap-3 mt-6">
+              <button
+                type="button"
+                disabled={page <= 1 || loading}
+                onClick={() => fetchPage(page - 1)}
+                className="px-4 py-2 rounded border text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:bg-pink-50"
+              >
+                Previous
+              </button>
+              <span className="text-sm text-gray-600">
+                Page {page} of {totalPages}
+              </span>
+              <button
+                type="button"
+                disabled={page >= totalPages || loading}
+                onClick={() => fetchPage(page + 1)}
+                className="px-4 py-2 rounded border text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:bg-pink-50"
+              >
+                Next
+              </button>
+            </div>
+          ) : null}
+        </>
       )}
     </section>
   );
@@ -114,6 +211,8 @@ export default function NewArrivalContent({
   feedProducts,
   newCategoryProducts,
   hotCategoryProducts,
+  newCategoryTotalCount = 0,
+  hotCategoryTotalCount = 0,
 }) {
   return (
     <div className="min-h-screen bg-gradient-to-b from-white via-pink-50 to-white pb-16">
@@ -148,13 +247,19 @@ export default function NewArrivalContent({
 
       {newCategoryProducts.length > 0 || hotCategoryProducts.length > 0 ? (
         <>
-          <ProductsSection
+          <PaginatedProductsSection
             title="New Makeup Arrivals in Cameroon"
-            products={newCategoryProducts}
+            initialProducts={newCategoryProducts}
+            initialTotalCount={newCategoryTotalCount}
+            filterKind="new"
+            emptyMessage="No new arrivals yet. Check back soon!"
           />
-          <ProductsSection
-            title="New Makeup Arrivals & Hot Brands in Cameroon"
-            products={hotCategoryProducts}
+          <PaginatedProductsSection
+            title="Hot Makeup Brands in Cameroon"
+            initialProducts={hotCategoryProducts}
+            initialTotalCount={hotCategoryTotalCount}
+            filterKind="hot"
+            emptyMessage="No hot picks right now. Check back soon!"
           />
         </>
       ) : null}
