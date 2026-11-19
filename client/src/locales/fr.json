@@ -18,9 +18,9 @@
     "previous": "Precedent",
     "viewAll": "Voir tout",
     "noData": "Aucune donnee",
-    "noDataTitle": "Rien a afficher ici !",
-    "noDataDescription": "Nous avons cherche partout, mais aucune donnee ne correspond a votre demande.",
-    "refreshPage": "Actualiser la page",
+    "noDataTitle": "Aucun produit ici pour l'instant",
+    "noDataDescription": "Nous n'avons rien trouve correspondant a votre recherche. Parcourez nos autres categories ou revenez bientot pour les nouveautes.",
+    "continueShopping": "Continuer mes achats",
     "required": "Obligatoire",
     "success": "Succes",
     "error": "Erreur"

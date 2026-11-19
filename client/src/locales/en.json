@@ -18,9 +18,9 @@
     "previous": "Previous",
     "viewAll": "View all",
     "noData": "No data",
-    "noDataTitle": "Nothing to fetch here!",
-    "noDataDescription": "We sniffed everywhere, but couldn't find any data matching your request.",
-    "refreshPage": "Refresh Page",
+    "noDataTitle": "No products here yet",
+    "noDataDescription": "We couldn't find anything matching this. Browse our other categories or check back soon for new arrivals.",
+    "continueShopping": "Continue Shopping",
     "required": "Required",
     "success": "Success",
     "error": "Error"

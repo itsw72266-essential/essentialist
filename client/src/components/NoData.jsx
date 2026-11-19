@@ -1,5 +1,6 @@
 "use client";
 import React from 'react'
+import Link from 'next/link'
 import { useTranslation } from 'react-i18next'
 import '@/lib/i18n'
 
@@ -166,13 +167,12 @@ const NoData = () => {
       </svg>
       <h2 className='mt-3 mb-2 text-xl font-semibold text-slate-800'>{t('common.noDataTitle')}</h2>
       <p className='mb-5 max-w-[340px] text-sm text-slate-500'>{t('common.noDataDescription')}</p>
-      <button
-        type='button'
-        onClick={() => window.location.reload()}
+      <Link
+        href='/'
         className='rounded-lg bg-[#e09a56] px-6 py-2.5 font-semibold text-white hover:bg-[#cf8a47] transition-colors'
       >
-        {t('common.refreshPage')}
-      </button>
+        {t('common.continueShopping')}
+      </Link>
     </div>
   )
 }
