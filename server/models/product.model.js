@@ -184,6 +184,7 @@ const productSchema = new mongoose.Schema(
     bulkPrice: { type: Number, default: null },
     price: { type: Number, default: null },
     discount: { type: Number, default: null },
+    isHot: { type: Boolean, default: false },
     description: { type: String, default: '' },
     specifications: { type: String, default: '' },
     more_details: { type: Object, default: {} },
@@ -218,6 +219,8 @@ productSchema.index({ category: 1 });
 productSchema.index({ subCategory: 1 });
 productSchema.index({ price: 1 });
 productSchema.index({ discount: 1 });
+productSchema.index({ isHot: 1 });
+productSchema.index({ createdAt: -1 });
 
 const ProductModel = mongoose.model('product', productSchema);
 

@@ -103,6 +103,50 @@ const PAGES = {
       ],
     },
   },
+  offers: {
+    en: {
+      title: "Makeup Offers & Deals Cameroon | Essentialist Store",
+      description:
+        "Shop discounted makeup deals in Cameroon. Authentic brands, special prices, fast delivery in Douala and nationwide.",
+      keywords: [
+        "makeup deals Cameroon",
+        "cosmetics offers Douala",
+        "discounted beauty products",
+      ],
+    },
+    fr: {
+      title: "Offres maquillage Cameroun | Essentialist",
+      description:
+        "Profitez des offres maquillage au Cameroun. Produits authentiques à prix réduits, livraison rapide.",
+      keywords: [
+        "offres maquillage Cameroun",
+        "promos cosmétiques",
+        "réductions beauté Douala",
+      ],
+    },
+  },
+  clearance: {
+    en: {
+      title: "Makeup Clearance Sale Cameroon | Essentialist Store",
+      description:
+        "Shop deep clearance discounts on makeup in Cameroon. Authentic brands, limited stock, fast delivery.",
+      keywords: [
+        "makeup clearance Cameroon",
+        "cosmetics clearance sale Douala",
+        "cheap beauty products",
+      ],
+    },
+    fr: {
+      title: "Soldes maquillage Cameroun | Essentialist",
+      description:
+        "Soldes et liquidation maquillage au Cameroun. Stock limité, prix cassés, livraison rapide.",
+      keywords: [
+        "soldes maquillage Cameroun",
+        "liquidation cosmétiques",
+        "promos beauté Douala",
+      ],
+    },
+  },
   reviews: {
     en: {
       title: "Customer Reviews | Essentialist Makeup Store",

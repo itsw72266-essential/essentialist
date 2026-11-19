@@ -42,6 +42,8 @@ export function revalidateProductTags({ productId, categoryIds } = {}) {
     bust(`products-${id}`); // home-page catalog bundle (src/server/catalog.js)
   }
   bust("new-arrival");
+  bust("offers");
+  bust("clearance");
 }
 
 /** Category create/update/delete → nav, the category page, home catalog. */

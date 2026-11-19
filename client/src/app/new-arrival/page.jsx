@@ -220,9 +220,7 @@ const HERO_SUBTITLE = "The Newest Beauty Trends in Cameroon";
 const HERO_DESCRIPTION =
   "Discover the latest additions to our collection. From newly launched NYX foundations to trending palettes, shop the freshest makeup arrivals in Cameroon at the best FCFA prices.";
 
-const USE_CATEGORY_BLOCKS = true; 
-const NEW_CATEGORY_ID = "68055442764e6d332bd162c8";
-const NEW_HOT_CATEGORY_ID = "6806b355bca41016c4406edb";
+const NEW_WITHIN_DAYS = 90;
 
 export async function generateMetadata() {
   const locale = await getServerLocale();
@@ -231,9 +229,9 @@ export async function generateMetadata() {
 
 async function loadProducts() {
   const basePayload = {
-    limit: 100, 
+    limit: 100,
     page: 1,
-    sortBy: "createdAt", 
+    sortBy: "createdAt",
     sortOrder: "desc",
     onlyActive: true,
   };
@@ -246,20 +244,24 @@ async function loadProducts() {
       body: basePayload,
       cache: "force-cache",
     }),
-    USE_CATEGORY_BLOCKS
-      ? apiFetch(SummaryApi.getProductByCategory.url, {
-          method: "POST",
-          body: { ...basePayload, categoryId: NEW_CATEGORY_ID, limit: 16 },
-          cache: "force-cache",
-        })
-      : Promise.resolve({ value: [] }),
-    USE_CATEGORY_BLOCKS
-      ? apiFetch(SummaryApi.getProductByCategory.url, {
-          method: "POST",
-          body: { ...basePayload, categoryId: NEW_HOT_CATEGORY_ID, limit: 16 },
-          cache: "force-cache",
-        })
-      : Promise.resolve({ value: [] }),
+    apiFetch(SummaryApi.getProduct.url, {
+      method: "POST",
+      body: {
+        ...basePayload,
+        limit: 16,
+        filters: { newWithinDays: NEW_WITHIN_DAYS },
+      },
+      cache: "force-cache",
+    }),
+    apiFetch(SummaryApi.getProduct.url, {
+      method: "POST",
+      body: {
+        ...basePayload,
+        limit: 16,
+        filters: { isHot: true },
+      },
+      cache: "force-cache",
+    }),
   ]);
 
   const extractProducts = (result, applyCutoff = false) => {

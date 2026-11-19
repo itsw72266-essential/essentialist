@@ -682,6 +682,7 @@ const initialState = {
   bulkPrice: '',
   price: '',
   discount: '',
+  isHot: false,
   description: '',
   metaTitle: '',
   metaDescription: '',
@@ -864,6 +865,14 @@ const UploadProduct = () => {
     setData((prev) => ({
       ...prev,
       [name]: value
+    }));
+  };
+
+  const handleCheckboxChange = (event) => {
+    const { name, checked } = event.target;
+    setData((prev) => ({
+      ...prev,
+      [name]: checked
     }));
   };
 
@@ -1284,6 +1293,20 @@ const UploadProduct = () => {
                 onChange={handleChange}
                 className="bg-blue-50 p-2 outline-none border focus-within:border-primary-200 rounded"
               />
+            </div>
+
+            <div className="flex items-center gap-2">
+              <input
+                id="isHot"
+                type="checkbox"
+                name="isHot"
+                checked={!!data.isHot}
+                onChange={handleCheckboxChange}
+                className="h-4 w-4"
+              />
+              <label htmlFor="isHot" className="font-medium">
+                Mark as Hot (shown in "New & Hot")
+              </label>
             </div>
 
             {Object.keys(data.more_details).map((key, index) => (

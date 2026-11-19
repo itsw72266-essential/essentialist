@@ -149,6 +149,16 @@ const buildProductQuery = ({ search, filters = {} }) => {
     }
   }
 
+  if (filters.isHot !== undefined) {
+    query.isHot = !!filters.isHot;
+  }
+
+  if (filters.newWithinDays !== undefined && filters.newWithinDays !== null) {
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - Number(filters.newWithinDays));
+    query.createdAt = { $gte: cutoff };
+  }
+
   if (filters.stockStatus === 'inStock') {
     query.stock = { $gt: 0 };
   } else if (filters.stockStatus === 'outOfStock') {
@@ -240,6 +250,7 @@ export const createProductController = async (request, response) => {
       bulkPrice,
       price,
       discount,
+      isHot = false,
       description,
       specifications,
       more_details,
@@ -319,6 +330,7 @@ export const createProductController = async (request, response) => {
       bulkPrice: bulkPrice ?? null,
       price,
       discount,
+      isHot: !!isHot,
       description,
       specifications,
       more_details,
