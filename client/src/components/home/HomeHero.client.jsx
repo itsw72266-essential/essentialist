@@ -41,17 +41,17 @@ export default function HomeHero() {
   }
 
   return (
-    <div className="container mx-auto px-0 sm:px-4 pt-4">
+    <div className="w-full">
       <div className="relative">
         <div
           ref={trackRef}
           className="grid grid-flow-col auto-cols-[94%] sm:auto-cols-[42%] lg:auto-cols-fr lg:grid-flow-row lg:grid-cols-4
-                     gap-2 sm:gap-3 overflow-x-auto lg:overflow-visible snap-x snap-mandatory scrollbar-none pb-1"
+                     gap-0 overflow-x-auto lg:overflow-visible snap-x snap-mandatory scrollbar-none"
         >
           {PANELS.map((panel, index) => (
             <div
               key={panel.src}
-              className="relative snap-start overflow-hidden rounded-none sm:rounded-lg h-[280px] sm:h-[300px] lg:h-[400px] bg-neutral-100"
+              className="relative snap-start overflow-hidden h-[280px] sm:h-[420px] lg:h-[740px] bg-neutral-100"
             >
               <Image
                 src={panel.src}
@@ -61,7 +61,7 @@ export default function HomeHero() {
                 fetchPriority={index === 0 ? 'high' : 'auto'}
                 loading={index === 0 ? 'eager' : 'lazy'}
                 unoptimized
-                className="object-cover lg:object-contain"
+                className="object-cover"
                 sizes="(min-width: 1024px) 25vw, (min-width: 640px) 42vw, 94vw"
               />
             </div>
