@@ -11,14 +11,28 @@ import '@/lib/i18n'
 // panel only needs an accessible alt text — no text overlay on top.
 const PANELS = [
   {
+    src: '/assets/Pink Stocking Stuffers Under $25.png',
+    altKey: 'home.heroPanelTitle',
+    width: 993,
+    height: 1584,
+  },
+  {
     src: '/assets/black-friday-beauty-gift-display.png',
     altKey: 'home.heroPanel1Title',
     width: 993,
     height: 1584,
   },
+   {
+    src: '/assets/Essentialist Makeup Deals Gift Bundle.png',
+    altKey: 'home.heroPanel2Title',
+    // Its real pixel dimensions, so object-contain shows the whole image
+    // (including the logo near the bottom) uncropped, like its siblings.
+    width: 941,
+    height: 1505,
+  },
   {
     src: '/assets/festive-makeup-savings-ad.png',
-    altKey: 'home.heroPanel2Title',
+    altKey: 'home.heroPanel3Title',
     width: 995,
     height: 1580,
   },
@@ -30,15 +44,28 @@ const PANELS = [
   //   width: 941,
   //   height: 1585,
   // },
+ 
   {
-    src: '/assets/holiday-makeup-gift-celebration.png',
+    src: '/assets/Holiday Makeup Essentials Savings.png',
     altKey: 'home.heroPanel4Title',
     width: 992,
     height: 1585,
   },
   {
-    src: '/assets/holiday-gifts-esmakeupstore.png',
+    src: '/assets/holiday-makeup-gift-celebration.png',
     altKey: 'home.heroPanel5Title',
+    width: 992,
+    height: 1585,
+  },
+  {
+    src: '/assets/Glossy Pink Makeup Sale Essentials.png',
+    altKey: 'home.heroPanel5Title',
+    width: 993,
+    height: 1584,
+  },
+  {
+    src: '/assets/holiday-gifts-esmakeupstore.png',
+    altKey: 'home.heroPanel6Title',
     width: 993,
     height: 1584,
   },
