@@ -15,24 +15,34 @@ const PANELS = [
   {
     src: '/assets/black-friday-beauty-gift-display.png',
     altKey: 'home.heroPanel1Title',
+    width: 993,
+    height: 1584,
   },
   {
     src: '/assets/festive-makeup-savings-ad.png',
     altKey: 'home.heroPanel2Title',
+    width: 995,
+    height: 1580,
   },
   {
     src: '/assets/holiday-glam-makeup-display.png',
     altKey: 'home.heroPanel3Title',
+    width: 941,
+    height: 1672,
     overlayEyebrowKey: 'home.heroPanel3Eyebrow',
     overlayTitleKey: 'home.heroPanel3Title',
   },
   {
     src: '/assets/holiday-makeup-gift-celebration.png',
     altKey: 'home.heroPanel4Title',
+    width: 992,
+    height: 1585,
   },
   {
     src: '/assets/holiday-gifts-esmakeupstore.png',
     altKey: 'home.heroPanel5Title',
+    width: 993,
+    height: 1584,
   },
 ]
 
@@ -59,8 +69,10 @@ export default function HomeHero() {
           {PANELS.map((panel, index) => (
             <div
               key={panel.src}
-              className="relative snap-start overflow-hidden aspect-[993/1584] bg-neutral-100
-                         flex-none basis-[92%] sm:basis-[46%] lg:basis-auto"
+              className="relative snap-start overflow-hidden bg-neutral-100
+                         flex-none basis-[92%] sm:basis-[46%] lg:basis-auto
+                         aspect-[var(--panel-ar)] lg:aspect-auto lg:h-[500px]"
+              style={{ '--panel-ar': `${panel.width} / ${panel.height}` }}
             >
               <Image
                 src={panel.src}
@@ -74,7 +86,7 @@ export default function HomeHero() {
                 sizes="(min-width: 1024px) 20vw, (min-width: 640px) 46vw, 92vw"
               />
               {panel.overlayTitleKey && (
-                <div className="absolute inset-x-0 top-0 bg-gradient-to-b from-pink-600/90 to-pink-600/0 px-4 pt-4 pb-10">
+                <div className="absolute inset-x-0 top-0 bg-gradient-to-b from-orange-600/90 to-orange-600/0 px-4 pt-4 pb-10">
                   {panel.overlayEyebrowKey && (
                     <p className="text-white text-xs sm:text-sm font-medium">
                       {t(panel.overlayEyebrowKey)}
