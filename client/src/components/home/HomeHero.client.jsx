@@ -9,6 +9,8 @@ import '@/lib/i18n'
 
 // Each image already has its own promo copy baked in by design, so the
 // panel only needs an accessible alt text — no text overlay on top.
+// Exception: holiday-glam-makeup-display.png has no baked-in headline like
+// its siblings, so we render a matching overlay for it in code.
 const PANELS = [
   {
     src: '/assets/black-friday-beauty-gift-display.png',
@@ -21,6 +23,8 @@ const PANELS = [
   {
     src: '/assets/holiday-glam-makeup-display.png',
     altKey: 'home.heroPanel3Title',
+    overlayEyebrowKey: 'home.heroPanel3Eyebrow',
+    overlayTitleKey: 'home.heroPanel3Title',
   },
   {
     src: '/assets/holiday-makeup-gift-celebration.png',
@@ -68,6 +72,18 @@ export default function HomeHero() {
                 className="object-contain"
                 sizes="(min-width: 1024px) 25vw, (min-width: 640px) 42vw, 94vw"
               />
+              {panel.overlayTitleKey && (
+                <div className="absolute inset-x-0 top-0 bg-gradient-to-b from-pink-600/90 to-pink-600/0 px-4 pt-4 pb-10">
+                  {panel.overlayEyebrowKey && (
+                    <p className="text-white text-xs sm:text-sm font-medium">
+                      {t(panel.overlayEyebrowKey)}
+                    </p>
+                  )}
+                  <p className="text-white text-lg sm:text-xl lg:text-2xl font-bold leading-tight">
+                    {t(panel.overlayTitleKey)}
+                  </p>
+                </div>
+              )}
             </div>
           ))}
         </div>
