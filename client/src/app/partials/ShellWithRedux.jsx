@@ -49,16 +49,14 @@ const PathAwareShell = memo(function PathAwareShell({ children }) {
           <div className="w-full py-1 px-2 sm:px-4 md:pl-0">
             <div className="flex flex-col md:flex-row gap-4">
               {showSidebar && !isCheckout && (
-                <div className="w-full md:w-1/4 lg:w-1/5">
+                <div className="w-full md:w-60 lg:w-64 shrink-0 min-w-0">
                   <Suspense fallback={<div className="animate-pulse h-96 bg-gray-100 rounded-xl"></div>}>
                     <HomeSidebarFilters />
                   </Suspense>
                 </div>
               )}
               <div
-                className={`w-full ${
-                  showSidebar && !isCheckout ? "md:w-3/4 lg:w-4/5" : "w-full"
-                } bg-white/80 rounded-xl shadow p-3`}
+                className="w-full min-w-0 flex-1 bg-white/80 rounded-xl shadow p-3"
               >
                 {children}
               </div>
