@@ -138,7 +138,6 @@ const Header = () => {
     const [deliveryTime, setDeliveryTime] = useState('');
 
     const navLinks = useMemo(() => [
-        { title: t('header.home'), path: '/' },
         { title: t('header.brands'), path: '/brands' },
         { title: t('header.newHot'), path: '/new-arrival' },
         { title: t('header.blog'), path: '/blog' },
@@ -253,15 +252,15 @@ const Header = () => {
     const showSidebar = !pathname.includes('/dashboard');
 
     return (
-        <header ref={headerRef} className="bg-white shadow" style={headerStyle}>
-            <div className="bg-pink-400 text-white px-1 py-0.5 sm:px-2 sm:py-1 flex flex-row flex-nowrap items-center justify-between gap-1 sm:gap-2 text-[10px] leading-tight sm:text-xs lg:text-sm min-h-[26px] sm:min-h-0">
+        <header ref={headerRef} className="bg-white shadow overflow-x-hidden" style={headerStyle}>
+            <div className="bg-pink-400 text-white px-1 py-0 sm:px-2 sm:py-1 flex flex-row flex-nowrap items-center justify-between gap-1 sm:gap-2 text-[9px] leading-tight sm:text-xs lg:text-sm min-h-[18px] sm:min-h-0">
                 <div className="flex items-center shrink-0 gap-1.5 sm:gap-3 lg:gap-4">
                     <a
                         href="tel:+237655225569"
                         className="flex items-center gap-0.5 hover:text-purple-200 whitespace-nowrap"
                         aria-label="+237 655 22 55 69"
                     >
-                        <HiPhone className="size-3 sm:size-3.5 shrink-0" />
+                        <HiPhone className="size-2.5 sm:size-3.5 shrink-0" />
                         <span className="hidden min-[400px]:inline lg:inline">+237 655 22 55 69</span>
                     </a>
                     <a
@@ -269,12 +268,12 @@ const Header = () => {
                         className="flex items-center gap-0.5 hover:text-purple-200"
                         aria-label="esssmakeup@gmail.com"
                     >
-                        <HiMail className="size-3 sm:size-3.5 shrink-0" />
+                        <HiMail className="size-2.5 sm:size-3.5 shrink-0" />
                         <span className="hidden md:inline">esssmakeup@gmail.com</span>
                     </a>
                 </div>
                 <div className="flex min-w-0 flex-1 items-center justify-center px-0.5 font-medium">
-                    <BiTimeFive className="mr-0.5 size-3 shrink-0 animate-pulse sm:mr-1 sm:size-3.5" />
+                    <BiTimeFive className="mr-0.5 size-2.5 shrink-0 animate-pulse sm:mr-1 sm:size-3.5" />
                     <span className="truncate text-center">
                         <span className="hidden lg:inline">{t('header.orderNow')} </span>
                         <span className="lg:hidden">{deliveryDateShort}</span>
@@ -287,15 +286,15 @@ const Header = () => {
                 <div className="flex shrink-0 items-center gap-1 sm:gap-2 lg:gap-4">
                     <LanguageSwitcher compact />
                     <div className="flex items-center cursor-pointer hover:text-purple-200 whitespace-nowrap">
-                        <FaMapMarkerAlt className="mr-0.5 size-3 shrink-0 sm:mr-1 sm:size-3.5" />
+                        <FaMapMarkerAlt className="mr-0.5 size-2.5 shrink-0 sm:mr-1 sm:size-3.5" />
                         <span className="hidden sm:inline">Bonamoussadi, Carrefour Maçon, Douala, Cameroon</span>
                         <span className="sm:hidden">{t('header.store')}</span>
                     </div>
                 </div>
             </div>
 
-            <nav className="bg-black text-white px-2 sm:px-4">
-                <div className="flex items-center justify-between">
+            <nav className="bg-black text-white px-0 sm:px-4">
+                <div className="flex items-center justify-between gap-0.5">
                     <div className="flex items-center flex-shrink-0">
                         <Link prefetch={linkPrefetch} href={localizePath("/", pathLocale)} className="flex items-center h-full">
                             {/* DESKTOP LOGO OPTIMIZED */}
@@ -316,8 +315,8 @@ const Header = () => {
                                 width={120}
                                 height={60}
                                 alt="logo"
-                                className="lg:hidden"
-                                style={{ maxWidth: "100%", objectFit: "contain", height: "auto" }}
+                                className="lg:hidden w-[56px] sm:w-[120px] h-auto shrink-0 ml-0.5"
+                                style={{ maxWidth: "100%", objectFit: "contain" }}
                                 priority={true}
                                 fetchPriority="high"
                                 unoptimized={true}
@@ -325,7 +324,7 @@ const Header = () => {
                         </Link> 
                     </div>
                     {!(isSearchPage && isMobile) && (
-                        <div ref={searchBarRef} className="flex-1 px-3 block">
+                        <div ref={searchBarRef} className="flex-1 min-w-0 px-0.5 sm:px-3 block">
                             <Search />
                         </div>
                     )}
@@ -372,17 +371,17 @@ const Header = () => {
                         </button>
                     </div>
 
-                    <div className="lg:hidden flex items-center gap-1.5 flex-shrink-0">
-                        <div className="user-account-menu relative">
-                            <button onClick={toggleUserMenu} className="flex flex-col items-start leading-tight text-white px-1 py-0.5">
-                                <span className="text-[9px] text-gray-300 whitespace-nowrap">
+                    <div className="lg:hidden flex items-center gap-0.5 flex-shrink-0 pr-0.5">
+                        <div className="user-account-menu relative max-w-[3.75rem] sm:max-w-none">
+                            <button onClick={toggleUserMenu} className="flex flex-col items-start leading-tight text-white px-0.5 py-0.5 w-full">
+                                <span className="text-[7px] sm:text-[9px] text-gray-300 truncate w-full">
                                     {user?._id
                                         ? t('header.helloUser', { name: (user?.name || '').split(' ')[0] || t('header.account') })
                                         : t('header.helloSignIn')}
                                 </span>
-                                <span className="flex items-center gap-0.5 text-[11px] font-bold whitespace-nowrap">
-                                    {t('header.accountAndLists')}
-                                    {openUserMenu ? <GoTriangleUp size={12} /> : <GoTriangleDown size={12} />}
+                                <span className="flex items-center gap-0.5 text-[9px] sm:text-[11px] font-bold w-full">
+                                    <span className="truncate">{t('header.accountAndLists')}</span>
+                                    {openUserMenu ? <GoTriangleUp size={10} className="shrink-0" /> : <GoTriangleDown size={10} className="shrink-0" />}
                                 </span>
                             </button>
                             {openUserMenu && (
@@ -393,18 +392,38 @@ const Header = () => {
                                 </div>
                             )}
                         </div>
-                        <button className="text-white mx-1 relative" onClick={toggleCartSection}>
-                            <BsCart4 size={24} />
+                        <button className="text-white relative shrink-0 p-0.5" onClick={toggleCartSection}>
+                            <BsCart4 size={19} />
                             {isClient && totalQty > 0 && (
-                                <span className="absolute -top-2 -right-2 text-xs bg-pink-400 px-2 py-0.5 rounded-full font-bold">{totalQty}</span>
+                                <span className="absolute -top-1.5 -right-1.5 text-[9px] leading-none bg-pink-400 px-1 py-0.5 rounded-full font-bold">{totalQty}</span>
                             )}
-                        </button>
-                        <button className="text-white mx-1" onClick={toggleMobileMenu}>
-                            {mobileMenuOpen ? <RiCloseLine size={30} /> : <RiMenu3Line size={30} />}
                         </button>
                     </div>
                 </div>
             </nav>
+
+            <div className="lg:hidden bg-black text-white border-t border-white/10 overflow-x-auto scrollbar-none">
+                <ul className="flex items-center gap-2.5 px-2 py-1.5 text-[11px] font-semibold whitespace-nowrap">
+                    <li className="flex items-center">
+                        <button
+                            type="button"
+                            onClick={toggleMobileMenu}
+                            className="flex items-center gap-0.5 hover:text-pink-400 transition-colors"
+                        >
+                            <RiMenu3Line size={14} />
+                            {t('header.all')}
+                        </button>
+                    </li>
+                    {navLinks.map(link => (
+                        <li key={link.path} className="flex items-center hover:text-purple-400">
+                            <Link prefetch={linkPrefetch} href={localizePath(link.path, pathLocale)}>{link.title}</Link>
+                        </li>
+                    ))}
+                    <li className="flex items-center hover:text-pink-400">
+                        <Link prefetch={linkPrefetch} href={localizePath("/offers", pathLocale)}>{t('header.salesOffers')}</Link>
+                    </li>
+                </ul>
+            </div>
 
             <div className="hidden lg:block bg-black text-white border-t border-purple-800">
                 <div className="relative max-w-screen-2xl mx-auto px-4">
@@ -419,13 +438,13 @@ const Header = () => {
                                 {t('header.all')}
                             </button>
                         </li>
-                        {navLinks.slice(0, 3).map(link => (
+                        {navLinks.slice(0, 2).map(link => (
                             <li key={link.path} className="flex items-center justify-between hover:text-purple-400 cursor-pointer">
                                 <Link prefetch={linkPrefetch} href={localizePath(link.path, pathLocale)}>{link.title}</Link>
                             </li>
                         ))}
                         <li className="flex items-center min-h-[2.5rem]"><Dropdown /></li>
-                        {navLinks.slice(3).map(link => (
+                        {navLinks.slice(2).map(link => (
                             <li key={link.path} className="flex items-center justify-between hover:text-purple-400 cursor-pointer">
                                 <Link prefetch={linkPrefetch} href={localizePath(link.path, pathLocale)}>{link.title}</Link>
                             </li>

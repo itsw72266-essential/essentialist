@@ -10,11 +10,12 @@ import '@/lib/i18n'
 // Each image already has its own promo copy baked in by design, so the
 // panel only needs an accessible alt text — no text overlay on top.
 const PANELS = [
-  {
-    src: '/assets/Pink Stocking Stuffers Under $25.png',
-    altKey: 'home.heroPanelTitle',
-    width: 993,
-    height: 1584,
+   {
+    type: 'iframe',
+    src: '/assets/essentialist_makeup_animated_ad.html',
+    altKey: 'home.heroPanelAdTitle',
+    width: 460,
+    height: 724,
   },
   {
     src: '/assets/black-friday-beauty-gift-display.png',
@@ -69,6 +70,12 @@ const PANELS = [
     width: 993,
     height: 1584,
   },
+  {
+    src: '/assets/Pink Stocking Stuffers Under $25.png',
+    altKey: 'home.heroPanelTitle',
+    width: 993,
+    height: 1584,
+  },
 ]
 
 export default function HomeHero() {
@@ -99,17 +106,26 @@ export default function HomeHero() {
                          aspect-[var(--panel-ar)]"
               style={{ '--panel-ar': `${panel.width} / ${panel.height}` }}
             >
-              <Image
-                src={panel.src}
-                alt={t(panel.altKey)}
-                fill
-                priority={index === 0}
-                fetchPriority={index === 0 ? 'high' : 'auto'}
-                loading={index === 0 ? 'eager' : 'lazy'}
-                unoptimized
-                className={panel.alwaysCover ? 'object-cover' : 'object-contain'}
-                sizes="(min-width: 1024px) 25vw, (min-width: 640px) 20vw, 25vw"
-              />
+              {panel.type === 'iframe' ? (
+                <iframe
+                  src={panel.src}
+                  title={t(panel.altKey)}
+                  loading="lazy"
+                  className="absolute inset-0 h-full w-full border-0"
+                />
+              ) : (
+                <Image
+                  src={panel.src}
+                  alt={t(panel.altKey)}
+                  fill
+                  priority={index === 0}
+                  fetchPriority={index === 0 ? 'high' : 'auto'}
+                  loading={index === 0 ? 'eager' : 'lazy'}
+                  unoptimized
+                  className={panel.alwaysCover ? 'object-cover' : 'object-contain'}
+                  sizes="(min-width: 1024px) 25vw, (min-width: 640px) 20vw, 25vw"
+                />
+              )}
             </div>
           ))}
         </div>

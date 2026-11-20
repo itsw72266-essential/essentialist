@@ -73,7 +73,7 @@ function SearchInner() {
     <div
       className="
         w-100 min-w-[10px] xs:min-w-[10px] sm:min-w-[10px] md:min-w-[10px] lg:min-w-[30px]
-        max-w-full h-10 sm:h-11 md:h-12 flex items-stretch rounded-md
+        max-w-full h-7 sm:h-11 md:h-12 flex items-stretch rounded-md
         focus-within:ring-2 focus-within:ring-yellow-400 transition-shadow
       "
     >
@@ -81,14 +81,14 @@ function SearchInner() {
         <button
           type="button"
           onClick={() => setCategoryMenuOpen((open) => !open)}
-          className="h-full flex items-center gap-1 px-2 sm:px-3 bg-gray-100 hover:bg-gray-200 text-black text-xs sm:text-sm rounded-l-md border border-gray-300 transition-colors"
+          className="h-full flex items-center gap-0.5 sm:gap-1 px-1.5 sm:px-3 bg-gray-100 hover:bg-gray-200 text-black text-[11px] sm:text-sm rounded-l-md border border-gray-300 transition-colors"
           aria-haspopup="listbox"
           aria-expanded={categoryMenuOpen}
           aria-label={t('search.allCategories')}
         >
-          <span className="max-w-[4rem] sm:max-w-[9rem] truncate">{selectedCategoryLabel}</span>
+          <span className="max-w-[2.75rem] sm:max-w-[9rem] truncate">{selectedCategoryLabel}</span>
           <GoTriangleDown
-            size={12}
+            size={11}
             className={`shrink-0 transition-transform ${categoryMenuOpen ? 'rotate-180' : ''}`}
           />
         </button>
@@ -122,7 +122,7 @@ function SearchInner() {
         )}
       </div>
 
-      <div className="flex-1 min-w-0 h-full flex items-center bg-white border-t border-b border-gray-300 px-2 sm:px-3">
+      <div className="flex-1 min-w-0 h-full flex items-center bg-white border-t border-b border-gray-300 px-1.5 sm:px-3">
         {isMobile && isSearchPage && (
           <Link
             href="/"
@@ -152,10 +152,10 @@ function SearchInner() {
       <button
         type="button"
         onClick={handleSubmit}
-        className="flex-shrink-0 h-full px-3 sm:px-4 flex items-center justify-center bg-yellow-400 hover:bg-yellow-500 rounded-r-md border border-gray-300 text-black transition-colors"
+        className="flex-shrink-0 h-full px-2.5 sm:px-4 flex items-center justify-center bg-yellow-400 hover:bg-yellow-500 rounded-r-md border border-gray-300 text-black transition-colors"
         aria-label={t('search.aria')}
       >
-        <IoSearch size={20} />
+        <IoSearch size={18} className="sm:w-5 sm:h-5" />
       </button>
     </div>
   )

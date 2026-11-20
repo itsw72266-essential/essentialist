@@ -69,10 +69,30 @@ const nextConfig = {
 // than guessing it in a generic security pass.
 nextConfig.headers = async () => [
   {
-    source: "/:path*",
+    // Everything except the animated hero-ad asset keeps the strict DENY
+    // clickjacking protection below; that one static, data-free promo
+    // page is embedded same-origin in the homepage hero carousel, so it
+    // gets SAMEORIGIN instead (see the second rule).
+    source: "/((?!assets/essentialist_makeup_animated_ad\\.html).*)",
     headers: [
       { key: "X-Content-Type-Options", value: "nosniff" },
       { key: "X-Frame-Options", value: "DENY" },
+      { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+      {
+        key: "Permissions-Policy",
+        value: "camera=(), microphone=(), geolocation=()",
+      },
+      {
+        key: "Strict-Transport-Security",
+        value: "max-age=63072000; includeSubDomains; preload",
+      },
+    ],
+  },
+  {
+    source: "/assets/essentialist_makeup_animated_ad.html",
+    headers: [
+      { key: "X-Content-Type-Options", value: "nosniff" },
+      { key: "X-Frame-Options", value: "SAMEORIGIN" },
       { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
       {
         key: "Permissions-Policy",

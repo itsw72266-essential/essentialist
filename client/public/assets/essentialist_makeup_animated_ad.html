@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Essentialist Makeup Store — Beauty Deals</title>
+<style>
+*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;background:#fce7f3;font-family:Arial,Helvetica,sans-serif}
+.poster{position:relative;width:min(460px,96vw);aspect-ratio:.635;background:#f472b6;border-radius:25px;overflow:hidden;color:white;box-shadow:0 8px 25px #be185d30}
+.head{position:absolute;z-index:5;top:4%;left:4%;right:4%}.eyebrow{font-size:clamp(14px,3.7vw,20px);font-weight:500}
+.headline{font-size:clamp(34px,8vw,54px);font-weight:950;line-height:.99;letter-spacing:-2.5px;margin-top:10px}.headline span{display:block}
+.stage{position:absolute;left:12%;right:12%;top:37%;height:47%;display:flex;align-items:center;justify-content:center}
+.glow{position:absolute;inset:8% -5% 5%;border:9px solid white;border-radius:22px;box-shadow:0 0 12px white,0 0 27px white,0 0 55px #fff9,inset 0 0 20px #fff9}
+.floor{position:absolute;bottom:2%;left:-18%;width:136%;height:12%;background:radial-gradient(ellipse,#fff9 0%,#fff4 30%,transparent 72%);filter:blur(8px)}
+.product{position:relative;z-index:2;width:68%;height:91%;display:flex;align-items:center;justify-content:center;filter:drop-shadow(0 18px 10px #8d174b55);transition:opacity .4s ease,transform .4s ease}
+.product.exit{opacity:0;transform:translateX(-42%) scale(.9)}
+.product.enter-start{transition:none;opacity:0;transform:translateX(42%) scale(.9)}
+.item{position:relative;display:flex;align-items:center;justify-content:center}
+.palette{width:90%;height:55%;border-radius:12px;background:linear-gradient(145deg,#33202a,#9b6876);border:5px solid #e3b3b8;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,1fr);gap:7px;padding:13px;transform:rotate(-12deg);box-shadow:0 8px 20px #42152b70}
+.shade{border-radius:50%;background:#d7a47e;box-shadow:inset 0 2px 4px #fff8}.shade:nth-child(2){background:#a65c65}.shade:nth-child(3){background:#f1c9a2}.shade:nth-child(4){background:#7d4d49}.shade:nth-child(5){background:#d9b7a2}.shade:nth-child(6){background:#b77c6a}
+.lip{height:82%;width:30%;position:absolute;bottom:5%}.lipbase{position:absolute;bottom:0;width:100%;height:67%;border-radius:5px 5px 10px 10px;background:linear-gradient(90deg,#8c263c,#d44c70,#76213c)}
+.lipstick{position:absolute;bottom:55%;left:13%;width:74%;height:45%;border-radius:5px 5px 2px 2px;background:linear-gradient(90deg,#bd506c,#ffb0bb,#9f3452);clip-path:polygon(0 25%,100% 0,100% 100%,0 100%)}
+.lippanel{position:absolute;bottom:5%;height:20%;width:110%;left:-5%;background:linear-gradient(90deg,#d4b1a1,#fff0d9,#a77e6c);border-radius:3px}
+.mascara{height:88%;width:24%;background:linear-gradient(90deg,#131018,#38313c,#08070c);border-radius:8px 8px 10px 10px;position:relative}
+.mascara:before{content:"";position:absolute;width:60%;height:25%;top:-22%;left:20%;background:#17131c;border-radius:4px 4px 2px 2px}
+.mascara:after{content:"NYX";position:absolute;top:44%;left:0;right:0;text-align:center;font-size:11px;font-weight:900;letter-spacing:1px;color:#e9d2d7}
+.blush{height:57%;width:78%;border-radius:18px;background:linear-gradient(140deg,#d98caa,#a33e70);border:7px solid #f2c2d6;transform:rotate(8deg);box-shadow:inset 0 0 14px #fff6;display:grid;place-items:center}
+.blush:after{content:"NYX";color:#fff;letter-spacing:4px;font-size:19px;font-weight:900}
+.bottle{height:80%;width:48%;border-radius:16px 16px 22px 22px;background:linear-gradient(90deg,#28232d,#51404d 30%,#18141e 75%,#51404d);box-shadow:inset 6px 0 8px #ffffff30;position:absolute;bottom:5%}
+.cap{position:absolute;top:5%;width:24%;height:22%;background:linear-gradient(90deg,#d8a5ad,#fce3e7,#b77b89);border-radius:5px 5px 2px 2px}
+.bottlelabel{position:absolute;top:53%;left:0;right:0;font-size:10px;letter-spacing:1.5px;color:white;font-weight:800;text-align:center}
+.info{position:absolute;z-index:5;bottom:7%;left:6%;right:6%;text-align:center}
+.cta{display:inline-block;background:#21151e;color:white;border-radius:30px;padding:11px 23px;font-weight:800;font-size:12px;letter-spacing:1.1px;margin-top:13px;text-decoration:none}
+.replay{position:absolute;z-index:6;bottom:4%;left:4%;width:34px;height:34px;border:0;border-radius:50%;background:#000;color:#fff;font-size:16px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.shine{position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(115deg,transparent 35%,#ffffff10 48%,transparent 60%);animation:shine 5s linear infinite}
+@keyframes shine{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<main class="poster" aria-label="Essentialist Makeup Store animated beauty promotion">
+ <header class="head"><div class="eyebrow">Epic beauty deals are on</div><div class="headline"><span>Only at</span><span>Essentialist.</span><span>Love your glow.</span></div></header>
+ <section class="stage"><div class="glow"></div><div class="floor"></div><div class="product" id="product"><div class="item" id="item" style="height:100%;width:100%"><div class="palette"><i class="shade"></i><i class="shade"></i><i class="shade"></i><i class="shade"></i><i class="shade"></i><i class="shade"></i></div></div></div></section>
+ <section class="info"><a class="cta" href="https://www.esmakeupstore.com/" target="_blank" rel="noopener">SHOP THE BEAUTY EDIT ↗</a></section>
+ <button class="replay" id="replay" type="button" aria-label="Show next product">↺</button>
+ <div class="shine"></div>
+</main>
+<script>
+(()=>{
+ const products=[
+  {kind:'palette'},
+  {kind:'lip'},
+  {kind:'mascara'},
+  {kind:'blush'},
+  {kind:'bottle'}
+ ];
+ let current=0,timer;const item=document.getElementById('item'),product=document.getElementById('product');
+ function draw(i){current=(i+products.length)%products.length;const p=products[current];product.classList.add('exit');setTimeout(()=>{item.innerHTML='';
+  if(p.kind==='palette')item.innerHTML='<div class="palette"><i class="shade"></i><i class="shade"></i><i class="shade"></i><i class="shade"></i><i class="shade"></i><i class="shade"></i></div>';
+  if(p.kind==='lip')item.innerHTML='<div class="lip"><div class="lipstick"></div><div class="lipbase"></div><div class="lippanel"></div></div>';
+  if(p.kind==='mascara')item.innerHTML='<div class="mascara"></div>';
+  if(p.kind==='blush')item.innerHTML='<div class="blush"></div>';
+  if(p.kind==='bottle')item.innerHTML='<div class="bottle"><span class="bottlelabel">NYX<br>PROFESSIONAL</span></div><div class="cap"></div>';
+  product.classList.remove('exit');
+  product.classList.add('enter-start');
+  void product.offsetWidth;
+  product.classList.remove('enter-start');
+ },250)}
+ function restart(){clearInterval(timer);timer=setInterval(()=>draw(current+1),3200)}
+ document.getElementById('replay').addEventListener('click',()=>{draw(current+1);restart()});
+ restart();
+})();
+</script>
+</body></html>
