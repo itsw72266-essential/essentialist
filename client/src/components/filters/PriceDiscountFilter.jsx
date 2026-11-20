@@ -77,21 +77,22 @@ export default function PriceDiscountFilter({
 }
 
 function PriceRange({ t, bounds, value, onCommit, sliderKey }) {
-  const [local, setLocal] = useState(value || [bounds.min, bounds.max])
+  const initial = value || [bounds.min, bounds.max]
+  const [label, setLabel] = useState(initial)
 
   return (
     <div>
       <h3 className="font-bold text-sm mb-1">{t('search.price')}</h3>
       <p className="text-sm text-gray-700 mb-3">
-        {DisplayPriceInRupees(local[0])} &ndash; {DisplayPriceInRupees(local[1])}
+        {DisplayPriceInRupees(label[0])} &ndash; {DisplayPriceInRupees(label[1])}
       </p>
       <Slider
         key={sliderKey}
         range
         min={bounds.min}
         max={bounds.max}
-        value={local}
-        onChange={setLocal}
+        defaultValue={initial}
+        onChange={setLabel}
         onChangeComplete={(next) => onCommit?.(next)}
         railStyle={railStyle}
         trackStyle={trackStyle}
@@ -103,21 +104,22 @@ function PriceRange({ t, bounds, value, onCommit, sliderKey }) {
 }
 
 function DiscountRange({ t, bounds, value, onCommit, sliderKey }) {
-  const [local, setLocal] = useState(value || [bounds.min, bounds.max])
+  const initial = value || [bounds.min, bounds.max]
+  const [label, setLabel] = useState(initial)
 
   return (
     <div>
       <h3 className="font-bold text-sm mb-1">{t('search.discount')}</h3>
       <p className="text-sm text-gray-700 mb-3">
-        {local[0]}% &ndash; {local[1]}%
+        {label[0]}% &ndash; {label[1]}%
       </p>
       <Slider
         key={sliderKey}
         range
         min={bounds.min}
         max={bounds.max}
-        value={local}
-        onChange={setLocal}
+        defaultValue={initial}
+        onChange={setLabel}
         onChangeComplete={(next) => onCommit?.(next)}
         railStyle={railStyle}
         trackStyle={trackStyle}
