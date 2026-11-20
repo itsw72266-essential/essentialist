@@ -252,7 +252,7 @@ const Header = () => {
     const showSidebar = !pathname.includes('/dashboard');
 
     return (
-        <header ref={headerRef} className="bg-white shadow overflow-x-hidden" style={headerStyle}>
+        <header ref={headerRef} className="bg-white shadow" style={headerStyle}>
             <div className="bg-pink-400 text-white px-1 py-0 sm:px-2 sm:py-1 flex flex-row flex-nowrap items-center justify-between gap-1 sm:gap-2 text-[9px] leading-tight sm:text-xs lg:text-sm min-h-[18px] sm:min-h-0">
                 <div className="flex items-center shrink-0 gap-1.5 sm:gap-3 lg:gap-4">
                     <a
