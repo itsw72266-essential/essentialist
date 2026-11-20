@@ -392,7 +392,7 @@ const Header = () => {
                                 </div>
                             )}
                         </div>
-                        <button className="text-white relative shrink-0 p-0.5 mr-1.5" onClick={toggleCartSection}>
+                        <button className="text-white relative shrink-0 p-0.5 ml-1 mr-1.5" onClick={toggleCartSection}>
                             <BsCart4 size={19} />
                             {isClient && totalQty > 0 && (
                                 <span className="absolute -top-1 -right-1 text-[9px] leading-none bg-pink-400 px-1 py-0.5 rounded-full font-bold">{totalQty}</span>
