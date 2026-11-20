@@ -267,6 +267,7 @@
   "accountMenu": {
     "myAccount": "My Account",
     "guest": "Guest",
+    "back": "Back",
     "admin": "Admin",
     "openProfile": "Open profile",
     "dashboardOverview": "Dashboard Overview",

@@ -206,6 +206,7 @@ import {
   MapPinned,
   LogOut,
   UserCircle,
+  ArrowLeft,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -253,6 +254,7 @@ const UserMenu = ({ onSelect }) => {
   const dispatch = useDispatch();
   const router = useRouter();
   const isUserAdmin = isAdmin(user?.role);
+  const isLoggedIn = Boolean(user?._id);
   const userLabel = user?.name || user?.mobile || t('accountMenu.guest');
 
   const closeMenu = () => {
@@ -348,17 +350,34 @@ const UserMenu = ({ onSelect }) => {
         </li>
 
         <li>
-          <button
-            type="button"
-            onClick={handleLogout}
-            className={cn(
-              linkClass(false),
-              'w-full border-0 bg-transparent cursor-pointer text-left font-medium',
-            )}
-          >
-            <LogOut className="h-4 w-4 shrink-0 opacity-90" aria-hidden />
-            <span>{t('accountMenu.logOut')}</span>
-          </button>
+          {isLoggedIn ? (
+            <button
+              type="button"
+              onClick={handleLogout}
+              className={cn(
+                linkClass(false),
+                'w-full border-0 bg-transparent cursor-pointer text-left font-medium',
+              )}
+            >
+              <LogOut className="h-4 w-4 shrink-0 opacity-90" aria-hidden />
+              <span>{t('accountMenu.logOut')}</span>
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => {
+                closeMenu();
+                router.back();
+              }}
+              className={cn(
+                linkClass(false),
+                'w-full border-0 bg-transparent cursor-pointer text-left font-medium',
+              )}
+            >
+              <ArrowLeft className="h-4 w-4 shrink-0 opacity-90" aria-hidden />
+              <span>{t('accountMenu.back')}</span>
+            </button>
+          )}
         </li>
       </ul>
     </nav>
