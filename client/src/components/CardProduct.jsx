@@ -244,7 +244,7 @@ import CardProductRating from './CardProductRating.client'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import '@/lib/i18n'
-import { getLocalizedContent, getLocalizedProductName } from '@/helpers/localizeContent'
+import { getLocalizedProductName } from '@/helpers/localizeContent'
 import { linkPrefetch } from '@/lib/devPerformance'
 import { useLocalizedHref } from '@/hooks/useLocalizedHref'
 
@@ -276,10 +276,6 @@ const CardProduct = React.memo(({ data, isLoading = false, priority = false }) =
   const localizedHref = useLocalizedHref()
   const displayName = useMemo(
     () => getLocalizedProductName(data, i18n.language),
-    [data, i18n.language],
-  )
-  const displayUnit = useMemo(
-    () => getLocalizedContent(data, 'unit', i18n.language),
     [data, i18n.language],
   )
   if (isLoading) {
@@ -360,15 +356,9 @@ const CardProduct = React.memo(({ data, isLoading = false, priority = false }) =
           <CardProductRating productId={data._id} />
         </div>
 
-        <h3 className="product-text-fixed font-bold text-gray-900 text-sm line-clamp-2 break-words mb-1 transition-colors duration-300 group-hover:text-pink-600">
+        <h3 className="product-text-fixed font-bold text-gray-900 text-sm line-clamp-2 break-words mb-3 transition-colors duration-300 group-hover:text-pink-600">
           {displayName}
         </h3>
-
-        {displayUnit && (
-          <div className="product-text-fixed-xs text-gray-400 text-xs mb-3 font-medium line-clamp-1 break-words">
-            {displayUnit}
-          </div>
-        )}
 
         <div className="flex items-center justify-between gap-1 mt-auto">
           <div className="flex flex-col min-w-0">

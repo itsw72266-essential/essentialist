@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import Slider from 'rc-slider'
 import 'rc-slider/assets/index.css'
@@ -46,18 +46,11 @@ export default function PriceDiscountFilter({
     max: Math.ceil(meta?.discountRange?.max ?? FALLBACK_DISCOUNT.max),
   }
 
-  const [localPrice, setLocalPrice] = useState(price || [priceBounds.min, priceBounds.max])
-  const [localDiscount, setLocalDiscount] = useState(discount || [discountBounds.min, discountBounds.max])
-
-  // Once real bounds load from the database, widen the default (unfiltered)
-  // slider range to match them instead of staying on the fallback guess.
-  useEffect(() => {
-    if (!price && meta?.priceRange) setLocalPrice([priceBounds.min, priceBounds.max])
-  }, [meta?.priceRange])
-
-  useEffect(() => {
-    if (!discount && meta?.discountRange) setLocalDiscount([discountBounds.min, discountBounds.max])
-  }, [meta?.discountRange])
+  // Keyed on the bounds so loading real DB bounds (replacing the fallback
+  // guess) remounts the slider cleanly once, instead of fighting with it via
+  // an effect that resets its value on every render and makes it jitter.
+  const priceKey = `${priceBounds.min}-${priceBounds.max}`
+  const discountKey = `${discountBounds.min}-${discountBounds.max}`
 
   if (priceBounds.min >= priceBounds.max && discountBounds.min >= discountBounds.max) {
     return null
@@ -65,43 +58,72 @@ export default function PriceDiscountFilter({
 
   return (
     <div className="space-y-6">
-      <div>
-        <h3 className="font-bold text-sm mb-1">{t('search.price')}</h3>
-        <p className="text-sm text-gray-700 mb-3">
-          {DisplayPriceInRupees(localPrice[0])} &ndash; {DisplayPriceInRupees(localPrice[1])}
-        </p>
-        <Slider
-          range
-          min={priceBounds.min}
-          max={priceBounds.max}
-          value={localPrice}
-          onChange={setLocalPrice}
-          onChangeComplete={(value) => onPriceChange?.(value)}
-          railStyle={railStyle}
-          trackStyle={trackStyle}
-          handleStyle={handleStyle}
-          allowCross={false}
-        />
-      </div>
+      <PriceRange
+        t={t}
+        bounds={priceBounds}
+        value={price}
+        onCommit={onPriceChange}
+        sliderKey={priceKey}
+      />
+      <DiscountRange
+        t={t}
+        bounds={discountBounds}
+        value={discount}
+        onCommit={onDiscountChange}
+        sliderKey={discountKey}
+      />
+    </div>
+  )
+}
 
-      <div>
-        <h3 className="font-bold text-sm mb-1">{t('search.discount')}</h3>
-        <p className="text-sm text-gray-700 mb-3">
-          {localDiscount[0]}% &ndash; {localDiscount[1]}%
-        </p>
-        <Slider
-          range
-          min={discountBounds.min}
-          max={discountBounds.max}
-          value={localDiscount}
-          onChange={setLocalDiscount}
-          onChangeComplete={(value) => onDiscountChange?.(value)}
-          railStyle={railStyle}
-          trackStyle={trackStyle}
-          handleStyle={handleStyle}
-          allowCross={false}
-        />
-      </div>
+function PriceRange({ t, bounds, value, onCommit, sliderKey }) {
+  const [local, setLocal] = useState(value || [bounds.min, bounds.max])
+
+  return (
+    <div>
+      <h3 className="font-bold text-sm mb-1">{t('search.price')}</h3>
+      <p className="text-sm text-gray-700 mb-3">
+        {DisplayPriceInRupees(local[0])} &ndash; {DisplayPriceInRupees(local[1])}
+      </p>
+      <Slider
+        key={sliderKey}
+        range
+        min={bounds.min}
+        max={bounds.max}
+        value={local}
+        onChange={setLocal}
+        onChangeComplete={(next) => onCommit?.(next)}
+        railStyle={railStyle}
+        trackStyle={trackStyle}
+        handleStyle={handleStyle}
+        allowCross={false}
+      />
+    </div>
+  )
+}
+
+function DiscountRange({ t, bounds, value, onCommit, sliderKey }) {
+  const [local, setLocal] = useState(value || [bounds.min, bounds.max])
+
+  return (
+    <div>
+      <h3 className="font-bold text-sm mb-1">{t('search.discount')}</h3>
+      <p className="text-sm text-gray-700 mb-3">
+        {local[0]}% &ndash; {local[1]}%
+      </p>
+      <Slider
+        key={sliderKey}
+        range
+        min={bounds.min}
+        max={bounds.max}
+        value={local}
+        onChange={setLocal}
+        onChangeComplete={(next) => onCommit?.(next)}
+        railStyle={railStyle}
+        trackStyle={trackStyle}
+        handleStyle={handleStyle}
+        allowCross={false}
+      />
     </div>
   )
 }
