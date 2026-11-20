@@ -15,6 +15,7 @@ import PriceDiscountFilter from './../../components/filters/PriceDiscountFilter'
 import DepartmentFilter from './../../components/filters/DepartmentFilter'
 import FilteredBy from './../../components/filters/FilteredBy'
 import { useCategoriesQuery } from '@/hooks/queries/useCatalogQueries'
+import { DisplayPriceInRupees } from '@/utils/DisplayPriceInRupees'
 
 export default function SearchPage() {
   const [data,setData] = useState([])
@@ -58,7 +59,7 @@ export default function SearchPage() {
       onRemove: () => setSelectedBrands((prev) => prev.filter((b) => b._id !== brand._id)),
     })),
     ...(priceRange
-      ? [{ key: 'price', label: `$${priceRange[0]} - $${priceRange[1]}`, onRemove: () => setPriceRange(null) }]
+      ? [{ key: 'price', label: `${DisplayPriceInRupees(priceRange[0])} - ${DisplayPriceInRupees(priceRange[1])}`, onRemove: () => setPriceRange(null) }]
       : []),
     ...(discountRange
       ? [{ key: 'discount', label: `${discountRange[0]}% - ${discountRange[1]}%`, onRemove: () => setDiscountRange(null) }]
@@ -121,15 +122,9 @@ export default function SearchPage() {
 
   return (
     <section className='bg-white'>
-      <div className='container mx-auto p-4'>
-        <div className="block sm:hidden mb-4">
-          <Search />
-        </div>
-
-        <p className='font-semibold'>Search Results: {data.length}  </p>
-
+      <div className='px-4 lg:pl-0 lg:pr-4'>
         <div className='flex flex-col lg:flex-row gap-4'>
-          <aside className='w-full lg:w-56 shrink-0 py-4 space-y-6'>
+          <aside className='w-full lg:w-56 shrink-0 py-4 px-4 lg:pl-0 lg:pr-0 space-y-6'>
             <FilteredBy chips={filterChips} onClear={clearFilters} />
             <DepartmentFilter selectedCategoryId={categoryId} onSelect={setDepartment} />
             <BrandsFilter selectedBrands={selectedBrands} onChange={setSelectedBrands} />
@@ -141,7 +136,13 @@ export default function SearchPage() {
             />
           </aside>
 
-          <div className='flex-1 min-w-0'>
+          <div className='flex-1 min-w-0 py-4'>
+            <div className="block sm:hidden mb-4">
+              <Search />
+            </div>
+
+            <p className='font-semibold'>Search Results: {data.length}  </p>
+
             <InfiniteScroll
                   dataLength={data.length}
                   hasMore={true}

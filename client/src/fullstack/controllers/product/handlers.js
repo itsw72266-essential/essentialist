@@ -1039,6 +1039,16 @@ export const getProductFilterMetaController = async (request, response) => {
               }
             }
           ],
+          discountRange: [
+            { $match: { discount: { $ne: null } } },
+            {
+              $group: {
+                _id: null,
+                min: { $min: "$discount" },
+                max: { $max: "$discount" }
+              }
+            }
+          ],
           brands: [
             {
               $group: {
@@ -1111,6 +1121,7 @@ export const getProductFilterMetaController = async (request, response) => {
     const subCategoryMap = new Map(subCategoryDocs.map((doc) => [doc._id.toString(), doc]));
 
     const priceRange = result?.priceRange?.[0] || { min: null, max: null };
+    const discountRange = result?.discountRange?.[0] || { min: null, max: null };
 
     const stockStatus = (result?.stockStatus || []).reduce(
       (acc, curr) => {
@@ -1133,6 +1144,7 @@ export const getProductFilterMetaController = async (request, response) => {
       error: false,
       data: {
         priceRange,
+        discountRange,
         stockStatus,
         brands: (result?.brands || [])
           .map((item) => {

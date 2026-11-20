@@ -293,7 +293,7 @@ const Header = () => {
                 </div>
             </div>
 
-            <nav className="bg-black text-white px-0 sm:px-4">
+            <nav className="bg-black text-white px-0 sm:px-4 lg:px-0">
                 <div className="flex items-center justify-between gap-0.5">
                     <div className="flex items-center flex-shrink-0">
                         <Link prefetch={linkPrefetch} href={localizePath("/", pathLocale)} className="flex items-center h-full">
