@@ -4,12 +4,12 @@ import dynamic from 'next/dynamic'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { FaRegCircleUser } from "react-icons/fa6";
 import useMobile from '../hooks/useMobile';
 import { BsCart4 } from "react-icons/bs";
 import { useSelector } from 'react-redux';
 import { GoTriangleDown, GoTriangleUp } from "react-icons/go";
 import UserMenu from './UserMenu';
+import Divider from './Divider';
 import { DisplayPriceInRupees } from '../utils/DisplayPriceInRupees';
 import { FaMapMarkerAlt } from 'react-icons/fa';
 import { HiPhone, HiMail } from 'react-icons/hi';
@@ -43,6 +43,73 @@ const SideBar = dynamic(() => import('./SideBar'), {
 });
 
 const DisplayCartItem = dynamic(() => import('./DisplayCartItem'));
+
+const AccountDropdownPanel = ({ user, onSelect, t, linkPrefetch }) => {
+    if (user?._id) {
+        return <UserMenu onSelect={onSelect} />
+    }
+    return (
+        <div className="w-64 sm:w-72">
+            <Link
+                prefetch={linkPrefetch}
+                href="/login"
+                onClick={onSelect}
+                className="block w-full text-center rounded bg-pink-400 hover:bg-pink-500 text-white font-semibold py-2 transition-colors"
+            >
+                {t('header.signIn')}
+            </Link>
+            <p className="mt-2 text-center text-xs text-slate-600">
+                {t('header.newCustomer')}{' '}
+                <Link
+                    prefetch={linkPrefetch}
+                    href="/register"
+                    onClick={onSelect}
+                    className="text-pink-600 hover:underline font-medium"
+                >
+                    {t('header.startHere')}
+                </Link>
+            </p>
+            <Divider />
+            <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                    <div className="font-bold mb-2">{t('header.yourLists')}</div>
+                    <ul className="space-y-1.5 text-slate-700">
+                        <li>
+                            <Link prefetch={linkPrefetch} href="/lists?create=1" onClick={onSelect} className="hover:text-pink-600 hover:underline">
+                                {t('header.createList')}
+                            </Link>
+                        </li>
+                        <li>
+                            <Link prefetch={linkPrefetch} href="/lists" onClick={onSelect} className="hover:text-pink-600 hover:underline">
+                                {t('header.findList')}
+                            </Link>
+                        </li>
+                    </ul>
+                </div>
+                <div>
+                    <div className="font-bold mb-2">{t('header.yourAccount')}</div>
+                    <ul className="space-y-1.5 text-slate-700">
+                        <li>
+                            <Link prefetch={linkPrefetch} href="/dashboard/profile" onClick={onSelect} className="hover:text-pink-600 hover:underline">
+                                {t('header.account')}
+                            </Link>
+                        </li>
+                        <li>
+                            <Link prefetch={linkPrefetch} href="/orders" onClick={onSelect} className="hover:text-pink-600 hover:underline">
+                                {t('header.myOrders')}
+                            </Link>
+                        </li>
+                        <li>
+                            <Link prefetch={linkPrefetch} href="/dashboard/address" onClick={onSelect} className="hover:text-pink-600 hover:underline">
+                                {t('header.addresses')}
+                            </Link>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    )
+}
 
 const Header = () => {
     const { t, i18n } = useTranslation()
@@ -109,14 +176,6 @@ const Header = () => {
     const handleCloseUserMenu = useCallback(() => setOpenUserMenu(false), []);
     const handleOpenUserMenu = useCallback(() => setOpenUserMenu(true), []);
 
-    const handleMobileUser = useCallback(() => {
-        if (!user?._id) {
-            router.push("/login")
-            return
-        }
-        router.push("/user")
-    }, [router, user]);
-
     const handleMobileMenuNavigate = useCallback(() => setMobileMenuOpen(false), []);
     const toggleCartSection = useCallback(() => setOpenCartSection(prev => !prev), []);
     const toggleUserMenu = useCallback(() => setOpenUserMenu(prev => !prev), []);
@@ -167,6 +226,14 @@ const Header = () => {
         if (categoryDropdown) document.addEventListener('mousedown', handler);
         return () => document.removeEventListener('mousedown', handler);
     }, [categoryDropdown]);
+
+    useEffect(() => {
+        const handler = (e) => {
+            if (!e.target.closest('.user-account-menu')) setOpenUserMenu(false);
+        };
+        if (openUserMenu) document.addEventListener('mousedown', handler);
+        return () => document.removeEventListener('mousedown', handler);
+    }, [openUserMenu]);
 
     useEffect(() => {
         const handler = (e) => {
@@ -270,25 +337,28 @@ const Header = () => {
                     </div>
 
                     <div className="hidden lg:flex items-center gap-2">
-                        {user?._id ? (
-                            <div className="relative" onMouseEnter={handleOpenUserMenu} onMouseLeave={handleCloseUserMenu}>
-                                <div onClick={toggleUserMenu} className="flex select-none items-center gap-1 cursor-pointer text-lg font-bold">
-                                    <span>{t('header.account')}</span>
-                                    {openUserMenu ? <GoTriangleUp size={22} /> : <GoTriangleDown size={22} />}
+                        <div className="user-account-menu relative" onMouseEnter={handleOpenUserMenu} onMouseLeave={handleCloseUserMenu}>
+                            <div onClick={toggleUserMenu} className="flex select-none items-center gap-1 cursor-pointer rounded border border-transparent px-2 py-1 hover:border-white/50 transition-colors">
+                                <div className="flex flex-col leading-tight text-left">
+                                    <span className="text-xs text-gray-300">
+                                        {user?._id
+                                            ? t('header.helloUser', { name: (user?.name || '').split(' ')[0] || t('header.account') })
+                                            : t('header.helloSignIn')}
+                                    </span>
+                                    <span className="flex items-center gap-1 text-sm font-bold whitespace-nowrap">
+                                        {t('header.accountAndLists')}
+                                        {openUserMenu ? <GoTriangleUp size={16} /> : <GoTriangleDown size={16} />}
+                                    </span>
                                 </div>
-                                {openUserMenu && (
-                                    <div className='absolute right-0 top-full pt-2 z-50'>
-                                        <div className='bg-white text-black rounded p-3 w-max min-w-[14rem] max-w-[22rem] shadow-lg'>
-                                            <UserMenu onSelect={handleCloseUserMenu} />
-                                        </div>
-                                    </div>
-                                )}
                             </div>
-                        ) : (
-                            <Link prefetch={linkPrefetch} href="/login" className='text-lg px-2 hover:text-pink-400 transition-colors'>
-                                {t('header.login')}
-                            </Link>
-                        )}
+                            {openUserMenu && (
+                                <div className='absolute right-0 top-full pt-2 z-50'>
+                                    <div className='bg-white text-black rounded p-4 w-max min-w-[14rem] max-w-[22rem] shadow-lg'>
+                                        <AccountDropdownPanel user={user} onSelect={handleCloseUserMenu} t={t} linkPrefetch={linkPrefetch} />
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                         <button onClick={toggleCartSection} className="flex items-center gap-2 bg-pink-400 hover:bg-yellow-400 px-4 py-2 rounded text-white transition-colors duration-200">
                             <div className="animate-bounce"><BsCart4 size={24} /></div>
                             <div className="font-semibold text-sm text-left">
@@ -302,15 +372,32 @@ const Header = () => {
                         </button>
                     </div>
 
-                    <div className="lg:hidden flex items-center gap-2">
+                    <div className="lg:hidden flex items-center gap-1.5 flex-shrink-0">
+                        <div className="user-account-menu relative">
+                            <button onClick={toggleUserMenu} className="flex flex-col items-start leading-tight text-white px-1 py-0.5">
+                                <span className="text-[9px] text-gray-300 whitespace-nowrap">
+                                    {user?._id
+                                        ? t('header.helloUser', { name: (user?.name || '').split(' ')[0] || t('header.account') })
+                                        : t('header.helloSignIn')}
+                                </span>
+                                <span className="flex items-center gap-0.5 text-[11px] font-bold whitespace-nowrap">
+                                    {t('header.accountAndLists')}
+                                    {openUserMenu ? <GoTriangleUp size={12} /> : <GoTriangleDown size={12} />}
+                                </span>
+                            </button>
+                            {openUserMenu && (
+                                <div className='absolute right-0 top-full pt-2 z-50'>
+                                    <div className='bg-white text-black rounded p-3 w-max min-w-[13rem] max-w-[18rem] shadow-lg'>
+                                        <AccountDropdownPanel user={user} onSelect={handleCloseUserMenu} t={t} linkPrefetch={linkPrefetch} />
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                         <button className="text-white mx-1 relative" onClick={toggleCartSection}>
                             <BsCart4 size={24} />
                             {isClient && totalQty > 0 && (
                                 <span className="absolute -top-2 -right-2 text-xs bg-pink-400 px-2 py-0.5 rounded-full font-bold">{totalQty}</span>
                             )}
-                        </button>
-                        <button className="text-white mx-1" onClick={handleMobileUser}>
-                            <FaRegCircleUser size={24} />
                         </button>
                         <button className="text-white mx-1" onClick={toggleMobileMenu}>
                             {mobileMenuOpen ? <RiCloseLine size={30} /> : <RiMenu3Line size={30} />}
@@ -320,17 +407,32 @@ const Header = () => {
             </nav>
 
             <div className="hidden lg:block bg-black text-white border-t border-purple-800">
-                <div className="max-w-screen-2xl mx-auto px-4">
-                    <ul className="flex justify-center space-x-20">
-                        {navLinks.map(link => (
+                <div className="relative max-w-screen-2xl mx-auto px-4">
+                    <ul className="flex items-center justify-center space-x-6 xl:space-x-10 text-sm whitespace-nowrap">
+                        <li className="flex items-center">
+                            <button
+                                type="button"
+                                onClick={toggleMobileMenu}
+                                className="flex items-center gap-1.5 px-2 py-2 font-bold hover:text-pink-400 transition-colors"
+                            >
+                                <RiMenu3Line size={18} />
+                                {t('header.all')}
+                            </button>
+                        </li>
+                        {navLinks.slice(0, 3).map(link => (
                             <li key={link.path} className="flex items-center justify-between hover:text-purple-400 cursor-pointer">
                                 <Link prefetch={linkPrefetch} href={localizePath(link.path, pathLocale)}>{link.title}</Link>
                             </li>
                         ))}
                         <li className="flex items-center min-h-[2.5rem]"><Dropdown /></li>
+                        {navLinks.slice(3).map(link => (
+                            <li key={link.path} className="flex items-center justify-between hover:text-purple-400 cursor-pointer">
+                                <Link prefetch={linkPrefetch} href={localizePath(link.path, pathLocale)}>{link.title}</Link>
+                            </li>
+                        ))}
                         <li className="relative flex items-center cursor-pointer" ref={offersDropdownRef} onMouseEnter={() => setOffersDropdownOpen(true)} onMouseLeave={() => setOffersDropdownOpen(false)}>
                             <button className="flex items-center gap-1 text-white px-2 py-2 hover:text-pink-400 focus:outline-none" onClick={() => setOffersDropdownOpen((o) => !o)} type="button">
-                                {t('header.salesOffers')} 
+                                {t('header.salesOffers')}
                                 <GoTriangleDown className={`ml-1 transform transition-transform ${offersDropdownOpen ? 'rotate-180' : ''}`} />
                             </button>
                             {offersDropdownOpen && (
@@ -346,8 +448,8 @@ const Header = () => {
                 </div>
             </div>
 
-            <div className={`lg:hidden fixed top-0 left-0 w-full h-screen z-50 bg-opacity-80 transition-transform duration-300 ${mobileMenuOpen ? "translate-x-0" : "-translate-x-full"} flex overflow-y-auto bg-black`} style={{ backdropFilter: 'blur(5px)' }}>     
-                <div className="bg-black text-black h-full flex flex-col overflow-y-auto" style={{ width: '80%' }}>
+            <div className={`fixed top-0 left-0 w-full h-screen z-50 bg-opacity-80 transition-transform duration-300 ${mobileMenuOpen ? "translate-x-0" : "-translate-x-full pointer-events-none"} flex overflow-y-auto bg-black`} style={{ backdropFilter: 'blur(5px)' }}>
+                <div className="bg-black text-black h-full flex flex-col overflow-y-auto" style={{ width: '80%', maxWidth: '22rem' }}>
                     <div className="flex justify-between items-center px-4 py-3 border-b border-gray-100 sticky top-0 bg-white z-10">
                         <Link prefetch={linkPrefetch} href={localizePath("/", pathLocale)} onClick={() => setMobileMenuOpen(false)}>
                             <Image src="/assets/logo.jpg" width={120} height={60} alt="logo" style={{ maxWidth: "100%", objectFit: "contain", height: "auto" }} priority={true} unoptimized={true} />

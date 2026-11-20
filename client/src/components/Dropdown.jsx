@@ -273,7 +273,7 @@ const Dropdown = () => {
 
   return (
     <div
-      className="relative group"
+      className="group"
       ref={dropdownRef}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
@@ -283,10 +283,10 @@ const Dropdown = () => {
         aria-haspopup="true"
         aria-expanded={isHovered}
       >
-        <span className="flex items-center text-semibold text-lg">
+        <span className="flex items-center font-semibold text-sm whitespace-nowrap">
           {t("header.shopAllMakeup")}
           <svg
-            className={`w-auto h-4 ml-1.5 transition-transform duration-300 transform ${
+            className={`w-auto h-4 ml-1.5 shrink-0 transition-transform duration-300 transform ${
               isHovered ? "rotate-180" : ""
             }`}
             fill="none"
@@ -307,10 +307,9 @@ const Dropdown = () => {
 
       <div
         className={`
-          absolute left-0 top-full mt-1
+          absolute left-1/2 -translate-x-1/2 top-full mt-1
           w-full max-w-full
           md:w-[1250px] md:max-w-[1250px]
-          md:translate-x-[-62.5%]
           bg-white rounded-xl shadow-xl z-50 overflow-hidden
           transform origin-top transition-all duration-200 ease-in-out
           ${isHovered ? "opacity-100 scale-y-100" : "opacity-0 scale-y-0 pointer-events-none"}

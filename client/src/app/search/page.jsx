@@ -19,6 +19,7 @@ export default function SearchPage() {
   const [totalPage,setTotalPage] = useState(1)
   const searchParams = useSearchParams()
   const searchText = searchParams.get('q')
+  const categoryId = searchParams.get('category') || ''
 
   const fetchData = async() => {
     try {
@@ -28,6 +29,7 @@ export default function SearchPage() {
             data : {
               search : searchText ,
               page : page,
+              ...(categoryId ? { filters : { categoryIds : [categoryId] } } : {}),
             }
         })
 
@@ -54,8 +56,12 @@ export default function SearchPage() {
   }
 
   useEffect(()=>{
+    setPage(1)
+  },[searchText,categoryId])
+
+  useEffect(()=>{
     fetchData()
-  },[page,searchText])
+  },[page,searchText,categoryId])
 
   const handleFetchMore = ()=>{
     if(totalPage > page){

@@ -1,6 +1,7 @@
 "use client"
 import React, { useState } from 'react'
 import { useSelector } from 'react-redux'
+import Link from 'next/link'
 import AddAddress from '../../../components/AddAddress'
 import { MdDelete } from "react-icons/md";
 import { MdEdit } from "react-icons/md";
@@ -13,6 +14,8 @@ import { useGlobalContext } from '@/providers/ReactQueryProvider';
 // import { useGlobalContext } from '../../../providers/GlobalProvider';
 
 const Address = () => {
+  const user = useSelector(state => state.user)
+  const isAuthenticated = Boolean(user?._id)
   const addressList = useSelector(state => state.addresses.addressList) || []
   const [openAddress, setOpenAddress] = useState(false)
   const [openEdit, setOpenEdit] = useState(false)
@@ -20,6 +23,27 @@ const Address = () => {
   const { fetchAddress } = useGlobalContext()
 
   const activeAddresses = addressList.filter(address => address?.status !== false)
+
+  if (!isAuthenticated) {
+    return (
+      <div className=''>
+        <div className='bg-white shadow-lg px-2 py-2 flex justify-between gap-4 items-center'>
+          <h2 className='font-semibold text-ellipsis line-clamp-1'>Address</h2>
+        </div>
+        <div className='bg-blue-50 p-6 flex flex-col items-center text-center gap-3'>
+          <p className='text-gray-700'>
+            Saved addresses are tied to your account. Sign in to add and manage them.
+          </p>
+          <Link
+            href='/login'
+            className='bg-primary-200 px-4 py-2 rounded font-bold hover:bg-primary-100 transition-colors'
+          >
+            Sign in
+          </Link>
+        </div>
+      </div>
+    )
+  }
 
   const handleDisableAddress = async (id) => {
     try {

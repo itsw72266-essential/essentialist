@@ -714,6 +714,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
+import { ChevronDown, ChevronRight } from "lucide-react";
 
 import { buildSubCategoryPath } from "@/lib/catalogSlugs";
 import { useLocalizedHref } from "@/hooks/useLocalizedHref";
@@ -822,6 +823,11 @@ const SideBar = ({
     setHydrated(true);
   }, []);
 
+  const [openCategoryIds, setOpenCategoryIds] = useState({});
+  const toggleCategory = (categoryId) => {
+    setOpenCategoryIds((prev) => ({ ...prev, [categoryId]: !prev[categoryId] }));
+  };
+
   // Categories via React Query hook
   const {
     data: rqCategories = [],
@@ -920,8 +926,8 @@ const SideBar = ({
     : "bg-gray-50 px-6 py-2";
 
   const itemClasses = isMobile
-    ? "text-sm text-black py-2 px-3 font-bold rounded hover:bg-pink-600 hover:text-white cursor-pointer transition-colors block"
-    : "text-sm text-black py-1 px-2 rounded hover:bg-pink-100 hover:text-pink-600 cursor-pointer transition-colors";
+    ? "block w-full text-left text-sm text-black py-2 px-3 font-bold rounded hover:bg-pink-600 hover:text-white cursor-pointer transition-colors break-words leading-snug"
+    : "block w-full text-left text-sm text-black py-1 px-2 rounded hover:bg-pink-100 hover:text-pink-600 cursor-pointer transition-colors break-words leading-snug";
 
   const skeletonBlocks = useMemo(() => Array.from({ length: 8 }), []);
   const brandSkeletonBlocks = useMemo(() => Array.from({ length: 9 }), []);
@@ -1024,6 +1030,14 @@ const SideBar = ({
       </div>
 
       <div className={isMobile ? "" : "divide-y divide-gray-100"}>
+        <Link
+          href={localizedHref("/search")}
+          prefetch={false}
+          onClick={onNavigate}
+          className={`${categoryItemClasses} font-bold`}
+        >
+          {t("sidebar.allCategories")}
+        </Link>
         {finalLoadingCategory ? (
           skeletonBlocks.map((_, index) => (
             <SkeletonBlock key={index} index={index} />
@@ -1033,43 +1047,57 @@ const SideBar = ({
         ) : (
           finalCategoryData.map((category) => {
             const subcategories = getSubcategoriesForCategory(category._id);
+            const isOpen = !!openCategoryIds[category._id];
             return (
               <div key={category._id} className="overflow-hidden">
-                <div className={categoryItemClasses}>
-                  <span className="font-bold text-black">{category.name}</span>
-                </div>
-                <div className={subcategoryContainerClasses}>
-                  {subcategories.length > 0 ? (
-                    <ul className={`space-y-1 py-2 ${isMobile ? "pl-4" : ""}`}>
-                      {subcategories.map((subCat) => {
-                        const url = localizedHref(
-                          buildSubCategoryPath(category, subCat),
-                        );
+                <button
+                  type="button"
+                  onClick={() => toggleCategory(category._id)}
+                  className={`${categoryItemClasses} justify-between text-left`}
+                  aria-expanded={isOpen}
+                >
+                  <span className="font-bold text-black text-left">{category.name}</span>
+                  {subcategories.length > 0 &&
+                    (isOpen ? (
+                      <ChevronDown size={18} className="text-gray-500 shrink-0" />
+                    ) : (
+                      <ChevronRight size={18} className="text-gray-500 shrink-0" />
+                    ))}
+                </button>
+                {isOpen && (
+                  <div className={subcategoryContainerClasses}>
+                    {subcategories.length > 0 ? (
+                      <ul className={`space-y-1 py-2 ${isMobile ? "pl-4" : ""}`}>
+                        {subcategories.map((subCat) => {
+                          const url = localizedHref(
+                            buildSubCategoryPath(category, subCat),
+                          );
 
-                        return (
-                          <li key={subCat._id}>
-                            <Link
-                              href={url}
-                              prefetch={false}
-                              onClick={onNavigate}
-                              className={itemClasses}
-                            >
-                              {subCat.name}
-                            </Link>
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  ) : (
-                    <p
-                      className={`text-sm py-2 ${
-                        isMobile ? "text-gray-400 pl-4" : "text-gray-500"
-                      }`}
-                    >
-                      {t("sidebar.noSubcategories")}
-                    </p>
-                  )}
-                </div>
+                          return (
+                            <li key={subCat._id}>
+                              <Link
+                                href={url}
+                                prefetch={false}
+                                onClick={onNavigate}
+                                className={itemClasses}
+                              >
+                                {subCat.name}
+                              </Link>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    ) : (
+                      <p
+                        className={`text-sm py-2 ${
+                          isMobile ? "text-gray-400 pl-4" : "text-gray-500"
+                        }`}
+                      >
+                        {t("sidebar.noSubcategories")}
+                      </p>
+                    )}
+                  </div>
+                )}
               </div>
             );
           })
