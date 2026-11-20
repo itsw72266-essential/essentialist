@@ -724,7 +724,6 @@ import {
   useCategoriesQuery,
   useSubCategoriesQuery,
 } from "@/hooks/queries/useCatalogQueries";
-import FilteredBy from "@/components/filters/FilteredBy";
 import PriceDiscountFilter from "@/components/filters/PriceDiscountFilter";
 import "@/lib/i18n";
 
@@ -839,11 +838,6 @@ const SideBar = ({
   const [quickPrice, setQuickPrice] = useState(null);
   const [quickDiscount, setQuickDiscount] = useState(null);
 
-  const clearQuickFilters = () => {
-    setQuickPrice(null);
-    setQuickDiscount(null);
-  };
-
   const goToSearchWithFilters = ({ categoryId } = {}) => {
     const params = new URLSearchParams();
     if (categoryId) params.set("category", categoryId);
@@ -858,14 +852,6 @@ const SideBar = ({
     router.push(`/search?${params.toString()}`);
   };
 
-  const quickFilterChips = [
-    ...(quickPrice
-      ? [{ key: "quick-price", label: `${quickPrice[0]} - ${quickPrice[1]}`, onRemove: () => setQuickPrice(null) }]
-      : []),
-    ...(quickDiscount
-      ? [{ key: "quick-discount", label: `${quickDiscount[0]}% - ${quickDiscount[1]}%`, onRemove: () => setQuickDiscount(null) }]
-      : []),
-  ];
 
   // Categories via React Query hook
   const {
@@ -1045,7 +1031,6 @@ const SideBar = ({
             </h2>
           </div>
           <div className={`${isMobile ? "px-4 py-3" : "px-6 py-4"} space-y-6`}>
-            <FilteredBy chips={quickFilterChips} onClear={clearQuickFilters} />
             <PriceDiscountFilter
               price={quickPrice}
               discount={quickDiscount}
