@@ -35,6 +35,8 @@
     "price": "Price",
     "discount": "Discount",
     "department": "Category",
+    "filteredBy": "Filtered by",
+    "clearFilters": "Clear Filters",
     "placeholder": "Search for Face Primer Bronzer and more.",
     "prompts": [
       "Search \"Bronzer\"",
