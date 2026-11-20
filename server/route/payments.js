@@ -1135,6 +1135,7 @@ import {
   sanitizeGuestAddress,
   sanitizeGuestContact,
   resolveGuestOrderProducts,
+  resolveAuthoritativeOrderProducts,
   buildInitialDeliveryTimeline,
   getTimelineActor,
   ORDER_DEFAULT_CURRENCY,
@@ -1519,8 +1520,10 @@ async function createPendingPayunitOrder({
       paymentMethod: channelLabel,
       delivery_address: null,
       contact_info: contactInfo,
-      subTotalAmt: Number(body.subTotalAmt ?? computedTotal),
-      totalAmt: Number(body.totalAmt ?? computedTotal),
+      // Totals are always the server-computed value from authoritative
+      // product prices — never trust body.subTotalAmt/body.totalAmt.
+      subTotalAmt: computedTotal,
+      totalAmt: computedTotal,
       totalQuantity,
       currency: ORDER_CURRENCY,
       is_guest: true,
@@ -1536,7 +1539,7 @@ async function createPendingPayunitOrder({
           status: "PENDING",
           initiatedAt: new Date(),
           customerType,
-          amount: Number(body.totalAmt ?? computedTotal),
+          amount: computedTotal,
           currency: ORDER_CURRENCY,
         },
       },
@@ -1551,34 +1554,27 @@ async function createPendingPayunitOrder({
       throw validationError("Delivery address is required for authenticated payments.");
     }
 
-    const addressDoc = await AddressModel.findById(addressId).lean();
+    // Address must belong to the authenticated user.
+    const addressDoc = await AddressModel.findOne({
+      _id: addressId,
+      userId: req.userId,
+    }).lean();
     if (!addressDoc) {
       throw validationError(
         "Delivery address not found. Please refresh your addresses and try again."
       );
     }
 
-    const products = listItems.map((el, index) => {
-      const productDoc = el.productId ?? el.product ?? null;
-      if (!productDoc || !productDoc._id) {
-        throw validationError(
-          `Cart item #${index + 1} is missing product details. Please refresh your cart.`
-        );
-      }
-      return {
-        productId: productDoc._id,
-        product_details: {
-          name: productDoc.name,
-          image: productDoc.image,
-          sku: productDoc.sku ?? productDoc.productCode ?? undefined,
-          price: productDoc.price,
-        },
-        quantity: el.quantity ?? 1,
-        price: productDoc.price,
-        total: productDoc.price * (el.quantity ?? 1),
-        discount: productDoc.discount ?? 0,
-      };
-    });
+    // Price/discount always come from the database, never from the
+    // client-submitted line item.
+    let products;
+    try {
+      products = await resolveAuthoritativeOrderProducts(listItems);
+    } catch (resolveError) {
+      throw validationError(
+        resolveError.message || "Unable to resolve order products."
+      );
+    }
 
     const totalQuantity = products.reduce(
       (sum, item) => sum + (item.quantity || 0),
@@ -1602,8 +1598,10 @@ async function createPendingPayunitOrder({
         customer_email: addressDoc?.customer_email ?? "",
         mobile: addressDoc?.mobile ?? "",
       },
-      subTotalAmt: Number(body.subTotalAmt ?? computedTotal),
-      totalAmt: Number(body.totalAmt ?? computedTotal),
+      // Totals are always the server-computed value — never trust
+      // body.subTotalAmt/body.totalAmt.
+      subTotalAmt: computedTotal,
+      totalAmt: computedTotal,
       totalQuantity,
       currency: ORDER_CURRENCY,
       is_guest: false,
@@ -1617,7 +1615,7 @@ async function createPendingPayunitOrder({
           status: "PENDING",
           initiatedAt: new Date(),
           customerType,
-          amount: Number(body.totalAmt ?? computedTotal),
+          amount: computedTotal,
           currency: ORDER_CURRENCY,
         },
       },
@@ -1802,6 +1800,13 @@ router.post(
 // Payunit webhook
 // --------------------
 router.post("/webhook", paymentsLimiter, async (req, res) => {
+  // SECURITY: the Payunit SDK exposes no webhook signature/secret to verify,
+  // so the raw POST body (`payload`) is untrusted and MUST NOT be used to
+  // decide payment outcome. `transactionId` is only used as a lookup key;
+  // the authoritative status/amount/currency/channel always come from a
+  // server-to-server `getTransactionStatus` call below. If that lookup is
+  // missing, fails, or disagrees with the order on file, the webhook is
+  // ignored rather than trusted.
   const payload = req.body ?? {};
   const customFields =
     payload.custom_fields ??
@@ -1819,35 +1824,12 @@ router.post("/webhook", paymentsLimiter, async (req, res) => {
     payload.data?.txn_id ??
     null;
 
-  const orderId =
+  const claimedOrderId =
     payload.order_id ??
     payload.orderId ??
     payload.data?.order_id ??
     payload.data?.orderId ??
     customFields.order_id ??
-    null;
-
-  let status =
-    payload.status ??
-    payload.transaction_status ??
-    payload.data?.status ??
-    payload.data?.transaction_status ??
-    null;
-
-  let amount =
-    payload.amount ??
-    payload.total_amount ??
-    payload.data?.amount ??
-    payload.data?.total_amount ??
-    null;
-
-  let currency = payload.currency ?? payload.data?.currency ?? "XAF";
-  let channel =
-    payload.pay_with ??
-    payload.channel ??
-    payload.data?.pay_with ??
-    payload.data?.channel ??
-    customFields.channel_label ??
     null;
 
   const customerName =
@@ -1874,33 +1856,65 @@ router.post("/webhook", paymentsLimiter, async (req, res) => {
     customFields.phone ??
     null;
 
-  try {
-    if (transactionId) {
-      const statusResponse = await client.collections.getTransactionStatus(
-        transactionId
-      );
-      const statusPayload = statusResponse?.data ?? statusResponse ?? {};
-      status =
-        statusPayload.status ??
-        statusPayload.transaction_status ??
-        status;
-      amount =
-        amount ??
-        statusPayload.amount ??
-        statusPayload.total_amount;
-      currency = currency ?? statusPayload.currency;
-      channel =
-        channel ??
-        statusPayload.pay_with ??
-        statusPayload.channel ??
-        customFields.channel_label;
-    }
-  } catch (error) {
-    console.error("[Payunit:webhook status check]", error);
+  if (!transactionId) {
+    console.warn("[Payunit:webhook] Missing transactionId; ignoring unverifiable webhook.");
+    return res.json({ received: true });
   }
 
+  let statusPayload;
+  let statusCustomFields = {};
+  try {
+    const statusResponse = await client.collections.getTransactionStatus(
+      transactionId
+    );
+    statusPayload = statusResponse?.data ?? statusResponse ?? null;
+    statusCustomFields =
+      statusPayload?.custom_fields ?? statusPayload?.customFields ?? {};
+  } catch (error) {
+    console.error("[Payunit:webhook status check]", error);
+    statusPayload = null;
+  }
+
+  if (!statusPayload) {
+    console.warn(
+      `[Payunit:webhook] Could not verify transaction ${transactionId} via Payunit API; ignoring.`
+    );
+    return res.json({ received: true });
+  }
+
+  // The order id is only ever trusted from Payunit's own authoritative
+  // status response (or, failing that, the transaction id we looked up),
+  // never from the raw webhook body.
+  const orderId =
+    statusCustomFields.order_id ??
+    statusPayload.transaction_id ??
+    statusPayload.transactionId ??
+    transactionId;
+
+  if (
+    claimedOrderId &&
+    statusCustomFields.order_id &&
+    String(claimedOrderId) !== String(statusCustomFields.order_id)
+  ) {
+    console.warn(
+      `[Payunit:webhook] orderId mismatch between webhook body (${claimedOrderId}) and verified transaction (${statusCustomFields.order_id}); ignoring.`
+    );
+    return res.json({ received: true });
+  }
+
+  const status =
+    statusPayload.status ?? statusPayload.transaction_status ?? null;
+  const amount =
+    statusPayload.amount ?? statusPayload.total_amount ?? null;
+  const currency = statusPayload.currency ?? "XAF";
+  const channel =
+    statusPayload.pay_with ??
+    statusPayload.channel ??
+    statusCustomFields.channel_label ??
+    null;
+
   if (!orderId) {
-    console.warn("[Payunit:webhook] Missing orderId in webhook payload.");
+    console.warn("[Payunit:webhook] Missing orderId in verified transaction.");
     return res.json({ received: true });
   }
 
@@ -1910,6 +1924,17 @@ router.post("/webhook", paymentsLimiter, async (req, res) => {
 
   if (!orderRecord) {
     console.warn(`[Payunit:webhook] Order ${orderId} not found.`);
+    return res.json({ received: true });
+  }
+
+  // Bind the verified transaction to the order it claims to pay for: the
+  // transactionId must match what we stored when the payment was
+  // initiated, so a transaction for order A can never confirm order B.
+  const expectedTransactionId = orderRecord?.metadata?.payunit?.transactionId;
+  if (expectedTransactionId && expectedTransactionId !== transactionId) {
+    console.warn(
+      `[Payunit:webhook] transactionId mismatch for order ${orderId}: expected ${expectedTransactionId}, got ${transactionId}; ignoring.`
+    );
     return res.json({ received: true });
   }
 

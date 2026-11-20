@@ -16,6 +16,7 @@
 
 import { Router } from "express";
 import auth from "../middleware/auth.js";
+import { admin } from "../middleware/Admin.js";
 import {
   AddSubCategoryController,
   deleteSubCategoryController,
@@ -26,13 +27,13 @@ import { cacheResponse } from "../middleware/cache.middleware.js";
 
 const subCategoryRouter = Router();
 
-subCategoryRouter.post("/create", auth, AddSubCategoryController);
+subCategoryRouter.post("/create", auth, admin, AddSubCategoryController);
 subCategoryRouter.post(
   "/get",
   cacheResponse({ namespace: "subcategories:list", ttlSeconds: 300 }),
   getSubCategoryController
 );
-subCategoryRouter.put("/update", auth, updateSubCategoryController);
-subCategoryRouter.delete("/delete", auth, deleteSubCategoryController);
+subCategoryRouter.put("/update", auth, admin, updateSubCategoryController);
+subCategoryRouter.delete("/delete", auth, admin, deleteSubCategoryController);
 
 export default subCategoryRouter;

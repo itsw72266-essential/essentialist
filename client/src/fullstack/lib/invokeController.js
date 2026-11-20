@@ -110,7 +110,7 @@ export async function invokeController(handler, nextRequest, opts = {}) {
       return res.getResult();
     }
     const storageKey = `${idempotencyPrefix}:${headerKey}`;
-    const slot = tryAcquireIdempotencyKey(storageKey, idempotencyTtlSeconds);
+    const slot = await tryAcquireIdempotencyKey(storageKey, idempotencyTtlSeconds);
     if (!slot) {
       const res = createExpressResponse();
       res.status(409).json({
@@ -129,7 +129,7 @@ export async function invokeController(handler, nextRequest, opts = {}) {
   if (duplicateOrderGuard) {
     const dup = await findBlockingDuplicateOrder(body, finalReq.userId ?? null);
     if (dup) {
-      if (idemRelease) idemRelease();
+      if (idemRelease) await idemRelease();
       const res = createExpressResponse();
       res.status(dup.status).json(dup.body);
       return res.getResult();
@@ -140,12 +140,12 @@ export async function invokeController(handler, nextRequest, opts = {}) {
   try {
     await handler(finalReq, res);
   } catch (err) {
-    if (idemRelease) idemRelease();
+    if (idemRelease) await idemRelease();
     throw err;
   }
   const result = res.getResult();
   if (idemRelease && result.status >= 500) {
-    idemRelease();
+    await idemRelease();
   }
   return result;
 }

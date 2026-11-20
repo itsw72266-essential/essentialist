@@ -1,3 +1,5 @@
+import crypto from "crypto";
+
 export default function generatedOtp() {
-  return Math.floor(Math.random() * 900000) + 100000;
+  return crypto.randomInt(100000, 1000000);
 }

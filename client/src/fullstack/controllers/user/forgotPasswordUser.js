@@ -35,7 +35,7 @@ export async function forgotPasswordUserAction(input) {
   }
 
   const otp = generatedOtp();
-  const expiry = Date.now() + 60 * 60 * 1000;
+  const expiry = Date.now() + 10 * 60 * 1000;
 
   await UserModel.findByIdAndUpdate(user._id, {
     forgot_password_otp: String(otp),

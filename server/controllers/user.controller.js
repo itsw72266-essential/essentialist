@@ -453,7 +453,7 @@ export async function forgotPasswordController(request, response) {
     }
 
     const otp = generatedOtp();
-    const expiry = Date.now() + 60 * 60 * 1000; // 1 hour
+    const expiry = Date.now() + 10 * 60 * 1000; // 10 minutes
 
     await UserModel.findByIdAndUpdate(user._id, {
       forgot_password_otp: otp,
@@ -517,10 +517,19 @@ export async function verifyForgotPasswordOtp(request, response) {
       forgot_password_expiry: null,
     });
 
+    // Bind the subsequent reset-password call to this verified OTP so a
+    // password can never be reset by email alone.
+    const resetToken = jwt.sign(
+      { id: user._id.toString(), purpose: "password_reset" },
+      process.env.SECRET_KEY_ACCESS_TOKEN,
+      { expiresIn: "10m" },
+    );
+
     return response.json({
       message: "OTP verified successfully",
       error: false,
       success: true,
+      resetToken,
     });
   } catch (error) {
     return response.status(500).json({
@@ -536,7 +545,7 @@ export async function resetpassword(request, response) {
     const payload =
       request.validated?.body ||
       (await resetPasswordSchema.parseAsync(request.body));
-    const { email, newPassword, confirmPassword } = payload;
+    const { email, newPassword, confirmPassword, resetToken } = payload;
 
     if (newPassword !== confirmPassword) {
       return response.status(400).json({
@@ -550,6 +559,25 @@ export async function resetpassword(request, response) {
     if (!user) {
       return response.status(400).json({
         message: "Invalid request",
+        error: true,
+        success: false,
+      });
+    }
+
+    let decodedResetToken;
+    try {
+      decodedResetToken = jwt.verify(resetToken, process.env.SECRET_KEY_ACCESS_TOKEN);
+    } catch {
+      decodedResetToken = null;
+    }
+
+    if (
+      !decodedResetToken ||
+      decodedResetToken.purpose !== "password_reset" ||
+      decodedResetToken.id !== user._id.toString()
+    ) {
+      return response.status(401).json({
+        message: "Invalid or expired reset token. Please verify the OTP again.",
         error: true,
         success: false,
       });

@@ -1,6 +1,14 @@
 /**
- * HttpOnly auth cookies — parity with Express `user.controller` cookieConfig.
- * Dev (http): lax + non-secure so localhost works. Prod: SameSite=None + Secure for cross-subdomain if needed.
+ * HttpOnly auth cookies.
+ *
+ * SameSite=Lax everywhere: these cookies are only ever read by this same
+ * Next.js app's own `/api/next/*` routes (same origin as the pages that
+ * set them — there is no separate API domain, and no cross-site CORS is
+ * configured for them). SameSite=Lax still covers subdomains of the same
+ * registrable domain (e.g. www vs apex), since the SameSite attribute is
+ * scoped to the whole site, not a single origin. Using SameSite=None here
+ * would needlessly expose every state-changing route to CSRF from any
+ * third-party page, with no corresponding benefit.
  */
 
 const maxAgeSeconds = Math.floor(
@@ -13,7 +21,7 @@ function baseCookieOptions() {
     httpOnly: true,
     path: "/",
     maxAge: maxAgeSeconds,
-    sameSite: prod ? "none" : "lax",
+    sameSite: "lax",
     secure: prod,
   };
 }

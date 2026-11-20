@@ -48,6 +48,14 @@ const OtpVerificationForm = () => {
       if (response.data.success) {
         toast.success(response.data.message);
         setData(["", "", "", "", "", ""]);
+        if (response.data.resetToken) {
+          try {
+            sessionStorage.setItem("passwordResetToken", response.data.resetToken);
+          } catch {
+            // sessionStorage unavailable (private mode etc.) — reset page will
+            // redirect back here since it requires the token.
+          }
+        }
         router.push(
           `/reset-password?email=${encodeURIComponent(email)}&success=1`
         );

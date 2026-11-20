@@ -1171,6 +1171,72 @@ import {
   sendOrderNotificationToCustomer,
 } from "../../lib/mail.js";
 import AddressModel from "../../models/address.model.js";
+import ProductModel from "../../models/product.model.js";
+
+/**
+ * Re-price line items from the database. Never trust a client-supplied
+ * price/discount/total — only the product id and requested quantity are
+ * taken from the request body.
+ */
+export async function resolveAuthoritativeOrderProducts(listItems = []) {
+  if (!Array.isArray(listItems) || !listItems.length) {
+    throw new Error("Provide at least one product.");
+  }
+
+  const productIds = [];
+  const quantitiesById = new Map();
+
+  listItems.forEach((item, index) => {
+    const rawId = item?.productId?._id ?? item?.productId ?? item?.product;
+    const id = rawId?.toString?.() ?? rawId;
+    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+      throw new Error(`Line item at position ${index + 1} has an invalid product id.`);
+    }
+    const quantity = Math.max(1, Math.floor(Number(item?.quantity ?? item?.qty ?? 1) || 1));
+    productIds.push(id);
+    quantitiesById.set(id, quantity);
+  });
+
+  const products = await ProductModel.find({
+    _id: { $in: productIds },
+  })
+    .select("name image sku productCode price discount publish")
+    .lean();
+
+  const productMap = new Map(products.map((doc) => [doc._id.toString(), doc]));
+
+  return productIds.map((id) => {
+    const productDoc = productMap.get(id);
+    if (!productDoc) {
+      throw new Error(`Product ${id} is no longer available.`);
+    }
+
+    const quantity = quantitiesById.get(id);
+    const unitPrice = Number(productDoc.price) || 0;
+    const discount = Number(productDoc.discount) || 0;
+    const total = unitPrice * quantity;
+
+    const images = Array.isArray(productDoc.image)
+      ? productDoc.image
+      : productDoc.image
+        ? [productDoc.image]
+        : [];
+
+    return {
+      productId: productDoc._id,
+      product_details: {
+        name: productDoc.name,
+        image: images,
+        sku: productDoc.sku ?? productDoc.productCode ?? undefined,
+        price: unitPrice,
+      },
+      quantity,
+      price: unitPrice,
+      total,
+      discount,
+    };
+  });
+}
 
 export const ORDER_DEFAULT_CURRENCY =
   process.env.ORDER_DEFAULT_CURRENCY?.trim() || "INR";
@@ -1426,10 +1492,7 @@ export async function resolveGuestOrderProducts(listItems = []) {
       index,
       productDoc,
       productId: productId ? productId.toString() : productDoc._id.toString(),
-      quantity: Number(item.quantity ?? item.qty ?? 1) || 1,
-      price: item.price ?? item.unitPrice ?? productDoc?.price ?? null,
-      total: item.total ?? item.lineTotal ?? null,
-      discount: item.discount ?? productDoc?.discount ?? 0,
+      quantity: Math.max(1, Math.floor(Number(item.quantity ?? item.qty ?? 1) || 1)),
     });
   });
 
@@ -1465,12 +1528,11 @@ export async function resolveGuestOrderProducts(listItems = []) {
       );
     }
 
-    const unitPrice = Number(entry.price ?? productDoc.price ?? 0) || 0;
+    // Price and discount always come from the database record, never
+    // from the client-submitted line item.
+    const unitPrice = Number(productDoc.price) || 0;
     const quantity = entry.quantity;
-    const total =
-      entry.total != null
-        ? Number(entry.total) || 0
-        : Number(unitPrice * quantity);
+    const total = Number(unitPrice * quantity);
 
     const images = Array.isArray(productDoc.image)
       ? productDoc.image
@@ -1489,7 +1551,7 @@ export async function resolveGuestOrderProducts(listItems = []) {
       quantity,
       price: unitPrice,
       total,
-      discount: Number(entry.discount ?? productDoc.discount ?? 0) || 0,
+      discount: Number(productDoc.discount ?? 0) || 0,
     };
   });
 }
@@ -1706,8 +1768,7 @@ export function getTimelineActor(userId) {
 export async function CashOnDeliveryOrderController(request, response) {
   try {
     const userId = request.userId;
-    const { list_items, totalAmt, addressId, subTotalAmt, metadata } =
-      request.body;
+    const { list_items, addressId, metadata } = request.body;
 
     if (!Array.isArray(list_items) || !list_items.length) {
       return response.status(400).json({
@@ -1717,7 +1778,13 @@ export async function CashOnDeliveryOrderController(request, response) {
       });
     }
 
-    const addressObj = await AddressModel.findById(addressId).lean();
+    // Address must belong to the authenticated user — never trust an
+    // addressId blindly, or any customer could read/use another
+    // customer's saved address (IDOR).
+    const addressObj = await AddressModel.findOne({
+      _id: addressId,
+      userId,
+    }).lean();
     if (!addressObj) {
       return response.status(404).json({
         message: "Delivery address not found.",
@@ -1726,31 +1793,31 @@ export async function CashOnDeliveryOrderController(request, response) {
       });
     }
 
+    let products;
+    try {
+      products = await resolveAuthoritativeOrderProducts(list_items);
+    } catch (resolveError) {
+      return response.status(400).json({
+        message: resolveError.message || "Unable to resolve order products.",
+        error: true,
+        success: false,
+      });
+    }
+
     const orderId = `ORD-${new mongoose.Types.ObjectId()}`;
-    const products = list_items.map((el) => ({
-      productId: el.productId._id,
-      product_details: {
-        name: el.productId.name,
-        image: el.productId.image,
-        sku: el.productId.sku ?? el.productId.productCode ?? undefined,
-        price: el.productId.price,
-      },
-      quantity: el.quantity,
-      price: el.productId.price,
-      total: el.productId.price * el.quantity,
-      discount: el.productId.discount ?? 0,
-    }));
     const totalQuantity = products.reduce(
       (sum, item) => sum + (item.quantity || 0),
       0,
     );
 
+    // Totals are always computed server-side from authoritative prices;
+    // client-supplied totalAmt/subTotalAmt are never trusted.
     const computedTotal = products.reduce(
       (sum, item) => sum + (item.total || 0),
       0,
     );
-    const safeSubtotal = Number(subTotalAmt ?? computedTotal);
-    const safeTotal = Number(totalAmt ?? computedTotal);
+    const safeSubtotal = computedTotal;
+    const safeTotal = computedTotal;
     const orderPayload = {
       userId,
       orderId,
@@ -1811,8 +1878,6 @@ export async function GuestCashOnDeliveryOrderController(request, response) {
   try {
     const {
       list_items,
-      totalAmt,
-      subTotalAmt,
       isGuestOrder,
       metadata,
       ...addressData
@@ -1871,8 +1936,8 @@ export async function GuestCashOnDeliveryOrderController(request, response) {
       paymentMethod: "Cash on Delivery",
       delivery_address: null,
       contact_info: contactInfo,
-      subTotalAmt: Number(subTotalAmt ?? computedTotal),
-      totalAmt: Number(totalAmt ?? computedTotal),
+      subTotalAmt: computedTotal,
+      totalAmt: computedTotal,
       totalQuantity,
       currency: DEFAULT_CURRENCY,
       is_guest: true,
@@ -1935,29 +2000,59 @@ export async function paymentController(request, response) {
       });
     }
     const userId = request.userId;
-    const { list_items, totalAmt, addressId, subTotalAmt, metadata } =
-      request.body;
+    const { list_items, addressId, metadata } = request.body;
+
+    if (!Array.isArray(list_items) || !list_items.length) {
+      return response.status(400).json({
+        message: "Provide at least one product.",
+        error: true,
+        success: false,
+      });
+    }
+
+    // Address must belong to the authenticated user.
+    const addressObj = await AddressModel.findOne({
+      _id: addressId,
+      userId,
+    }).lean();
+    if (!addressObj) {
+      return response.status(404).json({
+        message: "Delivery address not found.",
+        error: true,
+        success: false,
+      });
+    }
 
     const user = await UserModel.findById(userId)
       .populate("shopping_cart")
       .populate("orderHistory")
       .populate("address_details");
 
-    const line_items = list_items.map((item) => {
+    // Price/discount always come from the database, never from the
+    // client-submitted line item.
+    let authoritativeProducts;
+    try {
+      authoritativeProducts = await resolveAuthoritativeOrderProducts(list_items);
+    } catch (resolveError) {
+      return response.status(400).json({
+        message: resolveError.message || "Unable to resolve order products.",
+        error: true,
+        success: false,
+      });
+    }
+
+    const line_items = authoritativeProducts.map((item) => {
       return {
         price_data: {
           currency: DEFAULT_CURRENCY.toLowerCase(),
           product_data: {
-            name: item.productId.name,
-            images: item.productId.image,
+            name: item.product_details.name,
+            images: item.product_details.image,
             metadata: {
-              productId: item.productId._id,
+              productId: item.productId.toString(),
             },
           },
-          unit_amount: pricewithDiscount(
-            item.productId.price,
-            item.productId.discount,
-          ),
+          unit_amount: pricewithDiscount(item.price, item.discount),
         },
         adjustable_quantity: {
           enabled: true,
@@ -2039,29 +2134,22 @@ export async function guestStripeCheckoutController(request, response) {
       guest_delivery_address: sanitizedAddress,
     };
 
-    const line_items = list_items.map((item) => {
-      const productId = item.productId;
-      if (!productId?.name) {
-        throw new Error("Invalid cart item: missing product details.");
-      }
-      const pid = productId._id ?? productId.id;
-      if (!pid) {
-        throw new Error("Invalid cart item: missing product id.");
-      }
+    // Price/discount always come from the database, never from the
+    // client-submitted line item.
+    const authoritativeProducts = await resolveAuthoritativeOrderProducts(list_items);
+
+    const line_items = authoritativeProducts.map((item) => {
       return {
         price_data: {
           currency: DEFAULT_CURRENCY.toLowerCase(),
           product_data: {
-            name: productId.name,
-            images: productId.image || [],
+            name: item.product_details.name,
+            images: item.product_details.image || [],
             metadata: {
-              productId: String(pid),
+              productId: item.productId.toString(),
             },
           },
-          unit_amount: pricewithDiscount(
-            productId.price,
-            productId.discount,
-          ),
+          unit_amount: pricewithDiscount(item.price, item.discount),
         },
         adjustable_quantity: {
           enabled: true,
@@ -2094,7 +2182,7 @@ export async function guestStripeCheckoutController(request, response) {
 
     return response.status(200).json(session);
   } catch (error) {
-    const status = /Invalid cart item|Provide at least one/i.test(
+    const status = /Invalid cart item|Provide at least one|invalid product id|no longer available/i.test(
       String(error?.message || ""),
     )
       ? 400

@@ -15,6 +15,7 @@
 
 import { Router } from "express";
 import auth from "../middleware/auth.js";
+import { admin } from "../middleware/Admin.js";
 import {
   AddCategoryController,
   CATEGORY_CACHE_NAMESPACE,
@@ -27,7 +28,7 @@ import { cacheResponse } from "../middleware/cache.middleware.js";
 const categoryRouter = Router();
 const ONE_HOUR_SECONDS = 60 * 60;
 
-categoryRouter.post("/add-category", auth, AddCategoryController);
+categoryRouter.post("/add-category", auth, admin, AddCategoryController);
 categoryRouter.get(
   "/get",
   cacheResponse({
@@ -36,7 +37,7 @@ categoryRouter.get(
   }),
   getCategoryController
 );
-categoryRouter.put("/update", auth, updateCategoryController);
-categoryRouter.delete("/delete", auth, deleteCategoryController);
+categoryRouter.put("/update", auth, admin, updateCategoryController);
+categoryRouter.delete("/delete", auth, admin, deleteCategoryController);
 
 export default categoryRouter;

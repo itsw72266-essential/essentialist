@@ -21,18 +21,27 @@ const ResetPasswordForm = () => {
     newPassword: "",
     confirmPassword: "",
   });
+  const [resetToken, setResetToken] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const valideValue = Object.values(data).every((el) => el);
+  const valideValue = Object.values(data).every((el) => el) && Boolean(resetToken);
 
   const success = searchParams.get("success");
   const emailFromQuery = searchParams.get("email");
 
   useEffect(() => {
-    if (success !== "1" || !emailFromQuery) {
-      router.replace("/");
+    let storedToken = "";
+    try {
+      storedToken = sessionStorage.getItem("passwordResetToken") || "";
+    } catch {
+      storedToken = "";
+    }
+
+    if (success !== "1" || !emailFromQuery || !storedToken) {
+      router.replace("/forgot-password");
     } else {
+      setResetToken(storedToken);
       setData((prev) => ({
         ...prev,
         email: emailFromQuery,
@@ -60,7 +69,7 @@ const ResetPasswordForm = () => {
     try {
       const response = await Axios({
         ...SummaryApi.resetPassword,
-        data: data,
+        data: { ...data, resetToken },
       });
 
       if (response.data.error) {
@@ -69,6 +78,11 @@ const ResetPasswordForm = () => {
 
       if (response.data.success) {
         toast.success(response.data.message);
+        try {
+          sessionStorage.removeItem("passwordResetToken");
+        } catch {
+          // ignore
+        }
         router.push("/login");
         setData({
           email: "",

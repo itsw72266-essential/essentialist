@@ -1,8 +1,14 @@
 import { NextResponse } from "next/server";
 
 import { registerUserAction } from "@/fullstack/controllers/user/registerUser";
+import { enforceRateLimit } from "@/fullstack/lib/rateLimiterMemory";
 
 export async function POST(request) {
+  const limited = await enforceRateLimit("auth", request);
+  if (limited) {
+    return NextResponse.json(limited.body, { status: limited.status });
+  }
+
   let json;
   try {
     json = await request.json();

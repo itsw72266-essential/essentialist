@@ -16,6 +16,7 @@ import {
 import auth from "../middleware/auth.js";
 import upload from "../middleware/multer.js";
 import { validateRequest } from "../middleware/validateRequest.js";
+import { authLimiter, otpLimiter } from "../middleware/rateLimiter.js";
 import {
   registerSchema,
   loginSchema,
@@ -29,6 +30,7 @@ const userRouter = Router();
 
 userRouter.post(
   "/register",
+  authLimiter,
   validateRequest(registerSchema),
   registerUserController
 );
@@ -37,7 +39,12 @@ userRouter.post(
   validateRequest(verifyEmailSchema),
   verifyEmailController
 );
-userRouter.post("/login", validateRequest(loginSchema), loginController);
+userRouter.post(
+  "/login",
+  authLimiter,
+  validateRequest(loginSchema),
+  loginController
+);
 userRouter.get("/logout", auth, logoutController);
 userRouter.put(
   "/upload-avatar",
@@ -48,16 +55,19 @@ userRouter.put(
 userRouter.put("/update-user", auth, updateUserDetails);
 userRouter.put(
   "/forgot-password",
+  authLimiter,
   validateRequest(forgotPasswordSchema),
   forgotPasswordController
 );
 userRouter.put(
   "/verify-forgot-password-otp",
+  otpLimiter,
   validateRequest(verifyForgotOtpSchema),
   verifyForgotPasswordOtp
 );
 userRouter.put(
   "/reset-password",
+  authLimiter,
   validateRequest(resetPasswordSchema),
   resetpassword
 );

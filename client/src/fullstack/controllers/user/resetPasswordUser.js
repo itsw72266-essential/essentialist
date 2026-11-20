@@ -3,6 +3,7 @@ import bcryptjs from "bcryptjs";
 import { connectMongo } from "../../db/mongoose.js";
 import UserModel from "../../models/user.model.js";
 import { resetPasswordSchema } from "../../schemas/auth.schema.js";
+import { verifyPasswordResetToken } from "../../lib/jwtTokens.js";
 
 export async function resetPasswordUserAction(input) {
   const parsed = resetPasswordSchema.safeParse(input);
@@ -18,7 +19,7 @@ export async function resetPasswordUserAction(input) {
     };
   }
 
-  const { email, newPassword, confirmPassword } = parsed.data;
+  const { email, newPassword, confirmPassword, resetToken } = parsed.data;
 
   if (newPassword !== confirmPassword) {
     return {
@@ -39,6 +40,34 @@ export async function resetPasswordUserAction(input) {
       status: 400,
       body: {
         message: "Invalid request",
+        error: true,
+        success: false,
+      },
+    };
+  }
+
+  // The reset token is only issued after successful OTP verification for
+  // this exact user, and expires in 10 minutes — without it, resetting a
+  // password by knowing only the account's email would be possible.
+  let decodedResetToken;
+  try {
+    decodedResetToken = verifyPasswordResetToken(resetToken);
+  } catch {
+    return {
+      status: 401,
+      body: {
+        message: "Invalid or expired reset token. Please verify the OTP again.",
+        error: true,
+        success: false,
+      },
+    };
+  }
+
+  if (decodedResetToken.id !== user._id.toString()) {
+    return {
+      status: 401,
+      body: {
+        message: "Invalid or expired reset token. Please verify the OTP again.",
         error: true,
         success: false,
       },

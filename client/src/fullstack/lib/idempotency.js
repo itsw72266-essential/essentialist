@@ -1,4 +1,13 @@
-/** In-memory idempotency slots (matches Express fallback when Redis is unavailable). */
+/**
+ * Idempotency key enforcement for the Next.js API layer.
+ *
+ * Uses Upstash Redis (SET NX EX — atomic across serverless instances) when
+ * configured, matching server/middleware/idempotency.js. Falls back to an
+ * in-memory Map only when Redis is unavailable — that fallback does NOT
+ * dedupe across concurrent serverless instances, so it's a best-effort
+ * degrade, not the primary guarantee.
+ */
+import { redisClient, isRedisAvailable } from "./redisClient.js";
 
 const memory = new Map();
 
@@ -19,9 +28,22 @@ export function getIdempotencyHeaderValue(headers = {}) {
 }
 
 /**
- * @returns {{ release: () => void } | null} null if key is already held (duplicate in-flight).
+ * @returns {Promise<{ release: () => Promise<void> } | null>} null if key is already held (duplicate in-flight).
  */
-export function tryAcquireIdempotencyKey(storageKey, ttlSeconds = 300) {
+export async function tryAcquireIdempotencyKey(storageKey, ttlSeconds = 300) {
+  if (isRedisAvailable && typeof redisClient.set === "function") {
+    const acquired = await redisClient.set(storageKey, Date.now(), {
+      nx: true,
+      ex: ttlSeconds,
+    });
+    if (!acquired) return null;
+    return {
+      release: async () => {
+        await redisClient.del(storageKey);
+      },
+    };
+  }
+
   sweepExpired();
   if (memory.has(storageKey)) return null;
   const exp = Date.now() + ttlSeconds * 1000;
@@ -30,7 +52,7 @@ export function tryAcquireIdempotencyKey(storageKey, ttlSeconds = 300) {
     memory.delete(storageKey);
   }, ttlSeconds * 1000);
   return {
-    release: () => {
+    release: async () => {
       clearTimeout(timer);
       memory.delete(storageKey);
     },

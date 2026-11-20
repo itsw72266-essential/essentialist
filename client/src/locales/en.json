@@ -28,6 +28,7 @@
   "search": {
     "aria": "Search",
     "inputAria": "Search input",
+    "allCategories": "All",
     "placeholder": "Search for Face Primer Bronzer and more.",
     "prompts": [
       "Search \"Bronzer\"",
@@ -74,7 +75,19 @@
     "language": "Language",
     "english": "English",
     "french": "French",
-    "shopAllMakeup": "Shop All Makeup"
+    "shopAllMakeup": "Shop All Makeup",
+    "all": "All",
+    "helloSignIn": "Hello, sign in",
+    "helloUser": "Hello, {{name}}",
+    "accountAndLists": "Account & Lists",
+    "signIn": "Sign in",
+    "newCustomer": "New customer?",
+    "startHere": "Start here.",
+    "yourLists": "Your Lists",
+    "createList": "Create a List",
+    "findList": "Find a List",
+    "yourAccount": "Your Account",
+    "addresses": "Your Addresses"
   },
   "footer": {
     "backgroundTitle": "Footer Background Paths",
@@ -268,6 +281,7 @@
     "inactive": "inactive",
     "brandsUnavailable": "Brands are unavailable right now.",
     "shopByCategory": "Shop By Category",
+    "allCategories": "All Makeup",
     "noCategories": "No categories found",
     "noSubcategories": "No subcategories available"
   },

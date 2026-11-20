@@ -1,6 +1,7 @@
 import { connectMongo } from "../../db/mongoose.js";
 import UserModel from "../../models/user.model.js";
 import { verifyForgotOtpSchema } from "../../schemas/auth.schema.js";
+import { signPasswordResetToken } from "../../lib/jwtTokens.js";
 
 export async function verifyForgotPasswordOtpUserAction(input) {
   const parsed = verifyForgotOtpSchema.safeParse(input);
@@ -52,12 +53,15 @@ export async function verifyForgotPasswordOtpUserAction(input) {
     forgot_password_expiry: null,
   });
 
+  const resetToken = signPasswordResetToken(user._id.toString());
+
   return {
     status: 200,
     body: {
       message: "OTP verified successfully",
       error: false,
       success: true,
+      resetToken,
     },
   };
 }

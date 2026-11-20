@@ -28,6 +28,7 @@
   "search": {
     "aria": "Rechercher",
     "inputAria": "Champ de recherche",
+    "allCategories": "Tout",
     "placeholder": "Rechercher un primer, bronzer et plus.",
     "prompts": [
       "Rechercher \"Bronzer\"",
@@ -61,6 +62,7 @@
     "blog": "BLOGUE",
     "contactUs": "CONTACTEZ-NOUS",
     "shopAllMakeup": "TOUT LE MAQUILLAGE",
+    "all": "Tout",
     "salesOffers": "PROMOS",
     "offers": "Offres",
     "clearance": "Destockage",
@@ -74,7 +76,18 @@
     "store": "Boutique",
     "language": "Langue",
     "english": "Anglais",
-    "french": "Francais"
+    "french": "Francais",
+    "helloSignIn": "Bonjour, identifiez-vous",
+    "helloUser": "Bonjour, {{name}}",
+    "accountAndLists": "Compte et listes",
+    "signIn": "Se connecter",
+    "newCustomer": "Nouveau client ?",
+    "startHere": "Commencez ici.",
+    "yourLists": "Vos listes",
+    "createList": "Creer une liste",
+    "findList": "Trouver une liste",
+    "yourAccount": "Votre compte",
+    "addresses": "Vos adresses"
   },
   "footer": {
     "backgroundTitle": "Chemins d'arriere-plan du pied de page",
@@ -268,6 +281,7 @@
     "inactive": "inactive",
     "brandsUnavailable": "Les marques sont indisponibles pour le moment.",
     "shopByCategory": "Acheter par categorie",
+    "allCategories": "Tout le maquillage",
     "noCategories": "Aucune categorie trouvee",
     "noSubcategories": "Aucune sous-categorie disponible"
   },

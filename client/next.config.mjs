@@ -58,4 +58,32 @@ const nextConfig = {
   },
 };
 
+// NOTE: No Content-Security-Policy header is set here. This app loads
+// Stripe.js/Checkout, Google Tag Manager/Analytics, jsdelivr-hosted
+// scripts, and Cloudinary-hosted images from several third-party
+// origins. A CSP needs to be hand-curated against that exact set of
+// origins (script-src/connect-src/frame-src for Stripe, img-src for
+// Cloudinary/CloudFront, script-src/connect-src for GTM/GA) — adding a
+// wrong or incomplete one here would silently break checkout. Add it
+// deliberately, tested end-to-end against a real checkout flow, rather
+// than guessing it in a generic security pass.
+nextConfig.headers = async () => [
+  {
+    source: "/:path*",
+    headers: [
+      { key: "X-Content-Type-Options", value: "nosniff" },
+      { key: "X-Frame-Options", value: "DENY" },
+      { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+      {
+        key: "Permissions-Policy",
+        value: "camera=(), microphone=(), geolocation=()",
+      },
+      {
+        key: "Strict-Transport-Security",
+        value: "max-age=63072000; includeSubDomains; preload",
+      },
+    ],
+  },
+];
+
 export default nextConfig;

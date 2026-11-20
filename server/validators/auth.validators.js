@@ -72,6 +72,7 @@ export const resetPasswordSchema = z.object({
   email: emailSchema,
   newPassword: z.string().min(6).max(128),
   confirmPassword: z.string().min(6).max(128),
+  resetToken: z.string().min(10, "A valid reset token is required"),
 });
 
 export const refreshTokenSchema = z.object({

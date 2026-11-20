@@ -130,3 +130,30 @@ export const webhookLimiter = createRateLimiter({
   keyGenerator: (req) =>
     req.headers["stripe-signature"] ? "stripe" : realIp(req),
 });
+
+// Auth endpoints: throttle by IP, and additionally by the submitted email
+// where present, so a distributed credential-stuffing run against one
+// account is also slowed even across many source IPs.
+export const authLimiter = createRateLimiter({
+  prefix: "auth",
+  windowSeconds: 15 * 60,
+  maxRequests: 10,
+  blockSeconds: 15 * 60,
+  keyGenerator: (req) => {
+    const email = String(req.body?.email || "").trim().toLowerCase();
+    return email ? `${realIp(req)}:${email}` : realIp(req);
+  },
+});
+
+// OTP verification is the most brute-forceable step (6-digit code) —
+// tighter window.
+export const otpLimiter = createRateLimiter({
+  prefix: "otp",
+  windowSeconds: 15 * 60,
+  maxRequests: 5,
+  blockSeconds: 15 * 60,
+  keyGenerator: (req) => {
+    const email = String(req.body?.email || "").trim().toLowerCase();
+    return email ? `${realIp(req)}:${email}` : realIp(req);
+  },
+});

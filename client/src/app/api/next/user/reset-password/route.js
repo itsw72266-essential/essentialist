@@ -1,8 +1,14 @@
 import { NextResponse } from "next/server";
 
 import { resetPasswordUserAction } from "@/fullstack/controllers/user/resetPasswordUser";
+import { enforceRateLimit } from "@/fullstack/lib/rateLimiterMemory";
 
 export async function PUT(request) {
+  const limited = await enforceRateLimit("auth", request);
+  if (limited) {
+    return NextResponse.json(limited.body, { status: limited.status });
+  }
+
   let json;
   try {
     json = await request.json();
