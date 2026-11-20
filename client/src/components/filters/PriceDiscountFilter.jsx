@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import Slider from 'rc-slider'
 import 'rc-slider/assets/index.css'
@@ -78,13 +78,22 @@ export default function PriceDiscountFilter({
 
 function PriceRange({ t, bounds, value, onCommit, sliderKey }) {
   const initial = value || [bounds.min, bounds.max]
-  const [label, setLabel] = useState(initial)
+  const labelRef = useRef(null)
+
+  const handleChange = (next) => {
+    if (labelRef.current) {
+      labelRef.current.textContent = `${DisplayPriceInRupees(next[0])} – ${DisplayPriceInRupees(next[1])}`
+    }
+  }
 
   return (
     <div>
       <h3 className="font-bold text-sm mb-1">{t('search.price')}</h3>
-      <p className="text-xs sm:text-sm text-gray-700 mb-3 whitespace-nowrap overflow-hidden text-ellipsis">
-        {DisplayPriceInRupees(label[0])} &ndash; {DisplayPriceInRupees(label[1])}
+      <p
+        ref={labelRef}
+        className="text-xs sm:text-sm text-gray-700 mb-3 whitespace-nowrap overflow-hidden text-ellipsis"
+      >
+        {DisplayPriceInRupees(initial[0])} &ndash; {DisplayPriceInRupees(initial[1])}
       </p>
       <Slider
         key={sliderKey}
@@ -92,8 +101,8 @@ function PriceRange({ t, bounds, value, onCommit, sliderKey }) {
         min={bounds.min}
         max={bounds.max}
         defaultValue={initial}
-        onChange={setLabel}
-        onChangeComplete={(next) => onCommit?.(next)}
+        onChange={handleChange}
+        onChangeComplete={onCommit}
         railStyle={railStyle}
         trackStyle={trackStyle}
         handleStyle={handleStyle}
@@ -105,13 +114,22 @@ function PriceRange({ t, bounds, value, onCommit, sliderKey }) {
 
 function DiscountRange({ t, bounds, value, onCommit, sliderKey }) {
   const initial = value || [bounds.min, bounds.max]
-  const [label, setLabel] = useState(initial)
+  const labelRef = useRef(null)
+
+  const handleChange = (next) => {
+    if (labelRef.current) {
+      labelRef.current.textContent = `${next[0]}% – ${next[1]}%`
+    }
+  }
 
   return (
     <div>
       <h3 className="font-bold text-sm mb-1">{t('search.discount')}</h3>
-      <p className="text-xs sm:text-sm text-gray-700 mb-3 whitespace-nowrap overflow-hidden text-ellipsis">
-        {label[0]}% &ndash; {label[1]}%
+      <p
+        ref={labelRef}
+        className="text-xs sm:text-sm text-gray-700 mb-3 whitespace-nowrap overflow-hidden text-ellipsis"
+      >
+        {initial[0]}% &ndash; {initial[1]}%
       </p>
       <Slider
         key={sliderKey}
@@ -119,8 +137,8 @@ function DiscountRange({ t, bounds, value, onCommit, sliderKey }) {
         min={bounds.min}
         max={bounds.max}
         defaultValue={initial}
-        onChange={setLabel}
-        onChangeComplete={(next) => onCommit?.(next)}
+        onChange={handleChange}
+        onChangeComplete={onCommit}
         railStyle={railStyle}
         trackStyle={trackStyle}
         handleStyle={handleStyle}
