@@ -67,7 +67,7 @@ const PathAwareShell = memo(function PathAwareShell({
       ) : (
         <main className="min-h-[78vh] bg-[#faf6f3] relative">
           {isHome && <HomeHero />}
-          <div className="w-full px-2 sm:px-4 py-1">
+          <div className="w-full py-1 px-2 sm:px-4 md:pl-0">
             <div className="flex flex-col md:flex-row gap-4">
               {hasMountedSidebar && !isCheckout && (
                 <div

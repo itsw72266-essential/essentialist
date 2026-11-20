@@ -725,7 +725,6 @@ import {
   useSubCategoriesQuery,
 } from "@/hooks/queries/useCatalogQueries";
 import FilteredBy from "@/components/filters/FilteredBy";
-import BrandsFilter from "@/components/filters/BrandsFilter";
 import PriceDiscountFilter from "@/components/filters/PriceDiscountFilter";
 import "@/lib/i18n";
 
@@ -835,13 +834,12 @@ const SideBar = ({
 
   // Quick filters — homepage sidebar only (!isMobile). There's no single
   // filterable product grid on the homepage, so picking filters here just
-  // carries them over to the search results page.
-  const [quickBrands, setQuickBrands] = useState([]);
+  // carries them over to the search results page. Brands aren't repeated
+  // here since "Shop By Brands" below already covers that.
   const [quickPrice, setQuickPrice] = useState(null);
   const [quickDiscount, setQuickDiscount] = useState(null);
 
   const clearQuickFilters = () => {
-    setQuickBrands([]);
     setQuickPrice(null);
     setQuickDiscount(null);
   };
@@ -849,10 +847,6 @@ const SideBar = ({
   const goToSearchWithFilters = ({ categoryId } = {}) => {
     const params = new URLSearchParams();
     if (categoryId) params.set("category", categoryId);
-    if (quickBrands.length) {
-      params.set("brand", quickBrands.map((b) => b._id).join(","));
-      params.set("brandNames", quickBrands.map((b) => b.name).join(","));
-    }
     if (quickPrice) {
       params.set("priceMin", quickPrice[0]);
       params.set("priceMax", quickPrice[1]);
@@ -865,11 +859,6 @@ const SideBar = ({
   };
 
   const quickFilterChips = [
-    ...quickBrands.map((brand) => ({
-      key: `quick-brand-${brand._id}`,
-      label: brand.name,
-      onRemove: () => setQuickBrands((prev) => prev.filter((b) => b._id !== brand._id)),
-    })),
     ...(quickPrice
       ? [{ key: "quick-price", label: `${quickPrice[0]} - ${quickPrice[1]}`, onRemove: () => setQuickPrice(null) }]
       : []),
@@ -1051,7 +1040,6 @@ const SideBar = ({
       {!isMobile && (
         <div className="p-4 border-b border-gray-200 space-y-6">
           <FilteredBy chips={quickFilterChips} onClear={clearQuickFilters} />
-          <BrandsFilter selectedBrands={quickBrands} onChange={setQuickBrands} />
           <PriceDiscountFilter
             price={quickPrice}
             discount={quickDiscount}
