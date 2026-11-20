@@ -855,7 +855,11 @@ const SideBar = ({
     syncToRedux: true,
   });
 
-  // Brands via React Query hook
+  // Brands via React Query hook — only fetch a handful fast up front; the
+  // rest only hits the database once "See more" is clicked. Doesn't sync to
+  // Redux's global allBrands (admin pages rely on that being complete).
+  const [brandsExpanded, setBrandsExpanded] = useState(false);
+
   const {
     data: rqBrands = [],
     isLoading: brandsLoading,
@@ -863,9 +867,21 @@ const SideBar = ({
     enabled: typeof window !== "undefined",
     staleTime: 10 * 60_000,
     refetchOnWindowFocus: false,
-    // Keep hook-returned structure; normalize to array of brand-like
+    params: { limit: 9, sort: "featured", onlyActive: true },
     select: (data) => normalizeBrands(data) || data || [],
-    syncToRedux: true,
+    syncToRedux: false,
+  });
+
+  const {
+    data: rqMoreBrands = [],
+    isLoading: moreBrandsLoading,
+  } = useBrandsQuery({
+    enabled: typeof window !== "undefined" && brandsExpanded,
+    staleTime: 10 * 60_000,
+    refetchOnWindowFocus: false,
+    params: { limit: 200, sort: "nameAsc", onlyActive: true },
+    select: (data) => normalizeBrands(data) || data || [],
+    syncToRedux: false,
   });
 
   // Prefer props when present, fallback to React Query data otherwise
@@ -886,12 +902,21 @@ const SideBar = ({
 
   // Prepare brands with fallback and sorting
   const resolvedBrands = useMemo(() => {
-    const source = rqBrands && rqBrands.length ? rqBrands : fallbackBrands;
+    const source =
+      brandsExpanded && rqMoreBrands.length
+        ? rqMoreBrands
+        : rqBrands && rqBrands.length
+        ? rqBrands
+        : fallbackBrands;
     return source
       .map(toBrandRecord)
       .filter(Boolean)
       .sort((a, b) => a.name.localeCompare(b.name));
-  }, [rqBrands]);
+  }, [rqBrands, rqMoreBrands, brandsExpanded]);
+
+  const showBrandsSeeMore = !brandsExpanded && !brandsLoading;
+  const showBrandsSeeMoreSpinner =
+    brandsExpanded && moreBrandsLoading && !rqMoreBrands.length;
 
   // Build subcategory grouping per category
   const getSubcategoriesForCategory = useMemo(() => {
@@ -1015,6 +1040,22 @@ const SideBar = ({
                 </Link>
               </li>
             ))}
+            {showBrandsSeeMore && (
+              <li>
+                <button
+                  type="button"
+                  onClick={() => setBrandsExpanded(true)}
+                  className={`${itemClasses} text-pink-600 font-semibold`}
+                >
+                  {t("sidebar.seeMore")}
+                </button>
+              </li>
+            )}
+            {showBrandsSeeMoreSpinner && (
+              <li className="px-3 py-1 text-sm text-gray-500">
+                {t("sidebar.loading")}
+              </li>
+            )}
           </ul>
         )}
       </div>

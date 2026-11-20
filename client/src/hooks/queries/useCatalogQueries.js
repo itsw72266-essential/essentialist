@@ -100,16 +100,17 @@ export function useSubCategoriesQuery({
 export function useBrandsQuery({
   enabled = true,
   syncToRedux = true,
+  params,
   ...queryOptions
 } = {}) {
   const dispatch = useDispatch();
   const { i18n } = useTranslation();
 
   const queryResult = useQuery({
-    queryKey: ["brands", i18n.language],
+    queryKey: ["brands", i18n.language, params || null],
     enabled,
     queryFn: async () => {
-      const response = await Axios(SummaryApi.getBrands);
+      const response = await Axios({ ...SummaryApi.getBrands, params });
       const data = response?.data;
       if (Array.isArray(data?.items)) return data.items;
       if (Array.isArray(data?.data)) return data.data;
