@@ -371,7 +371,7 @@ const Header = () => {
                         </button>
                     </div>
 
-                    <div className="lg:hidden flex items-center gap-0.5 flex-shrink-0 pr-0.5">
+                    <div className="lg:hidden flex items-center gap-0.5 flex-shrink-0 pr-2 sm:pr-1.5">
                         <div className="user-account-menu relative max-w-[3.75rem] sm:max-w-none">
                             <button onClick={toggleUserMenu} className="flex flex-col items-start leading-tight text-white px-0.5 py-0.5 w-full">
                                 <span className="text-[7px] sm:text-[9px] text-gray-300 truncate w-full">
@@ -392,10 +392,10 @@ const Header = () => {
                                 </div>
                             )}
                         </div>
-                        <button className="text-white relative shrink-0 p-0.5" onClick={toggleCartSection}>
+                        <button className="text-white relative shrink-0 p-0.5 mr-1.5" onClick={toggleCartSection}>
                             <BsCart4 size={19} />
                             {isClient && totalQty > 0 && (
-                                <span className="absolute -top-1.5 -right-1.5 text-[9px] leading-none bg-pink-400 px-1 py-0.5 rounded-full font-bold">{totalQty}</span>
+                                <span className="absolute -top-1 -right-1 text-[9px] leading-none bg-pink-400 px-1 py-0.5 rounded-full font-bold">{totalQty}</span>
                             )}
                         </button>
                     </div>
