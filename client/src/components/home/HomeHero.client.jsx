@@ -11,31 +11,35 @@ import '@/lib/i18n'
 // panel only needs an accessible alt text — no text overlay on top.
 const PANELS = [
    {
+    src: '/assets/Glossy Neon Beauty Deals Poster.webp',
+    altKey: 'home.heroPanelTitle',
+    width: 800,
+    height: 1282,
+  },
+  {
+    src: '/assets/black-friday-beauty-gift-display.webp',
+    altKey: 'home.heroPanelTitle',
+    width: 800,
+    height: 1276,
+  },
+  {
     type: 'iframe',
     src: '/assets/essentialist_makeup_animated_ad.html',
-    altKey: 'home.heroPanelAdTitle',
+    altKey: 'home.heroPanelAd1Title',
     width: 460,
     height: 724,
   },
   {
-    src: '/assets/black-friday-beauty-gift-display.png',
-    altKey: 'home.heroPanel1Title',
-    width: 993,
-    height: 1584,
-  },
-   {
-    src: '/assets/Essentialist Makeup Deals Gift Bundle.png',
+    src: '/assets/festive-makeup-savings-ad.webp',
     altKey: 'home.heroPanel2Title',
-    // Its real pixel dimensions, so object-contain shows the whole image
-    // (including the logo near the bottom) uncropped, like its siblings.
-    width: 941,
-    height: 1505,
+    width: 800,
+    height: 1270,
   },
   {
-    src: '/assets/festive-makeup-savings-ad.png',
+    src: '/assets/Essentialist Makeup Deals Gift Bundle.webp',
     altKey: 'home.heroPanel3Title',
-    width: 995,
-    height: 1580,
+    width: 800,
+    height: 1281,
   },
   // {
   //   src: '/assets/Essentialist Makeup Gift Box.png',
@@ -47,34 +51,34 @@ const PANELS = [
   // },
  
   {
-    src: '/assets/Holiday Makeup Essentials Savings.png',
+    src: '/assets/Holiday Makeup Essentials Savings.webp',
     altKey: 'home.heroPanel4Title',
-    width: 992,
-    height: 1585,
+    width: 800,
+    height: 1279,
   },
   {
-    src: '/assets/holiday-makeup-gift-celebration.png',
+    src: '/assets/holiday-makeup-gift-celebration.webp',
     altKey: 'home.heroPanel5Title',
-    width: 992,
-    height: 1585,
+    width: 800,
+    height: 1278,
   },
   {
-    src: '/assets/Glossy Pink Makeup Sale Essentials.png',
+    src: '/assets/Glossy Pink Makeup Sale Essentials.webp',
     altKey: 'home.heroPanel5Title',
-    width: 993,
-    height: 1584,
+    width: 800,
+    height: 1279,
   },
   {
-    src: '/assets/holiday-gifts-esmakeupstore.png',
+    src: '/assets/holiday-gifts-esmakeupstore.webp',
     altKey: 'home.heroPanel6Title',
-    width: 993,
-    height: 1584,
+    width: 800,
+    height: 1276,
   },
   {
-    src: '/assets/Pink Stocking Stuffers Under $25.png',
+    src: '/assets/Pink Stocking Stuffers Under $25.webp',
     altKey: 'home.heroPanelTitle',
-    width: 993,
-    height: 1584,
+    width: 800,
+    height: 1278,
   },
 ]
 
