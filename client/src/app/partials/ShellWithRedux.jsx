@@ -23,6 +23,7 @@ import {
 } from "@/hooks/queries/useCatalogQueries";
 import { useUserProfileQuery } from "@/hooks/queries/useUserProfileQuery";
 import { HomeFiltersProvider, useHomeFilters } from "../../components/home/HomeFiltersContext";
+import QuickFilterChips from "../../components/filters/QuickFilterChips";
 
 const HomeSidebarFilters = lazy(() => import("../../components/home/HomeSidebarFilters"));
 const HomeFilteredProducts = lazy(() => import("../../components/home/HomeFilteredProducts"));
@@ -33,15 +34,19 @@ const Login = lazy(() =>
 );
 
 function HomeMainContent({ children }) {
-  const { hasActiveFilters } = useHomeFilters();
-  if (hasActiveFilters) {
-    return (
-      <Suspense fallback={<div className="animate-pulse h-96 bg-gray-100 rounded-xl"></div>}>
-        <HomeFilteredProducts />
-      </Suspense>
-    );
-  }
-  return children;
+  const { hasActiveFilters, dealKey, setDealKey } = useHomeFilters();
+  return (
+    <>
+      <QuickFilterChips active={dealKey} onSelect={setDealKey} />
+      {hasActiveFilters ? (
+        <Suspense fallback={<div className="animate-pulse h-96 bg-gray-100 rounded-xl"></div>}>
+          <HomeFilteredProducts />
+        </Suspense>
+      ) : (
+        children
+      )}
+    </>
+  );
 }
 
 const PathAwareShell = memo(function PathAwareShell({ children }) {

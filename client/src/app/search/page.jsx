@@ -11,6 +11,7 @@ import InfiniteScroll from 'react-infinite-scroll-component'
 import Search from './../../components/Search'
 import CardLoading from './../../components/CardLoading';
 import FiltersSidebar from './../../components/filters/FiltersSidebar'
+import QuickFilterChips, { DEAL_FILTERS } from './../../components/filters/QuickFilterChips'
 
 export default function SearchPage() {
   const [data,setData] = useState([])
@@ -41,6 +42,9 @@ export default function SearchPage() {
     return min && max ? [Number(min), Number(max)] : null
   })
 
+  const [dealKey, setDealKey] = useState('all')
+  const dealFilters = DEAL_FILTERS.find((d) => d.key === dealKey)?.filters || {}
+
   const setDepartment = (nextCategoryId) => {
     const params = new URLSearchParams(searchParams.toString())
     if (nextCategoryId) params.set('category', nextCategoryId)
@@ -51,7 +55,7 @@ export default function SearchPage() {
   const fetchData = async() => {
     try {
       setLoading(true)
-        const hasFilters = categoryId || brandIds.length || priceRange || discountRange
+        const hasFilters = categoryId || brandIds.length || priceRange || discountRange || dealKey !== 'all'
         const response = await Axios({
             ...SummaryApi.searchProduct,
             data : {
@@ -62,6 +66,7 @@ export default function SearchPage() {
                 ...(brandIds.length ? { brandIds } : {}),
                 ...(priceRange ? { price : { min: priceRange[0], max: priceRange[1] } } : {}),
                 ...(discountRange ? { discount : { min: discountRange[0], max: discountRange[1] } } : {}),
+                ...dealFilters,
               } } : {}),
             }
         })
@@ -90,11 +95,11 @@ export default function SearchPage() {
 
   useEffect(()=>{
     setPage(1)
-  },[searchText,categoryId,selectedBrands,priceRange,discountRange])
+  },[searchText,categoryId,selectedBrands,priceRange,discountRange,dealKey])
 
   useEffect(()=>{
     fetchData()
-  },[page,searchText,categoryId,selectedBrands,priceRange,discountRange])
+  },[page,searchText,categoryId,selectedBrands,priceRange,discountRange,dealKey])
 
   const handleFetchMore = ()=>{
     if(totalPage > page){
@@ -123,6 +128,8 @@ export default function SearchPage() {
             <div className="block sm:hidden mb-4">
               <Search />
             </div>
+
+            <QuickFilterChips active={dealKey} onSelect={setDealKey} />
 
             <p className='font-semibold'>Search Results: {data.length}  </p>
 

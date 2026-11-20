@@ -9,6 +9,7 @@ export function HomeFiltersProvider({ children }) {
   const [selectedBrands, setSelectedBrands] = useState([])
   const [priceRange, setPriceRange] = useState(null)
   const [discountRange, setDiscountRange] = useState(null)
+  const [dealKey, setDealKey] = useState('all')
 
   const value = useMemo(
     () => ({
@@ -20,11 +21,13 @@ export function HomeFiltersProvider({ children }) {
       setPriceRange,
       discountRange,
       setDiscountRange,
+      dealKey,
+      setDealKey,
       hasActiveFilters: Boolean(
-        categoryId || selectedBrands.length || priceRange || discountRange
+        categoryId || selectedBrands.length || priceRange || discountRange || dealKey !== 'all'
       ),
     }),
-    [categoryId, selectedBrands, priceRange, discountRange]
+    [categoryId, selectedBrands, priceRange, discountRange, dealKey]
   )
 
   return (

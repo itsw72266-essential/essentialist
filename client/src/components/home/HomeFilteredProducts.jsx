@@ -8,10 +8,12 @@ import AxiosToastError from '@/lib/axiosToastError'
 import CardProduct from '@/components/CardProduct'
 import CardLoading from '@/components/CardLoading'
 import { useHomeFilters } from './HomeFiltersContext'
+import { DEAL_FILTERS } from '@/components/filters/QuickFilterChips'
 
 export default function HomeFilteredProducts() {
-  const { categoryId, selectedBrands, priceRange, discountRange } = useHomeFilters()
+  const { categoryId, selectedBrands, priceRange, discountRange, dealKey } = useHomeFilters()
   const brandIds = selectedBrands.map((b) => b._id)
+  const dealFilters = DEAL_FILTERS.find((d) => d.key === dealKey)?.filters || {}
 
   const [data, setData] = useState([])
   const [loading, setLoading] = useState(true)
@@ -31,6 +33,7 @@ export default function HomeFilteredProducts() {
             ...(brandIds.length ? { brandIds } : {}),
             ...(priceRange ? { price: { min: priceRange[0], max: priceRange[1] } } : {}),
             ...(discountRange ? { discount: { min: discountRange[0], max: discountRange[1] } } : {}),
+            ...dealFilters,
           },
         },
       })
@@ -53,12 +56,12 @@ export default function HomeFilteredProducts() {
 
   useEffect(() => {
     setPage(1)
-  }, [categoryId, selectedBrands, priceRange, discountRange])
+  }, [categoryId, selectedBrands, priceRange, discountRange, dealKey])
 
   useEffect(() => {
     fetchData()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, categoryId, selectedBrands, priceRange, discountRange])
+  }, [page, categoryId, selectedBrands, priceRange, discountRange, dealKey])
 
   const handleFetchMore = () => {
     if (totalPage > page) setPage((prev) => prev + 1)

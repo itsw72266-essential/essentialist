@@ -136,6 +136,17 @@ const buildProductQuery = ({ search, filters = {} }) => {
     }
   }
 
+  // discount is stored as a percentage; discountAmount lets callers filter
+  // by the actual currency amount saved (price * discount / 100).
+  if (filters.discountAmount?.min !== undefined && filters.discountAmount?.min !== null) {
+    query.$expr = {
+      $gte: [
+        { $multiply: ["$price", { $divide: [{ $ifNull: ["$discount", 0] }, 100] }] },
+        Number(filters.discountAmount.min),
+      ],
+    };
+  }
+
   if (filters.bulkPrice) {
     const bulkFilter = {};
     if (filters.bulkPrice.min !== undefined && filters.bulkPrice.min !== null) {
