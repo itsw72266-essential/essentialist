@@ -44,6 +44,15 @@ const PathAwareShell = memo(function PathAwareShell({
   const showSidebar = isHome && !isMobile;
   const isCheckout = neutralPath === "/checkout";
 
+  // Once the sidebar has been shown, keep it mounted (just hidden via CSS)
+  // instead of unmounting on every navigation away from home — otherwise it
+  // re-runs its loading skeleton and re-fetches its data every single time
+  // the user comes back to the homepage.
+  const [hasMountedSidebar, setHasMountedSidebar] = useState(showSidebar);
+  useEffect(() => {
+    if (showSidebar) setHasMountedSidebar(true);
+  }, [showSidebar]);
+
   const categories = navData?.categories ?? [];
   const subCategories = navData?.subCategories ?? [];
   const brands = navData?.brands ?? [];
@@ -60,8 +69,12 @@ const PathAwareShell = memo(function PathAwareShell({
           {isHome && <HomeHero />}
           <div className="w-full px-2 sm:px-4 py-1">
             <div className="flex flex-col md:flex-row gap-4">
-              {showSidebar && !isCheckout && (
-                <div className="w-full md:w-1/4 lg:w-1/5 bg-white/70 rounded-xl shadow-sm">
+              {hasMountedSidebar && !isCheckout && (
+                <div
+                  className={`w-full md:w-1/4 lg:w-1/5 bg-white/70 rounded-xl shadow-sm ${
+                    showSidebar ? "" : "hidden"
+                  }`}
+                >
                   <Suspense fallback={<div className="animate-pulse h-96 bg-gray-100 rounded-xl"></div>}>
                     <SideBar
                       categoryData={categories}

@@ -789,11 +789,18 @@ export const searchProduct = async (request, response) => {
     };
 
     const query = buildProductQuery({ search, filters: resolvedFilters });
-    const sortOptions = buildSortOptions(sort);
+    // A free-text search should rank by how well a product matches the
+    // query, not by "newest" — otherwise loosely-matching but recent
+    // products bury the actual best match off the first page.
+    const useRelevanceSort = !!search && (!sort || sort === "newest");
+    const sortOptions = useRelevanceSort
+      ? { score: { $meta: "textScore" } }
+      : buildSortOptions(sort);
+    const projection = useRelevanceSort ? { score: { $meta: "textScore" } } : null;
     const skip = (page - 1) * limit;
 
     const [data, dataCount] = await Promise.all([
-      ProductModel.find(query)
+      ProductModel.find(query, projection)
         .sort(sortOptions)
         .skip(skip)
         .limit(limit)
