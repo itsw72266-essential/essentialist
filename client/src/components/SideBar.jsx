@@ -720,6 +720,7 @@ import { ChevronDown, ChevronRight } from "lucide-react";
 import { buildSubCategoryPath } from "@/lib/catalogSlugs";
 import { useLocalizedHref } from "@/hooks/useLocalizedHref";
 import {
+  useBrandsQuery,
   useCategoriesQuery,
   useSubCategoriesQuery,
 } from "@/hooks/queries/useCatalogQueries";
@@ -727,12 +728,42 @@ import FilteredBy from "@/components/filters/FilteredBy";
 import PriceDiscountFilter from "@/components/filters/PriceDiscountFilter";
 import "@/lib/i18n";
 
+// Local fallback if brand API returns empty
+const fallbackBrands = [
+  "NYX",
+  "LA girl",
+  "ELF",
+  "SMASHBOX",
+  "BOBBI BROWN",
+  "TOO FACED",
+  "ESTEE LAUDER",
+  "MAC",
+  "CLINIC",
+  "ONE SIZE",
+  "JUVIA",
+];
+
+const createBrandSlug = (brand) =>
+  brand.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+
 const pickArray = (...candidates) => {
   for (const candidate of candidates) {
     if (Array.isArray(candidate)) return candidate;
   }
   return [];
 };
+
+const normalizeBrands = (payload) =>
+  pickArray(
+    payload,
+    payload?.data,
+    payload?.data?.data,
+    payload?.data?.brands,
+    payload?.data?.docs,
+    payload?.brands,
+    payload?.result,
+    payload?.rows
+  );
 
 const normalizeCollection = (payload) =>
   pickArray(
@@ -744,6 +775,41 @@ const normalizeCollection = (payload) =>
     payload?.rows,
     payload?.result
   );
+
+const toBrandRecord = (brandLike) => {
+  if (!brandLike) return null;
+
+  if (typeof brandLike === "string") {
+    return {
+      id: brandLike,
+      name: brandLike,
+      slug: createBrandSlug(brandLike),
+    };
+  }
+
+  const id = brandLike._id || brandLike.id || brandLike.value || null;
+  const name =
+    brandLike.name ||
+    brandLike.title ||
+    brandLike.label ||
+    brandLike.displayName ||
+    "";
+  const slug =
+    brandLike.slug ||
+    brandLike.handle ||
+    brandLike.urlKey ||
+    (name ? createBrandSlug(name) : "");
+
+  if (!id || !name || !slug) return null;
+
+  return {
+    id,
+    name,
+    slug,
+    isActive:
+      typeof brandLike.isActive === "boolean" ? brandLike.isActive : true,
+  };
+};
 
 const SideBar = ({
   isMobile = false,
@@ -828,6 +894,35 @@ const SideBar = ({
     syncToRedux: true,
   });
 
+  // Brands via React Query hook — only fetch a handful fast up front; the
+  // rest only hits the database once "See more" is clicked. Doesn't sync to
+  // Redux's global allBrands (admin pages rely on that being complete).
+  const [brandsExpanded, setBrandsExpanded] = useState(false);
+
+  const {
+    data: rqBrands = [],
+    isLoading: brandsLoading,
+  } = useBrandsQuery({
+    enabled: typeof window !== "undefined",
+    staleTime: 10 * 60_000,
+    refetchOnWindowFocus: false,
+    params: { limit: 9, sort: "featured", onlyActive: true },
+    select: (data) => normalizeBrands(data) || data || [],
+    syncToRedux: false,
+  });
+
+  const {
+    data: rqMoreBrands = [],
+    isLoading: moreBrandsLoading,
+  } = useBrandsQuery({
+    enabled: typeof window !== "undefined" && brandsExpanded,
+    staleTime: 10 * 60_000,
+    refetchOnWindowFocus: false,
+    params: { limit: 200, sort: "nameAsc", onlyActive: true },
+    select: (data) => normalizeBrands(data) || data || [],
+    syncToRedux: false,
+  });
+
   // Prefer props when present, fallback to React Query data otherwise
   const finalCategoryData =
     Array.isArray(categoryData) && categoryData.length > 0
@@ -844,6 +939,23 @@ const SideBar = ({
       ? loadingCategory
       : categoriesLoading || subCategoriesLoading;
 
+  // Prepare brands with fallback and sorting
+  const resolvedBrands = useMemo(() => {
+    const source =
+      brandsExpanded && rqMoreBrands.length
+        ? rqMoreBrands
+        : rqBrands && rqBrands.length
+        ? rqBrands
+        : fallbackBrands;
+    return source
+      .map(toBrandRecord)
+      .filter(Boolean)
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }, [rqBrands, rqMoreBrands, brandsExpanded]);
+
+  const showBrandsSeeMore = !brandsExpanded && !brandsLoading;
+  const showBrandsSeeMoreSpinner =
+    brandsExpanded && moreBrandsLoading && !rqMoreBrands.length;
 
   // Build subcategory grouping per category
   const getSubcategoriesForCategory = useMemo(() => {
@@ -882,6 +994,7 @@ const SideBar = ({
     : "block w-full text-left text-sm text-black py-1 px-2 rounded hover:bg-pink-100 hover:text-pink-600 cursor-pointer transition-colors break-words leading-snug";
 
   const skeletonBlocks = useMemo(() => Array.from({ length: 8 }), []);
+  const brandSkeletonBlocks = useMemo(() => Array.from({ length: 9 }), []);
 
   const SkeletonBlock = ({ index }) => (
     <div key={`category-skeleton-${index}`} className="p-4 animate-pulse">
@@ -891,46 +1004,136 @@ const SideBar = ({
     </div>
   );
 
+  const BrandSkeleton = ({ index }) => (
+    <div
+      key={`brand-skeleton-${index}`}
+      className="h-4 rounded bg-gray-200 animate-pulse"
+      style={{ width: `${60 + (index % 4) * 8}%` }}
+    />
+  );
+
   // Pre-hydration skeleton to avoid mismatch
   if (!hydrated) {
     return (
       <aside className={baseClasses}>
         <div className={headerClasses}>
           <h2 className="text-white font-bold text-lg uppercase tracking-wide">
-            {t("sidebar.shopByCategory")}
+            {t("sidebar.shopByBrand")}
           </h2>
         </div>
         <div className={isMobile ? "px-4 py-3" : "px-6 py-4"}>
-          {skeletonBlocks.map((_, index) => (
-            <SkeletonBlock key={`category-prehydrate-${index}`} index={index} />
-          ))}
+          <div className="space-y-3">
+            {brandSkeletonBlocks.map((_, index) => (
+              <BrandSkeleton key={`brand-prehydrate-${index}`} index={index} />
+            ))}
+          </div>
         </div>
       </aside>
     );
   }
 
+  const showBrandSkeleton = brandsLoading;
+  const showBrandError = !brandsLoading && !resolvedBrands.length;
+
   return (
     <aside className={baseClasses}>
       {!isMobile && (
-        <div className="px-6 py-4 border-b border-gray-200 space-y-6">
-          <FilteredBy chips={quickFilterChips} onClear={clearQuickFilters} />
-          <PriceDiscountFilter
-            price={quickPrice}
-            discount={quickDiscount}
-            onPriceChange={setQuickPrice}
-            onDiscountChange={setQuickDiscount}
-          />
-          <button
-            type="button"
-            onClick={() => goToSearchWithFilters()}
-            className="text-pink-600 hover:text-pink-700 hover:underline font-semibold text-sm"
-          >
-            {t("sidebar.showResults")}
-          </button>
-        </div>
+        <>
+          <div className={headerClasses}>
+            <h2 className="text-white font-bold text-lg uppercase tracking-wide">
+              {t("sidebar.filters")}
+            </h2>
+          </div>
+          <div className={`${isMobile ? "px-4 py-3" : "px-6 py-4"} space-y-6`}>
+            <FilteredBy chips={quickFilterChips} onClear={clearQuickFilters} />
+            <PriceDiscountFilter
+              price={quickPrice}
+              discount={quickDiscount}
+              onPriceChange={setQuickPrice}
+              onDiscountChange={setQuickDiscount}
+            />
+            <button
+              type="button"
+              onClick={() => goToSearchWithFilters()}
+              className="text-pink-600 hover:text-pink-700 hover:underline font-semibold text-sm"
+            >
+              {t("sidebar.showResults")}
+            </button>
+          </div>
+        </>
       )}
 
-      <div className={headerClasses}>
+      <div
+        className={`${headerClasses} ${
+          isMobile ? "" : "border-t border-pink-300"
+        }`}
+      >
+        <h2 className="text-white font-bold text-lg uppercase tracking-wide">
+          {t("sidebar.shopByBrands")}
+        </h2>
+      </div>
+
+      <div className={isMobile ? "px-4 py-3" : "px-6 py-4"}>
+        {showBrandSkeleton ? (
+          <div className="space-y-3">
+            {brandSkeletonBlocks.map((_, index) => (
+              <BrandSkeleton key={`brand-skel-${index}`} index={index} />
+            ))}
+          </div>
+        ) : showBrandError ? (
+          <p className="text-sm text-gray-500">
+            {t("sidebar.brandsUnavailable")}
+          </p>
+        ) : (
+          <ul className="space-y-1">
+            <li>
+              <Link
+                href={localizedHref("/brands")}
+                prefetch={false}
+                onClick={onNavigate}
+                className={`${itemClasses} font-bold`}
+              >
+                {t("sidebar.allBrands")}
+              </Link>
+            </li>
+            {resolvedBrands.map((brand) => (
+              <li key={brand.id}>
+                <Link
+                  href={localizedHref(`/brands/${brand.slug}`)}
+                  prefetch={false}
+                  onClick={onNavigate}
+                  className={itemClasses}
+                >
+                  {brand.name}
+                  {!brand.isActive ? ` (${t("sidebar.inactive")})` : ""}
+                </Link>
+              </li>
+            ))}
+            {showBrandsSeeMore && (
+              <li>
+                <button
+                  type="button"
+                  onClick={() => setBrandsExpanded(true)}
+                  className={`${itemClasses} text-pink-600 font-semibold`}
+                >
+                  {t("sidebar.seeMore")}
+                </button>
+              </li>
+            )}
+            {showBrandsSeeMoreSpinner && (
+              <li className="px-3 py-1 text-sm text-gray-500">
+                {t("sidebar.loading")}
+              </li>
+            )}
+          </ul>
+        )}
+      </div>
+
+      <div
+        className={`${headerClasses} ${
+          isMobile ? "border-t border-purple-800" : "border-t border-pink-300"
+        }`}
+      >
         <h2 className="text-white font-bold text-lg uppercase tracking-wide">
           {t("sidebar.shopByCategory")}
         </h2>
