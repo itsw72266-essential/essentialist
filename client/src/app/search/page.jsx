@@ -27,10 +27,24 @@ export default function SearchPage() {
   const searchParams = useSearchParams()
   const searchText = searchParams.get('q')
   const categoryId = searchParams.get('category') || ''
-  const [selectedBrands, setSelectedBrands] = useState([])
+
+  const [selectedBrands, setSelectedBrands] = useState(() => {
+    const ids = (searchParams.get('brand') || '').split(',').filter(Boolean)
+    const names = (searchParams.get('brandNames') || '').split(',').filter(Boolean)
+    return ids.map((id, i) => ({ _id: id, name: names[i] || id }))
+  })
   const brandIds = selectedBrands.map((b) => b._id)
-  const [priceRange, setPriceRange] = useState(null)
-  const [discountRange, setDiscountRange] = useState(null)
+
+  const [priceRange, setPriceRange] = useState(() => {
+    const min = searchParams.get('priceMin')
+    const max = searchParams.get('priceMax')
+    return min && max ? [Number(min), Number(max)] : null
+  })
+  const [discountRange, setDiscountRange] = useState(() => {
+    const min = searchParams.get('discountMin')
+    const max = searchParams.get('discountMax')
+    return min && max ? [Number(min), Number(max)] : null
+  })
 
   const setDepartment = (nextCategoryId) => {
     const params = new URLSearchParams(searchParams.toString())

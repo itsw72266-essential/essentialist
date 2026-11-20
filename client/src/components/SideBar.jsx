@@ -713,6 +713,7 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { ChevronDown, ChevronRight } from "lucide-react";
 
@@ -723,6 +724,9 @@ import {
   useCategoriesQuery,
   useSubCategoriesQuery,
 } from "@/hooks/queries/useCatalogQueries";
+import FilteredBy from "@/components/filters/FilteredBy";
+import BrandsFilter from "@/components/filters/BrandsFilter";
+import PriceDiscountFilter from "@/components/filters/PriceDiscountFilter";
 import "@/lib/i18n";
 
 // Local fallback if brand API returns empty
@@ -817,6 +821,7 @@ const SideBar = ({
 }) => {
   const { t } = useTranslation();
   const localizedHref = useLocalizedHref();
+  const router = useRouter();
   // Avoid hydration mismatch for suspense/unified initial paint
   const [hydrated, setHydrated] = useState(false);
   useEffect(() => {
@@ -827,6 +832,51 @@ const SideBar = ({
   const toggleCategory = (categoryId) => {
     setOpenCategoryIds((prev) => ({ ...prev, [categoryId]: !prev[categoryId] }));
   };
+
+  // Quick filters — homepage sidebar only (!isMobile). There's no single
+  // filterable product grid on the homepage, so picking filters here just
+  // carries them over to the search results page.
+  const [quickBrands, setQuickBrands] = useState([]);
+  const [quickPrice, setQuickPrice] = useState(null);
+  const [quickDiscount, setQuickDiscount] = useState(null);
+
+  const clearQuickFilters = () => {
+    setQuickBrands([]);
+    setQuickPrice(null);
+    setQuickDiscount(null);
+  };
+
+  const goToSearchWithFilters = ({ categoryId } = {}) => {
+    const params = new URLSearchParams();
+    if (categoryId) params.set("category", categoryId);
+    if (quickBrands.length) {
+      params.set("brand", quickBrands.map((b) => b._id).join(","));
+      params.set("brandNames", quickBrands.map((b) => b.name).join(","));
+    }
+    if (quickPrice) {
+      params.set("priceMin", quickPrice[0]);
+      params.set("priceMax", quickPrice[1]);
+    }
+    if (quickDiscount) {
+      params.set("discountMin", quickDiscount[0]);
+      params.set("discountMax", quickDiscount[1]);
+    }
+    router.push(`/search?${params.toString()}`);
+  };
+
+  const quickFilterChips = [
+    ...quickBrands.map((brand) => ({
+      key: `quick-brand-${brand._id}`,
+      label: brand.name,
+      onRemove: () => setQuickBrands((prev) => prev.filter((b) => b._id !== brand._id)),
+    })),
+    ...(quickPrice
+      ? [{ key: "quick-price", label: `${quickPrice[0]} - ${quickPrice[1]}`, onRemove: () => setQuickPrice(null) }]
+      : []),
+    ...(quickDiscount
+      ? [{ key: "quick-discount", label: `${quickDiscount[0]}% - ${quickDiscount[1]}%`, onRemove: () => setQuickDiscount(null) }]
+      : []),
+  ];
 
   // Categories via React Query hook
   const {
@@ -998,6 +1048,26 @@ const SideBar = ({
 
   return (
     <aside className={baseClasses}>
+      {!isMobile && (
+        <div className="p-4 border-b border-gray-200 space-y-6">
+          <FilteredBy chips={quickFilterChips} onClear={clearQuickFilters} />
+          <BrandsFilter selectedBrands={quickBrands} onChange={setQuickBrands} />
+          <PriceDiscountFilter
+            price={quickPrice}
+            discount={quickDiscount}
+            onPriceChange={setQuickPrice}
+            onDiscountChange={setQuickDiscount}
+          />
+          <button
+            type="button"
+            onClick={() => goToSearchWithFilters()}
+            className="w-full rounded bg-pink-400 hover:bg-pink-500 text-white font-semibold py-2 text-sm transition-colors"
+          >
+            {t("sidebar.showResults")}
+          </button>
+        </div>
+      )}
+
       <div className={headerClasses}>
         <h2 className="text-white font-bold text-lg uppercase tracking-wide">
           {t("sidebar.shopByBrands")}
