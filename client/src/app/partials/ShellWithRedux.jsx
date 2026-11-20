@@ -22,13 +22,27 @@ import {
   useSubCategoriesQuery,
 } from "@/hooks/queries/useCatalogQueries";
 import { useUserProfileQuery } from "@/hooks/queries/useUserProfileQuery";
+import { HomeFiltersProvider, useHomeFilters } from "../../components/home/HomeFiltersContext";
 
 const HomeSidebarFilters = lazy(() => import("../../components/home/HomeSidebarFilters"));
+const HomeFilteredProducts = lazy(() => import("../../components/home/HomeFilteredProducts"));
 const CartMobileLink = lazy(() => import("../../components/CartMobile"));
 const Modal = lazy(() => import("../../components/Modal"));
 const Login = lazy(() =>
   import("../(auth)/login/page").then((mod) => ({ default: mod.default || mod }))
 );
+
+function HomeMainContent({ children }) {
+  const { hasActiveFilters } = useHomeFilters();
+  if (hasActiveFilters) {
+    return (
+      <Suspense fallback={<div className="animate-pulse h-96 bg-gray-100 rounded-xl"></div>}>
+        <HomeFilteredProducts />
+      </Suspense>
+    );
+  }
+  return children;
+}
 
 const PathAwareShell = memo(function PathAwareShell({ children }) {
   const pathname = usePathname();
@@ -46,22 +60,24 @@ const PathAwareShell = memo(function PathAwareShell({ children }) {
       ) : (
         <main className="min-h-[78vh] bg-[#faf6f3] relative">
           {isHome && <HomeHero />}
-          <div className="w-full py-1 px-2 sm:px-4 md:pl-0">
-            <div className="flex flex-col md:flex-row gap-4">
-              {showSidebar && !isCheckout && (
-                <div className="w-full md:w-60 lg:w-64 shrink-0 min-w-0">
-                  <Suspense fallback={<div className="animate-pulse h-96 bg-gray-100 rounded-xl"></div>}>
-                    <HomeSidebarFilters />
-                  </Suspense>
+          <HomeFiltersProvider>
+            <div className="w-full py-1 px-2 sm:px-4 md:pl-0">
+              <div className="flex flex-col md:flex-row gap-4">
+                {showSidebar && !isCheckout && (
+                  <div className="w-full md:w-60 lg:w-64 shrink-0 min-w-0">
+                    <Suspense fallback={<div className="animate-pulse h-96 bg-gray-100 rounded-xl"></div>}>
+                      <HomeSidebarFilters />
+                    </Suspense>
+                  </div>
+                )}
+                <div
+                  className="w-full min-w-0 flex-1 bg-white/80 rounded-xl shadow p-3"
+                >
+                  {isHome ? <HomeMainContent>{children}</HomeMainContent> : children}
                 </div>
-              )}
-              <div
-                className="w-full min-w-0 flex-1 bg-white/80 rounded-xl shadow p-3"
-              >
-                {children}
               </div>
             </div>
-          </div>
+          </HomeFiltersProvider>
         </main>
       )}
       {pathname !== "/checkout" && !isDashboard && (
