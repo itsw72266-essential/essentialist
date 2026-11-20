@@ -10,12 +10,7 @@ import InfiniteScroll from 'react-infinite-scroll-component'
 // import noDataImage from '/public/assets/nothing here yet.webp'
 import Search from './../../components/Search'
 import CardLoading from './../../components/CardLoading';
-import BrandsFilter from './../../components/filters/BrandsFilter'
-import PriceDiscountFilter from './../../components/filters/PriceDiscountFilter'
-import DepartmentFilter from './../../components/filters/DepartmentFilter'
-import FilteredBy from './../../components/filters/FilteredBy'
-import { useCategoriesQuery } from '@/hooks/queries/useCatalogQueries'
-import { DisplayPriceInRupees } from '@/utils/DisplayPriceInRupees'
+import FiltersSidebar from './../../components/filters/FiltersSidebar'
 
 export default function SearchPage() {
   const [data,setData] = useState([])
@@ -52,33 +47,6 @@ export default function SearchPage() {
     else params.delete('category')
     router.replace(`/search?${params.toString()}`)
   }
-
-  const clearFilters = () => {
-    setSelectedBrands([])
-    setPriceRange(null)
-    setDiscountRange(null)
-    setDepartment('')
-  }
-
-  const { data: categories = [] } = useCategoriesQuery()
-  const selectedCategory = categories.find((c) => c._id === categoryId)
-
-  const filterChips = [
-    ...(selectedCategory
-      ? [{ key: 'department', label: selectedCategory.name, onRemove: () => setDepartment('') }]
-      : []),
-    ...selectedBrands.map((brand) => ({
-      key: `brand-${brand._id}`,
-      label: brand.name,
-      onRemove: () => setSelectedBrands((prev) => prev.filter((b) => b._id !== brand._id)),
-    })),
-    ...(priceRange
-      ? [{ key: 'price', label: `${DisplayPriceInRupees(priceRange[0])} - ${DisplayPriceInRupees(priceRange[1])}`, onRemove: () => setPriceRange(null) }]
-      : []),
-    ...(discountRange
-      ? [{ key: 'discount', label: `${discountRange[0]}% - ${discountRange[1]}%`, onRemove: () => setDiscountRange(null) }]
-      : []),
-  ]
 
   const fetchData = async() => {
     try {
@@ -138,14 +106,15 @@ export default function SearchPage() {
     <section className='bg-white'>
       <div className='px-4 lg:pl-0 lg:pr-4'>
         <div className='flex flex-col lg:flex-row gap-4'>
-          <aside className='w-full lg:w-56 shrink-0 py-4 px-4 lg:pl-0 lg:pr-0 space-y-6'>
-            <FilteredBy chips={filterChips} onClear={clearFilters} />
-            <DepartmentFilter selectedCategoryId={categoryId} onSelect={setDepartment} />
-            <BrandsFilter selectedBrands={selectedBrands} onChange={setSelectedBrands} />
-            <PriceDiscountFilter
-              price={priceRange}
-              discount={discountRange}
+          <aside className='w-full lg:w-56 shrink-0 py-4 px-4 lg:pl-0 lg:pr-0'>
+            <FiltersSidebar
+              categoryId={categoryId}
+              onCategoryChange={setDepartment}
+              selectedBrands={selectedBrands}
+              onBrandsChange={setSelectedBrands}
+              priceRange={priceRange}
               onPriceChange={setPriceRange}
+              discountRange={discountRange}
               onDiscountChange={setDiscountRange}
             />
           </aside>

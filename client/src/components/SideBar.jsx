@@ -713,7 +713,6 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { ChevronDown, ChevronRight } from "lucide-react";
 
@@ -724,7 +723,6 @@ import {
   useCategoriesQuery,
   useSubCategoriesQuery,
 } from "@/hooks/queries/useCatalogQueries";
-import PriceDiscountFilter from "@/components/filters/PriceDiscountFilter";
 import "@/lib/i18n";
 
 // Local fallback if brand API returns empty
@@ -819,7 +817,6 @@ const SideBar = ({
 }) => {
   const { t } = useTranslation();
   const localizedHref = useLocalizedHref();
-  const router = useRouter();
   // Avoid hydration mismatch for suspense/unified initial paint
   const [hydrated, setHydrated] = useState(false);
   useEffect(() => {
@@ -830,28 +827,6 @@ const SideBar = ({
   const toggleCategory = (categoryId) => {
     setOpenCategoryIds((prev) => ({ ...prev, [categoryId]: !prev[categoryId] }));
   };
-
-  // Quick filters — homepage sidebar only (!isMobile). There's no single
-  // filterable product grid on the homepage, so picking filters here just
-  // carries them over to the search results page. Brands aren't repeated
-  // here since "Shop By Brands" below already covers that.
-  const [quickPrice, setQuickPrice] = useState(null);
-  const [quickDiscount, setQuickDiscount] = useState(null);
-
-  const goToSearchWithFilters = ({ categoryId } = {}) => {
-    const params = new URLSearchParams();
-    if (categoryId) params.set("category", categoryId);
-    if (quickPrice) {
-      params.set("priceMin", quickPrice[0]);
-      params.set("priceMax", quickPrice[1]);
-    }
-    if (quickDiscount) {
-      params.set("discountMin", quickDiscount[0]);
-      params.set("discountMax", quickDiscount[1]);
-    }
-    router.push(`/search?${params.toString()}`);
-  };
-
 
   // Categories via React Query hook
   const {
@@ -1023,31 +998,6 @@ const SideBar = ({
 
   return (
     <aside className={baseClasses}>
-      {!isMobile && (
-        <>
-          <div className={headerClasses}>
-            <h2 className="text-white font-bold text-lg uppercase tracking-wide">
-              {t("sidebar.filters")}
-            </h2>
-          </div>
-          <div className={`${isMobile ? "px-4 py-3" : "px-6 py-4"} space-y-6`}>
-            <PriceDiscountFilter
-              price={quickPrice}
-              discount={quickDiscount}
-              onPriceChange={setQuickPrice}
-              onDiscountChange={setQuickDiscount}
-            />
-            <button
-              type="button"
-              onClick={() => goToSearchWithFilters()}
-              className="text-pink-600 hover:text-pink-700 hover:underline font-semibold text-sm"
-            >
-              {t("sidebar.showResults")}
-            </button>
-          </div>
-        </>
-      )}
-
       <div
         className={`${headerClasses} ${
           isMobile ? "" : "border-t border-pink-300"

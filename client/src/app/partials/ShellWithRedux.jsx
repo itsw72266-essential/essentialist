@@ -4,7 +4,6 @@
 import {
   Suspense,
   useEffect,
-  useMemo,
   useState,
   lazy,
   memo,
@@ -24,18 +23,14 @@ import {
 } from "@/hooks/queries/useCatalogQueries";
 import { useUserProfileQuery } from "@/hooks/queries/useUserProfileQuery";
 
-const SideBar = lazy(() => import("../../components/SideBar"));
+const HomeSidebarFilters = lazy(() => import("../../components/home/HomeSidebarFilters"));
 const CartMobileLink = lazy(() => import("../../components/CartMobile"));
 const Modal = lazy(() => import("../../components/Modal"));
 const Login = lazy(() =>
   import("../(auth)/login/page").then((mod) => ({ default: mod.default || mod }))
 );
 
-const PathAwareShell = memo(function PathAwareShell({
-  children,
-  navData,
-  loadingStates,
-}) {
+const PathAwareShell = memo(function PathAwareShell({ children }) {
   const pathname = usePathname();
   const [isMobile] = useMobile();
   const neutralPath = stripLocalePrefix(pathname);
@@ -43,22 +38,6 @@ const PathAwareShell = memo(function PathAwareShell({
   const isDashboard = neutralPath.startsWith("/dashboard");
   const showSidebar = isHome && !isMobile;
   const isCheckout = neutralPath === "/checkout";
-
-  // Once the sidebar has been shown, keep it mounted (just hidden via CSS)
-  // instead of unmounting on every navigation away from home — otherwise it
-  // re-runs its loading skeleton and re-fetches its data every single time
-  // the user comes back to the homepage.
-  const [hasMountedSidebar, setHasMountedSidebar] = useState(showSidebar);
-  useEffect(() => {
-    if (showSidebar) setHasMountedSidebar(true);
-  }, [showSidebar]);
-
-  const categories = navData?.categories ?? [];
-  const subCategories = navData?.subCategories ?? [];
-  const brands = navData?.brands ?? [];
-
-  const loadingCategoryOverride = loadingStates?.categories ?? false;
-  const loadingBrandOverride = loadingStates?.brands ?? false;
 
   return (
     <>
@@ -69,20 +48,10 @@ const PathAwareShell = memo(function PathAwareShell({
           {isHome && <HomeHero />}
           <div className="w-full py-1 px-2 sm:px-4 md:pl-0">
             <div className="flex flex-col md:flex-row gap-4">
-              {hasMountedSidebar && !isCheckout && (
-                <div
-                  className={`w-full md:w-1/4 lg:w-1/5 bg-white/70 rounded-xl shadow-sm ${
-                    showSidebar ? "" : "hidden"
-                  }`}
-                >
+              {showSidebar && !isCheckout && (
+                <div className="w-full md:w-1/4 lg:w-1/5">
                   <Suspense fallback={<div className="animate-pulse h-96 bg-gray-100 rounded-xl"></div>}>
-                    <SideBar
-                      categoryData={categories}
-                      subCategoryData={subCategories}
-                      brandData={brands}
-                      loadingCategory={loadingCategoryOverride}
-                      loadingBrand={loadingBrandOverride}
-                    />
+                    <HomeSidebarFilters />
                   </Suspense>
                 </div>
               )}
@@ -112,17 +81,20 @@ function ShellWithRedux({ children, initialNavData }) {
 
   const [showLoginModal, setShowLoginModal] = useState(false);
 
-  const categoriesQuery = useCategoriesQuery({
+  // These sync their results into Redux (allCategory/allSubCategory/allBrands)
+  // for the rest of the app — the homepage sidebar no longer consumes them
+  // directly, it fetches only what it needs itself.
+  useCategoriesQuery({
     enabled: typeof window !== "undefined",
     initialData: initialNavData?.categories ?? [],
   });
 
-  const subCategoriesQuery = useSubCategoriesQuery({
+  useSubCategoriesQuery({
     enabled: typeof window !== "undefined",
     initialData: initialNavData?.subCategories ?? [],
   });
 
-  const brandsQuery = useBrandsQuery({
+  useBrandsQuery({
     enabled: typeof window !== "undefined",
   });
 
@@ -136,30 +108,6 @@ function ShellWithRedux({ children, initialNavData }) {
     return () => window.removeEventListener("show-login", handler);
   }, []);
 
-  const navData = useMemo(
-    () => ({
-      categories: categoriesQuery.data ?? initialNavData?.categories ?? [],
-      subCategories:
-        subCategoriesQuery.data ?? initialNavData?.subCategories ?? [],
-      brands: brandsQuery.data ?? [],
-    }),
-    [
-      brandsQuery.data,
-      categoriesQuery.data,
-      initialNavData?.categories,
-      initialNavData?.subCategories,
-      subCategoriesQuery.data,
-    ]
-  );
-
-  const loadingStates = useMemo(
-    () => ({
-      categories: categoriesQuery.isFetching || subCategoriesQuery.isFetching,
-      brands: brandsQuery.isFetching,
-    }),
-    [brandsQuery.isFetching, categoriesQuery.isFetching, subCategoriesQuery.isFetching]
-  );
-
   return (
     <>
       {!isDashboard && <Header />}
@@ -171,9 +119,7 @@ function ShellWithRedux({ children, initialNavData }) {
           </div>
         }
       >
-        <PathAwareShell navData={navData} loadingStates={loadingStates}>
-          {children}
-        </PathAwareShell>
+        <PathAwareShell>{children}</PathAwareShell>
       </Suspense>
 
       {showLoginModal && (

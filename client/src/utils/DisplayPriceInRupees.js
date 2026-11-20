@@ -1,6 +1,8 @@
+const formatter = new Intl.NumberFormat('fr-CM', {
+    style : 'currency',
+    currency : 'XAF'
+})
+
 export const DisplayPriceInRupees = (price)=>{
-    return new Intl.NumberFormat('fr-CM',{
-        style : 'currency',
-        currency : 'XAF'
-    }).format(price)
+    return formatter.format(price)
 }
