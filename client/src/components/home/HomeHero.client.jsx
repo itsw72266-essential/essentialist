@@ -114,7 +114,7 @@ export default function HomeHero() {
                 <iframe
                   src={panel.src}
                   title={t(panel.altKey)}
-                  loading="lazy"
+                  loading={index < 4 ? 'eager' : 'lazy'}
                   className="absolute inset-0 h-full w-full border-0"
                 />
               ) : (
@@ -122,9 +122,9 @@ export default function HomeHero() {
                   src={panel.src}
                   alt={t(panel.altKey)}
                   fill
-                  priority={index === 0}
-                  fetchPriority={index === 0 ? 'high' : 'auto'}
-                  loading={index === 0 ? 'eager' : 'lazy'}
+                  priority={index < 4}
+                  fetchPriority={index < 4 ? 'high' : 'auto'}
+                  loading={index < 4 ? 'eager' : 'lazy'}
                   unoptimized
                   className={panel.alwaysCover ? 'object-cover' : 'object-contain'}
                   sizes="(min-width: 1024px) 25vw, (min-width: 640px) 20vw, 25vw"
