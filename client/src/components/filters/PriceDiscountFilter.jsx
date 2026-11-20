@@ -83,7 +83,7 @@ function PriceRange({ t, bounds, value, onCommit, sliderKey }) {
   return (
     <div>
       <h3 className="font-bold text-sm mb-1">{t('search.price')}</h3>
-      <p className="text-sm text-gray-700 mb-3">
+      <p className="text-xs sm:text-sm text-gray-700 mb-3 whitespace-nowrap overflow-hidden text-ellipsis">
         {DisplayPriceInRupees(label[0])} &ndash; {DisplayPriceInRupees(label[1])}
       </p>
       <Slider
@@ -110,7 +110,7 @@ function DiscountRange({ t, bounds, value, onCommit, sliderKey }) {
   return (
     <div>
       <h3 className="font-bold text-sm mb-1">{t('search.discount')}</h3>
-      <p className="text-sm text-gray-700 mb-3">
+      <p className="text-xs sm:text-sm text-gray-700 mb-3 whitespace-nowrap overflow-hidden text-ellipsis">
         {label[0]}% &ndash; {label[1]}%
       </p>
       <Slider
