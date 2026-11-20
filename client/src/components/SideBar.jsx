@@ -1038,25 +1038,36 @@ const SideBar = ({
   return (
     <aside className={baseClasses}>
       {!isMobile && (
-        <div className="p-4 border-b border-gray-200 space-y-6">
-          <FilteredBy chips={quickFilterChips} onClear={clearQuickFilters} />
-          <PriceDiscountFilter
-            price={quickPrice}
-            discount={quickDiscount}
-            onPriceChange={setQuickPrice}
-            onDiscountChange={setQuickDiscount}
-          />
-          <button
-            type="button"
-            onClick={() => goToSearchWithFilters()}
-            className="w-full rounded bg-pink-400 hover:bg-pink-500 text-white font-semibold py-2 text-sm transition-colors"
-          >
-            {t("sidebar.showResults")}
-          </button>
-        </div>
+        <>
+          <div className={headerClasses}>
+            <h2 className="text-white font-bold text-lg uppercase tracking-wide">
+              {t("sidebar.filters")}
+            </h2>
+          </div>
+          <div className={`${isMobile ? "px-4 py-3" : "px-6 py-4"} space-y-6`}>
+            <FilteredBy chips={quickFilterChips} onClear={clearQuickFilters} />
+            <PriceDiscountFilter
+              price={quickPrice}
+              discount={quickDiscount}
+              onPriceChange={setQuickPrice}
+              onDiscountChange={setQuickDiscount}
+            />
+            <button
+              type="button"
+              onClick={() => goToSearchWithFilters()}
+              className="w-full rounded bg-pink-400 hover:bg-pink-500 text-white font-semibold py-2 text-sm transition-colors"
+            >
+              {t("sidebar.showResults")}
+            </button>
+          </div>
+        </>
       )}
 
-      <div className={headerClasses}>
+      <div
+        className={`${headerClasses} ${
+          isMobile ? "" : "border-t border-pink-300"
+        }`}
+      >
         <h2 className="text-white font-bold text-lg uppercase tracking-wide">
           {t("sidebar.shopByBrands")}
         </h2>
