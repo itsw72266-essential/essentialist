@@ -1,5 +1,3 @@
-export const dynamic = "force-dynamic";
-
 import { updateCartItemQtyController } from "@/fullstack/controllers/cart/handlers";
 import { asAuthPut } from "@/fullstack/lib/nextRoute";
 

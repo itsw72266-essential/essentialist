@@ -1,5 +1,3 @@
-export const dynamic = "force-dynamic";
-
 import { updateProductDetails } from "@/fullstack/controllers/product/handlers";
 import { asAdminPut } from "@/fullstack/lib/nextRoute";
 

@@ -1,5 +1,3 @@
-export const dynamic = "force-dynamic";
-
 import { backfillTranslationsController } from "@/fullstack/controllers/i18n/handlers";
 import { asAdminPost } from "@/fullstack/lib/nextRoute";
 

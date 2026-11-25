@@ -1,5 +1,3 @@
-export const dynamic = "force-dynamic";
-
 import { verifyReceiptByTokenController } from "@/fullstack/controllers/order/handlers";
 import { asPublicPost } from "@/fullstack/lib/nextRoute";
 

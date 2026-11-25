@@ -1,5 +1,3 @@
-export const dynamic = "force-dynamic";
-
 import { paymentsPostGuestMtn } from "@/fullstack/controllers/payments/paymentsHandlers";
 import { payunitGuestMtnPostOpts } from "@/fullstack/lib/orderAndPaymentRouteOpts";
 import { asPublicPost } from "@/fullstack/lib/nextRoute";

@@ -1,5 +1,3 @@
-export const dynamic = "force-dynamic";
-
 import { getAdminDashboardController } from "@/fullstack/controllers/guestadmin/handlers";
 import { asAdminGet } from "@/fullstack/lib/nextRoute";
 

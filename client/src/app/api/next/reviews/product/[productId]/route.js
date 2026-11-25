@@ -1,5 +1,3 @@
-export const dynamic = "force-dynamic";
-
 import { deleteMyReview, listReviews } from "@/fullstack/controllers/review/handlers";
 import { asAuthDeleteWithParams, asOptionalAuthGetWithParams } from "@/fullstack/lib/nextRoute";
 

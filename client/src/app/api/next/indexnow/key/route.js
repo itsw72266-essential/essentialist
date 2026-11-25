@@ -1,5 +1,3 @@
-export const dynamic = "force-dynamic";
-
 import { indexNowGetKeyController } from "@/fullstack/controllers/indexnow/handlers";
 import { asPublicGet } from "@/fullstack/lib/nextRoute";
 

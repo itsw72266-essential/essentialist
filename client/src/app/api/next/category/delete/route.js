@@ -1,5 +1,3 @@
-export const dynamic = "force-dynamic";
-
 import { deleteCategoryController } from "@/fullstack/controllers/category/handlers";
 import { asAdminDelete } from "@/fullstack/lib/nextRoute";
 

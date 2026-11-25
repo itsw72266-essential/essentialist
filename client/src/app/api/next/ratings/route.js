@@ -1,5 +1,3 @@
-export const dynamic = "force-dynamic";
-
 import { upsertRating } from "@/fullstack/controllers/rating/handlers";
 import { asOptionalAuthPost } from "@/fullstack/lib/nextRoute";
 

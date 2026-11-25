@@ -1,5 +1,3 @@
-export const dynamic = "force-dynamic";
-
 import { guestStripeCheckoutController } from "@/fullstack/controllers/order/handlers";
 import { stripeCheckoutPostOpts } from "@/fullstack/lib/orderAndPaymentRouteOpts";
 import { asPublicPost } from "@/fullstack/lib/nextRoute";

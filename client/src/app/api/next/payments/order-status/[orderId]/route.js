@@ -1,5 +1,3 @@
-export const dynamic = "force-dynamic";
-
 import { paymentsGetOrderStatus } from "@/fullstack/controllers/payments/paymentsHandlers";
 import { paymentsPollGetOpts } from "@/fullstack/lib/orderAndPaymentRouteOpts";
 import { asAuthGetWithParams } from "@/fullstack/lib/nextRoute";
