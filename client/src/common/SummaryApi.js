@@ -132,6 +132,16 @@ export async function apiFetch(
   }
 
   const requestUrl = buildUrl(path, params)
+  const isProductionBuild =
+    process.env.NEXT_PHASE === 'phase-production-build'
+  const isLocalHostUrl =
+    /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?(?:\/|$)/i.test(requestUrl)
+
+  // Next may pre-render pages before the local app server is listening.
+  // Avoid self-fetching localhost API routes during that build-only phase.
+  if (isServer && isProductionBuild && isLocalHostUrl) {
+    return null
+  }
 
   let abortTimer
   if (timeout > 0 && controller) {

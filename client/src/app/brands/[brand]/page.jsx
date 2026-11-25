@@ -574,9 +574,11 @@ const HARDCODED_BRAND_SLUGS = ['estee-lauder']
 const RAW_API_BASE = (getServerSideApiBaseUrl() || process.env.NEXT_PUBLIC_API_URL || '').trim()
 const API_BASE = RAW_API_BASE.replace(/\/$/, '')
 const IS_EXPORT_MODE = process.env.NEXT_EXPORT === 'true'
+const IS_PRODUCTION_BUILD = process.env.NEXT_PHASE === 'phase-production-build'
 const IS_LOCALHOST_API = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(API_BASE)
 const CAN_USE_REMOTE_API =
-  Boolean(API_BASE) && !(IS_EXPORT_MODE && IS_LOCALHOST_API)
+  Boolean(API_BASE) &&
+  !(IS_LOCALHOST_API && (IS_EXPORT_MODE || IS_PRODUCTION_BUILD))
 
 /* -------------------------------------------------------------------------- */
 /* Helper utilities                                                           */
