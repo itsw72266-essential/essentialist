@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { paymentsWebhook } from "@/fullstack/controllers/payments/paymentsHandlers";
 import { asPublicPost } from "@/fullstack/lib/nextRoute";
 

@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { NextResponse } from "next/server";
 
 import { resetPasswordUserAction } from "@/fullstack/controllers/user/resetPasswordUser";

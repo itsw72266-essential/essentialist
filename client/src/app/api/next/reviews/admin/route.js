@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { adminCreateReview } from "@/fullstack/controllers/review/handlers";
 import { asAdminPrivilegePost } from "@/fullstack/lib/nextRoute";
 

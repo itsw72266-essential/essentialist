@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { NextResponse } from "next/server";
 
 import { loginUserAction } from "@/fullstack/controllers/user/loginUser";

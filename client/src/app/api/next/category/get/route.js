@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { getCategoryController } from "@/fullstack/controllers/category/handlers";
 import { asPublicGet } from "@/fullstack/lib/nextRoute";
 

@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { searchProduct } from "@/fullstack/controllers/product/handlers";
 import { asPublicPost } from "@/fullstack/lib/nextRoute";
 

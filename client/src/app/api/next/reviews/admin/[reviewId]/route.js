@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { adminDeleteReview, adminUpdateReview } from "@/fullstack/controllers/review/handlers";
 import {
   asAdminPrivilegeDeleteWithParams,

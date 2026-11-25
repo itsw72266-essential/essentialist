@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { createProductController } from "@/fullstack/controllers/product/handlers";
 import { asAdminPost } from "@/fullstack/lib/nextRoute";
 

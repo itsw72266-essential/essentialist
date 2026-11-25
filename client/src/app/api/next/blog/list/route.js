@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { getBlogListController } from "@/fullstack/controllers/blog/handlers";
 import { asOptionalAuthGet } from "@/fullstack/lib/nextRoute";
 

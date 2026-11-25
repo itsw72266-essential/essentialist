@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { NextResponse } from "next/server";
 
 import { verifyForgotPasswordOtpUserAction } from "@/fullstack/controllers/user/verifyForgotPasswordOtpUser";

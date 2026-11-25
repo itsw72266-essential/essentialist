@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { updateSubCategoryController } from "@/fullstack/controllers/subcategory/handlers";
 import { asAdminPut } from "@/fullstack/lib/nextRoute";
 

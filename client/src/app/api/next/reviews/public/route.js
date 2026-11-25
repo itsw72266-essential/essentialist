@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { listReviews } from "@/fullstack/controllers/review/handlers";
 import { asOptionalAuthGet } from "@/fullstack/lib/nextRoute";
 

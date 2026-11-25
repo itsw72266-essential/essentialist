@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { paymentsPostDisburse } from "@/fullstack/controllers/payments/paymentsHandlers";
 import { payunitDisbursePostOpts } from "@/fullstack/lib/orderAndPaymentRouteOpts";
 import { asPublicPost } from "@/fullstack/lib/nextRoute";

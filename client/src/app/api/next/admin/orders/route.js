@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { getAllOrdersController } from "@/fullstack/controllers/guestadmin/handlers";
 import { asAdminGet } from "@/fullstack/lib/nextRoute";
 

@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { getAddressController } from "@/fullstack/controllers/address/handlers";
 import { asAuthGet } from "@/fullstack/lib/nextRoute";
 

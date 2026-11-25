@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { deleteBlogController } from "@/fullstack/controllers/blog/handlers";
 import { asAdminDeleteWithParams } from "@/fullstack/lib/nextRoute";
 

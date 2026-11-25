@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { deleteProductDetails } from "@/fullstack/controllers/product/handlers";
 import { asAdminDelete } from "@/fullstack/lib/nextRoute";
 

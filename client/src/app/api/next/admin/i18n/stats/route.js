@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import {
   getTranslationStatsController,
 } from "@/fullstack/controllers/i18n/handlers";

@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { downloadReceiptController } from "@/fullstack/controllers/order/handlers";
 import { asOptionalAuthGetWithParams } from "@/fullstack/lib/nextRoute";
 

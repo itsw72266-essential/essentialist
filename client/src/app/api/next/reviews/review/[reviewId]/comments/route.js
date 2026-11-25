@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { createReviewComment, listReviewComments } from "@/fullstack/controllers/review/handlers";
 import { asAuthPostWithParams, asOptionalAuthGetWithParams } from "@/fullstack/lib/nextRoute";
 

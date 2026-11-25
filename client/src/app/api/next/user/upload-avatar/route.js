@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { NextResponse } from "next/server";
 
 import { uploadAvatarForUserId } from "@/fullstack/controllers/user/uploadAvatarUser";

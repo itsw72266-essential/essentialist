@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { deleteCartItemQtyController } from "@/fullstack/controllers/cart/handlers";
 import { asAuthDelete } from "@/fullstack/lib/nextRoute";
 
